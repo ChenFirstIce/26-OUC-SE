@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Write-Host '[1/2] 后端接口与权限测试' -ForegroundColor Cyan
 Push-Location (Join-Path $ProjectRoot 'backend')

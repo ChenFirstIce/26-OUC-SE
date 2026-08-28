@@ -1,4 +1,4 @@
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+﻿$ProjectRoot = Split-Path -Parent $PSScriptRoot
 $RuntimeDir = Join-Path $ProjectRoot '.runtime'
 foreach ($Name in @('backend', 'frontend')) {
     $PidFile = Join-Path $RuntimeDir "$Name.pid"
