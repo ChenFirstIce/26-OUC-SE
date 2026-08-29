@@ -39,6 +39,7 @@ def assignment_view(assignment: AssignmentPackage, include_secret: dict | None =
     result = {
         "id": assignment.id, "patient_id": assignment.patient_id,
         "patient_code": assignment.patient.patient_code,
+        "patient_name": assignment.patient.profile.full_name if assignment.patient.profile else None,
         "doctor_id": assignment.doctor_id, "doctor_name": assignment.doctor.display_name,
         "title": assignment.title, "note": assignment.note, "status": assignment.status,
         "deadline": assignment.deadline, "created_at": assignment.created_at,
@@ -175,6 +176,7 @@ def get_item_result(
     return {
         "assignment_id": assignment.id, "item_id": item.id,
         "patient_code": assignment.patient.patient_code,
+        "patient_name": assignment.patient.profile.full_name if assignment.patient.profile else None,
         "questionnaire_code": item.questionnaire_version.template.code,
         "questionnaire_name": item.questionnaire_version.template.name,
         "questionnaire_version": item.questionnaire_version.version,

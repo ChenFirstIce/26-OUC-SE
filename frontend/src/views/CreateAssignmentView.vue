@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
 import { api } from '../api/client'
 import { useAuthStore } from '../stores/auth'
+import { patientLabel } from '../utils/patient'
 
 const route=useRoute(); const router=useRouter();const auth=useAuthStore(); const patients=ref<any[]>([]); const questionnaires=ref<any[]>([]);const doctors=ref<any[]>([]); const result=ref<any>(); const qr=ref(''); const saving=ref(false)
 const form=reactive({ patient_id: Number(route.query.patient)||undefined as number|undefined, questionnaire_version_ids: [] as number[], title:'认知筛查任务', note:'请根据真实感受完成问卷。', deadline:'',doctor_id:undefined as number|undefined })
@@ -14,7 +15,7 @@ async function copy(text:string){await navigator.clipboard.writeText(text);ElMes
 </script>
 <template><div><div class="page-heading"><div><span class="eyebrow">NEW ASSIGNMENT</span><h1>派发问卷</h1><p>选择患者和已发布问卷，生成专属移动端填写入口。</p></div></div>
 <div v-if="!result" class="form-page"><article class="panel form-card"><el-form label-position="top">
-<el-form-item label="选择患者"><el-select v-model="form.patient_id" filterable placeholder="患者编码" class="full"><el-option v-for="p in patients" :key="p.id" :label="`${p.patient_code} · ${p.doctor_name}`" :value="p.id"/></el-select></el-form-item>
+<el-form-item label="选择患者"><el-select v-model="form.patient_id" filterable placeholder="输入患者编号或姓名搜索" class="full"><el-option v-for="p in patients" :key="p.id" :label="patientLabel(p)" :value="p.id"><div class="patient-option"><b>{{p.patient_code}} · {{p.full_name||'姓名待补充'}}</b><small>{{p.sex==='male'?'男':p.sex==='female'?'女':'未填写性别'}} · {{p.age??'年龄未知'}}岁 · 主诊 {{p.doctor_name}}</small></div></el-option></el-select></el-form-item>
 <el-form-item v-if="auth.user?.role==='admin'" label="指定负责医生（不选则沿用患者主诊医生）"><el-select v-model="form.doctor_id" clearable class="full"><el-option v-for="d in doctors" :key="d.id" :label="`${d.display_name} · ${d.department_name||'未分科'}`" :value="d.id"/></el-select></el-form-item>
 <el-form-item label="选择问卷（可多选）"><el-checkbox-group v-model="form.questionnaire_version_ids" class="questionnaire-select"><el-checkbox v-for="q in questionnaires" :key="q.latest_version_id" :value="q.latest_version_id"><div><b>{{ q.name }}</b><small>{{ q.description }}</small></div></el-checkbox></el-checkbox-group></el-form-item>
 <el-form-item label="任务名称"><el-input v-model="form.title"/></el-form-item><el-form-item label="医生说明"><el-input v-model="form.note" type="textarea" :rows="3"/></el-form-item><el-form-item label="截止时间（可选）"><el-date-picker v-model="form.deadline" type="datetime" value-format="YYYY-MM-DDTHH:mm:ssZ"/></el-form-item>
@@ -22,3 +23,9 @@ async function copy(text:string){await navigator.clipboard.writeText(text);ElMes
 </el-form></article></div>
 <article v-else class="success-card"><div class="success-icon">✓</div><h2>问卷派发成功</h2><p>将二维码或链接和访问码交给患者。访问码请通过独立方式告知。</p><img :src="qr" alt="患者填写二维码" class="qr"/><div class="secret-row"><div><small>访问码</small><strong>{{ result.access_code }}</strong></div><el-button @click="copy(result.access_code)">复制</el-button></div><div class="link-box"><span>{{ result.patient_link }}</span><el-button link type="primary" @click="copy(result.patient_link)">复制链接</el-button></div><div class="actions center"><router-link to="/assignments"><el-button>查看派发列表</el-button></router-link><el-button type="primary" @click="result=null">继续派发</el-button></div></article>
 </div></template>
+
+<style scoped>
+.patient-option{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%}
+.patient-option b{color:#1b314f}
+.patient-option small{color:#8291a6;font-size:11px}
+</style>

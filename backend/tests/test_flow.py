@@ -64,6 +64,8 @@ def test_staff_patient_assignment_submission_statistics_flow():
         })
         assert assigned.status_code == 201, assigned.text
         secret = assigned.json()
+        assert secret["patient_code"] == code
+        assert secret["patient_name"] == "闭环测试患者"
 
         verified = client.post("/api/v1/patient-session/verify", json={
             "token": secret["token"], "access_code": secret["access_code"],
@@ -71,6 +73,7 @@ def test_staff_patient_assignment_submission_statistics_flow():
         assert verified.status_code == 200, verified.text
         patient_headers = {"Authorization": f"Bearer {verified.json()['access_token']}"}
         tasks = client.get("/api/v1/patient-session/tasks", headers=patient_headers).json()
+        assert tasks["assignment"]["patient_name"] == "闭环测试患者"
         item_id = tasks["items"][0]["id"]
         task = client.get(f"/api/v1/patient-session/tasks/{item_id}", headers=patient_headers).json()
         answers = valid_answers(task["schema"])

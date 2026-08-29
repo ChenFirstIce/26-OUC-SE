@@ -6,13 +6,75 @@ from sqlalchemy.orm import Session
 
 from .core.security import hash_password, token_digest
 from .models import (
-    AssignmentItem, AssignmentPackage, ClinicalRecord, Department, Patient, QuestionnaireTemplate,
+    AssignmentItem, AssignmentPackage, ClinicalRecord, Department, Patient, PatientProfile, QuestionnaireTemplate,
     QuestionnaireVersion, User, UserPermission,
 )
 
 
 DEMO_ACCESS_CODE = "123456"
 DEMO_TOKEN = "demo-patient-token"
+
+DEMO_SURNAMES = ["王", "李", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴", "徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗"]
+DEMO_GIVEN_NAMES = ["建国", "秀兰", "志强", "桂英", "文华", "国强", "淑芬", "德明", "玉珍", "振华"]
+DEMO_OCCUPATIONS = ["退休教师", "退休工人", "退休职员", "个体经营者", "务农", "会计", "工程技术人员"]
+DEMO_CONCERNS = [
+    "近半年出现记忆力下降，偶有重复询问，家属陪同就诊。",
+    "近期容易忘记约定事项，希望进行认知功能筛查。",
+    "家属发现其处理复杂家务的效率下降，前来评估。",
+    "自觉注意力和反应速度较前下降，日常生活基本独立。",
+    "常有物品放置后找不到的情况，希望建立连续随访档案。",
+]
+DEMO_HISTORIES = [
+    "高血压病史约10年，规律复诊；否认脑卒中及重大手术史。",
+    "2型糖尿病病史约8年，血糖控制尚可；既往无严重颅脑外伤。",
+    "高脂血症病史，间断服药；否认癫痫及精神疾病史。",
+    "既往体健，无明确慢性病及重大手术史。",
+    "冠心病病史约5年，病情稳定；无脑卒中史。",
+]
+DEMO_MEDICATIONS = [
+    "氨氯地平 5mg 每日一次。",
+    "二甲双胍 0.5g 每日两次。",
+    "阿托伐他汀 20mg 每晚一次。",
+    "目前无长期规律用药。",
+    "阿司匹林 100mg 每日一次，按门诊医嘱使用。",
+]
+
+
+def demo_profile_values(index: int) -> dict:
+    """为课程演示患者生成稳定、完整且可重复的虚构主档。"""
+    surname = DEMO_SURNAMES[(index - 1) % len(DEMO_SURNAMES)]
+    given_name = DEMO_GIVEN_NAMES[(index - 1) // len(DEMO_SURNAMES)]
+    contact_surname = DEMO_SURNAMES[(index + 6) % len(DEMO_SURNAMES)]
+    return {
+        "full_name": f"{surname}{given_name}",
+        "phone": f"138{index:08d}",
+        "marital_status": ["已婚", "丧偶", "已婚", "离异"][index % 4],
+        "occupation": DEMO_OCCUPATIONS[(index - 1) % len(DEMO_OCCUPATIONS)],
+        "chief_concern": DEMO_CONCERNS[(index - 1) % len(DEMO_CONCERNS)],
+        "past_medical_history": DEMO_HISTORIES[(index - 1) % len(DEMO_HISTORIES)],
+        "family_history": "否认明确痴呆及其他遗传性神经系统疾病家族史。" if index % 5 else "一名一级亲属晚年曾出现明显记忆力下降，具体诊断不详。",
+        "current_medications": DEMO_MEDICATIONS[(index - 1) % len(DEMO_MEDICATIONS)],
+        "allergy_history": "否认已知药物及食物过敏。" if index % 9 else "青霉素类药物过敏，既往出现皮疹。",
+        "emergency_contact": f"{contact_surname}{['明', '芳', '军', '敏'][index % 4]}",
+        "emergency_phone": f"139{index:08d}",
+    }
+
+
+def ensure_demo_patient_profiles(db: Session) -> None:
+    """只补齐 P0001-P0100 演示数据，不向真实新建患者写入虚构病史。"""
+    patients = db.scalars(select(Patient).where(Patient.patient_code.like("P%"))).all()
+    for patient in patients:
+        suffix = patient.patient_code.removeprefix("P")
+        if not suffix.isdigit() or not 1 <= int(suffix) <= 100:
+            continue
+        values = demo_profile_values(int(suffix))
+        profile = patient.profile
+        if profile is None:
+            db.add(PatientProfile(patient_id=patient.id, **values))
+            continue
+        for field, value in values.items():
+            if not getattr(profile, field):
+                setattr(profile, field, value)
 
 
 SCD_SCHEMA = {
@@ -53,6 +115,7 @@ def seed_database(db: Session) -> None:
         for user in db.scalars(select(User)).all():
             if not db.get(UserPermission, user.id):
                 db.add(UserPermission(user_id=user.id, can_manage_templates=user.role == "admin"))
+        ensure_demo_patient_profiles(db)
         demo_patient = db.scalar(select(Patient).where(Patient.patient_code == "P0001"))
         if demo_patient and not db.scalar(select(ClinicalRecord.id).where(ClinicalRecord.patient_id == demo_patient.id).limit(1)):
             now = datetime.now(timezone.utc)
@@ -112,6 +175,8 @@ def seed_database(db: Session) -> None:
         db.add(patient)
         patients.append(patient)
     db.flush()
+    for index, patient in enumerate(patients, start=1):
+        db.add(PatientProfile(patient_id=patient.id, **demo_profile_values(index)))
     demo_assignment = AssignmentPackage(
         patient_id=patients[0].id, doctor_id=doctors[0].id, title="首次筛查演示任务",
         note="请根据真实感受填写。本任务内容仅用于课程演示。",

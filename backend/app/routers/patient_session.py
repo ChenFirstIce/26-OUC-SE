@@ -78,6 +78,7 @@ def assignment_summary(assignment: AssignmentPackage) -> dict:
         "id": assignment.id, "title": assignment.title, "note": assignment.note,
         "status": assignment.status, "deadline": assignment.deadline,
         "patient_code": assignment.patient.patient_code,
+        "patient_name": assignment.patient.profile.full_name if assignment.patient.profile else None,
         "doctor_name": assignment.doctor.display_name,
     }
 
@@ -187,4 +188,3 @@ def assessment_view(assessment: Assessment) -> dict:
         "risk_level": assessment.risk_level, "review_status": assessment.review_status,
         "assessed_at": assessment.assessed_at,
     }
-
