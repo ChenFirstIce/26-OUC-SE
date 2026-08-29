@@ -33,6 +33,19 @@ class User(Base):
     department: Mapped[Department | None] = relationship()
 
 
+class UserPermission(Base):
+    """可独立调整的业务权限，避免把所有能力硬编码在角色中。"""
+
+    __tablename__ = "user_permissions"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    can_create_patients: Mapped[bool] = mapped_column(Boolean, default=True)
+    can_assign_questionnaires: Mapped[bool] = mapped_column(Boolean, default=True)
+    can_review_results: Mapped[bool] = mapped_column(Boolean, default=True)
+    can_manage_templates: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    user: Mapped[User] = relationship()
+
+
 class Patient(Base):
     __tablename__ = "patients"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -47,6 +60,27 @@ class Patient(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     department: Mapped[Department] = relationship()
     assigned_doctor: Mapped[User] = relationship()
+    profile: Mapped[PatientProfile | None] = relationship(back_populates="patient", uselist=False, cascade="all, delete-orphan")
+
+
+class PatientProfile(Base):
+    """可扩展的患者临床主档，与任务/问卷数据解耦并兼容既有数据库。"""
+
+    __tablename__ = "patient_profiles"
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), primary_key=True)
+    full_name: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    marital_status: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    occupation: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    chief_concern: Mapped[str | None] = mapped_column(Text, nullable=True)
+    past_medical_history: Mapped[str | None] = mapped_column(Text, nullable=True)
+    family_history: Mapped[str | None] = mapped_column(Text, nullable=True)
+    current_medications: Mapped[str | None] = mapped_column(Text, nullable=True)
+    allergy_history: Mapped[str | None] = mapped_column(Text, nullable=True)
+    emergency_contact: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    emergency_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    patient: Mapped[Patient] = relationship(back_populates="profile")
 
 
 class QuestionnaireTemplate(Base):
@@ -129,6 +163,25 @@ class Assessment(Base):
     assessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
 
 
+class ClinicalRecord(Base):
+    """医生人工记录的诊断、随访和处置意见；与自动问卷评分明确分离。"""
+
+    __tablename__ = "clinical_records"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    doctor_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    record_type: Mapped[str] = mapped_column(String(30), index=True)
+    title: Mapped[str] = mapped_column(String(120))
+    diagnosis_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    content: Mapped[str] = mapped_column(Text)
+    event_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    status: Mapped[str] = mapped_column(String(20), default="active", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    patient: Mapped[Patient] = relationship()
+    doctor: Mapped[User] = relationship()
+
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -139,4 +192,3 @@ class AuditLog(Base):
     target_id: Mapped[str] = mapped_column(String(50))
     result: Mapped[str] = mapped_column(String(20), default="success")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
-

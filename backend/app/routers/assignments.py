@@ -13,6 +13,7 @@ from ..models import Assessment, AssignmentItem, AssignmentPackage, Patient, Que
 from ..services.questionnaire import all_questions
 from ..services.assignment import refresh_assignment_status
 from ..services.audit import audit
+from ..services.permissions import require_permission
 
 
 router = APIRouter(prefix="/assignments", tags=["问卷派发"])
@@ -24,6 +25,14 @@ class AssignmentInput(BaseModel):
     title: str = Field(min_length=2, max_length=120)
     note: str = ""
     deadline: datetime | None = None
+    doctor_id: int | None = None
+
+
+class AssignmentUpdateInput(BaseModel):
+    title: str | None = Field(default=None, min_length=2, max_length=120)
+    note: str | None = None
+    deadline: datetime | None = None
+    doctor_id: int | None = None
 
 
 def assignment_view(assignment: AssignmentPackage, include_secret: dict | None = None) -> dict:
@@ -60,6 +69,7 @@ def list_assignments(user: User = Depends(current_user), db: Session = Depends(g
 
 @router.post("", status_code=201)
 def create_assignment(payload: AssignmentInput, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_permission(db, user, "can_assign_questionnaires")
     patient = db.get(Patient, payload.patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail="患者不存在")
@@ -71,8 +81,12 @@ def create_assignment(payload: AssignmentInput, user: User = Depends(current_use
         raise HTTPException(status_code=422, detail="只能派发已发布问卷")
     raw_token = new_assignment_token()
     access_code = new_access_code()
+    doctor_id = payload.doctor_id if user.role == "admin" and payload.doctor_id else patient.assigned_doctor_id
+    doctor = db.get(User, doctor_id)
+    if not doctor or doctor.role != "doctor" or not doctor.active:
+        raise HTTPException(status_code=422, detail="负责医生不存在或不可用")
     assignment = AssignmentPackage(
-        patient_id=patient.id, doctor_id=user.id, title=payload.title, note=payload.note,
+        patient_id=patient.id, doctor_id=doctor_id, title=payload.title, note=payload.note,
         deadline=payload.deadline, token_hash=token_digest(raw_token), access_code_hash=hash_password(access_code),
     )
     db.add(assignment)
@@ -84,6 +98,32 @@ def create_assignment(payload: AssignmentInput, user: User = Depends(current_use
     db.refresh(assignment)
     link = f"{settings.frontend_origin}/p/fill/{raw_token}"
     return assignment_view(assignment, {"patient_link": link, "access_code": access_code, "token": raw_token})
+
+
+@router.patch("/{assignment_id}")
+def update_assignment(assignment_id: int, payload: AssignmentUpdateInput,
+                      user: User = Depends(current_user), db: Session = Depends(get_db)):
+    assignment = db.get(AssignmentPackage, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="派发任务不存在")
+    ensure_patient_scope(user, assignment.doctor_id)
+    require_permission(db, user, "can_assign_questionnaires")
+    if assignment.status in {"submitted", "reviewed", "revoked"}:
+        raise HTTPException(status_code=409, detail="已完成或撤销的任务不能修改")
+    fields = payload.model_fields_set
+    for field in ("title", "note", "deadline"):
+        if field in fields:
+            setattr(assignment, field, getattr(payload, field))
+    if "doctor_id" in fields:
+        if user.role != "admin":
+            raise HTTPException(status_code=403, detail="只有管理员可以转交派发任务")
+        doctor = db.get(User, payload.doctor_id) if payload.doctor_id else None
+        if not doctor or doctor.role != "doctor" or not doctor.active:
+            raise HTTPException(status_code=422, detail="负责医生不存在或不可用")
+        assignment.doctor_id = doctor.id
+    audit(db, "user", user.id, "assignment.update", "assignment", assignment.id)
+    db.commit()
+    return assignment_view(assignment)
 
 
 @router.get("/{assignment_id}")
@@ -155,6 +195,7 @@ def revoke(assignment_id: int, user: User = Depends(current_user), db: Session =
     if not assignment:
         raise HTTPException(status_code=404, detail="派发任务不存在")
     ensure_patient_scope(user, assignment.doctor_id)
+    require_permission(db, user, "can_assign_questionnaires")
     if assignment.status in {"submitted", "reviewed"}:
         raise HTTPException(status_code=409, detail="已提交任务不能撤销")
     assignment.status = "revoked"

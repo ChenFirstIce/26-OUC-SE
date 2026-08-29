@@ -8,6 +8,12 @@ export interface StaffUser {
   display_name: string
   role: 'admin' | 'doctor'
   department_name?: string
+  permissions?: {
+    can_create_patients: boolean
+    can_assign_questionnaires: boolean
+    can_review_results: boolean
+    can_manage_templates: boolean
+  }
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -21,12 +27,18 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = data.user
   }
 
+  async function refresh() {
+    if (!localStorage.getItem('staff_token')) return
+    const { data } = await api.get('/auth/me')
+    localStorage.setItem('staff_user', JSON.stringify(data))
+    user.value = data
+  }
+
   function logout() {
     localStorage.removeItem('staff_token')
     localStorage.removeItem('staff_user')
     user.value = null
   }
 
-  return { user, loggedIn, login, logout }
+  return { user, loggedIn, login, refresh, logout }
 })
-

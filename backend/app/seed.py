@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from .core.security import hash_password, token_digest
 from .models import (
-    AssignmentItem, AssignmentPackage, Department, Patient, QuestionnaireTemplate,
-    QuestionnaireVersion, User,
+    AssignmentItem, AssignmentPackage, ClinicalRecord, Department, Patient, QuestionnaireTemplate,
+    QuestionnaireVersion, User, UserPermission,
 )
 
 
@@ -50,6 +50,23 @@ WELLBEING_SCHEMA = {
 
 def seed_database(db: Session) -> None:
     if db.scalar(select(User.id).limit(1)):
+        for user in db.scalars(select(User)).all():
+            if not db.get(UserPermission, user.id):
+                db.add(UserPermission(user_id=user.id, can_manage_templates=user.role == "admin"))
+        demo_patient = db.scalar(select(Patient).where(Patient.patient_code == "P0001"))
+        if demo_patient and not db.scalar(select(ClinicalRecord.id).where(ClinicalRecord.patient_id == demo_patient.id).limit(1)):
+            now = datetime.now(timezone.utc)
+            db.add_all([
+                ClinicalRecord(patient_id=demo_patient.id, doctor_id=demo_patient.assigned_doctor_id,
+                               record_type="diagnosis", title="首次门诊认知情况记录（演示）",
+                               diagnosis_code="DEMO-R41.3", content="患者主诉近期记忆下降。建议结合正式认知量表、实验室检查和影像资料进一步评估；本条为系统演示记录。",
+                               event_at=now - timedelta(days=45)),
+                ClinicalRecord(patient_id=demo_patient.id, doctor_id=demo_patient.assigned_doctor_id,
+                               record_type="follow_up", title="阶段性随访（演示）",
+                               content="家属反馈生活自理能力总体稳定，已完成居家安全与规律作息宣教，计划四周后复评。",
+                               event_at=now - timedelta(days=14)),
+            ])
+        db.commit()
         return
     departments = [
         Department(code="NEU", name="神经内科"),
@@ -65,6 +82,8 @@ def seed_database(db: Session) -> None:
     ]
     db.add_all([admin, *doctors])
     db.flush()
+    db.add(UserPermission(user_id=admin.id, can_manage_templates=True))
+    db.add_all([UserPermission(user_id=doctor.id) for doctor in doctors])
     templates = []
     for code, name, description, schema, scoring in [
         ("DEMO_SCD", "认知状态演示问卷", "模拟主观认知变化收集，仅用于系统演示。", SCD_SCHEMA,
@@ -103,5 +122,13 @@ def seed_database(db: Session) -> None:
     db.flush()
     for _, version in templates:
         db.add(AssignmentItem(assignment_id=demo_assignment.id, questionnaire_version_id=version.id))
+    db.add_all([
+        ClinicalRecord(patient_id=patients[0].id, doctor_id=doctors[0].id, record_type="diagnosis",
+                       title="首次门诊认知情况记录（演示）", diagnosis_code="DEMO-R41.3",
+                       content="患者主诉近期记忆下降。建议结合正式认知量表、实验室检查和影像资料进一步评估；本条为系统演示记录。",
+                       event_at=datetime.now(timezone.utc) - timedelta(days=45)),
+        ClinicalRecord(patient_id=patients[0].id, doctor_id=doctors[0].id, record_type="follow_up",
+                       title="阶段性随访（演示）", content="家属反馈生活自理能力总体稳定，已完成居家安全与规律作息宣教，计划四周后复评。",
+                       event_at=datetime.now(timezone.utc) - timedelta(days=14)),
+    ])
     db.commit()
-

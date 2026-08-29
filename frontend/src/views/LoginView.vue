@@ -21,11 +21,11 @@ async function submit() {
 <template>
   <div class="login-page">
     <div class="login-art">
-      <div class="art-copy"><span class="eyebrow">COGNITIVE CARE · 认知关怀</span><h1>让每一次筛查<br>都成为连续的照护</h1><p>问卷派发、移动填写、结果复核和数据统计在一个清晰的流程中完成。</p></div>
+      <div class="login-grid"></div><div class="art-copy"><span class="eyebrow">NEURO·NEXUS / COGNITIVE CARE CLOUD</span><h1>让每一次筛查<br>都成为连续的照护</h1><p>连接患者移动填写、临床复核、纵向档案与机构治理，为认知照护提供可信的数据工作流。</p><div class="login-features"><span><i></i>移动端实时接入</span><span><i></i>纵向风险分析</span><span><i></i>细粒度权限审计</span></div></div>
     </div>
     <div class="login-panel">
       <div class="login-box">
-        <span class="brand-mark large">认</span><h2>欢迎回来</h2><p class="muted">登录医生与管理工作台</p>
+        <span class="brand-mark large">N</span><h2>欢迎回来</h2><p class="muted">登录临床与机构管理工作台</p>
         <el-form label-position="top" @submit.prevent="submit">
           <el-form-item label="账号"><el-input v-model="username" size="large" /></el-form-item>
           <el-form-item label="密码"><el-input v-model="password" type="password" size="large" show-password @keyup.enter="submit" /></el-form-item>
@@ -36,4 +36,3 @@ async function submit() {
     </div>
   </div>
 </template>
-

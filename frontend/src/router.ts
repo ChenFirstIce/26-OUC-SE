@@ -16,16 +16,21 @@ const router = createRouter({
         { path: 'assignments', component: () => import('./views/AssignmentsView.vue') },
         { path: 'assignments/create', component: () => import('./views/CreateAssignmentView.vue') },
         { path: 'questionnaires', component: () => import('./views/QuestionnairesView.vue') },
+        { path: 'admin', component: () => import('./views/AdminCenterView.vue'), meta: { adminOnly: true } },
       ],
     },
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.public) return true
   const auth = useAuthStore()
-  return auth.loggedIn ? true : { path: '/login', query: { redirect: to.fullPath } }
+  if (!auth.loggedIn) return { path: '/login', query: { redirect: to.fullPath } }
+  if (!auth.user?.permissions) {
+    try { await auth.refresh() } catch { auth.logout(); return { path: '/login', query: { redirect: to.fullPath } } }
+  }
+  if (to.meta.adminOnly && auth.user?.role !== 'admin') return '/dashboard'
+  return true
 })
 
 export default router
-

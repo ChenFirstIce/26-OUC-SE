@@ -40,7 +40,7 @@ onMounted(load)
 
 <template>
   <div v-loading="loading">
-    <div class="page-heading"><div><span class="eyebrow">OVERVIEW</span><h1>数据总览</h1><p>查看患者筛查流程、完成情况与需关注结果。</p></div><router-link to="/assignments/create"><el-button type="primary" size="large">+ 派发问卷</el-button></router-link></div>
+    <div class="page-heading"><div><span class="eyebrow">DATA CENTER</span><h1>数据中心</h1><p>查看患者筛查流程、完成情况与需关注结果。</p></div><router-link to="/assignments/create"><el-button type="primary" size="large">+ 派发问卷</el-button></router-link></div>
     <div class="stats-grid">
       <StatCard label="负责患者" :value="overview.patient_count || 0" hint="当前数据权限范围" />
       <StatCard label="问卷派发" :value="overview.assignment_count || 0" hint="包含进行中与已完成" tone="warm" />
