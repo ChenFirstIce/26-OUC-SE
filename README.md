@@ -25,11 +25,11 @@
 - `assets/`
   - 课程资料中提取的图片参考资源，用于后续特殊任务实现。
 - `docs/`
-  - 项目原始说明、量表规格、交互任务与参考资料。
+  - 项目原始说明、量表规格、交互任务与补充状态文档。
 - `docs/sources/`
   - 从课程 PDF 中整理出的文本材料。
-- `dos/`
-  - 项目运行补充文档目录，包含当前状态说明与启动说明。
+- `docs/status/`
+  - 项目阶段状态和任务完成情况说明。
 - `dist/`
   - 生产构建输出目录。
 - `node_modules/`
@@ -59,4 +59,4 @@
 
 ## 运行方式
 
-见 [dos/STARTUP.md](/mnt/d/Workspace/NCS/Project/Patient/dos/STARTUP.md)。
+见 [STARTUP.md](/mnt/d/Workspace/NCS/Project/Patient/STARTUP.md)。
