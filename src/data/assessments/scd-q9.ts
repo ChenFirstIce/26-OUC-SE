@@ -1,4 +1,5 @@
 import type {
+  AnswerValue,
   AssessmentDefinition,
   AssessmentQuestion,
   ScoredAnswer,
@@ -55,6 +56,24 @@ function sumScores(answers: ScoredAnswer[]) {
   return answers.reduce((total, answer) => total + answer.score, 0);
 }
 
+function scoreQuestion(questionId: string, value: AnswerValue) {
+  if (typeof value === "boolean") {
+    return value ? 1 : 0;
+  }
+
+  if (typeof value === "string") {
+    const scale: Record<string, number> = {
+      often: 1,
+      sometimes: 0.5,
+      never: 0,
+    };
+
+    return scale[value] ?? 0;
+  }
+
+  throw new Error(`Unsupported SCD-Q9 answer value for ${questionId}`);
+}
+
 export const scdQ9Definition: AssessmentDefinition = {
   id: "scd-q9",
   title: "SCD-Q9 主观认知下降筛查",
@@ -62,6 +81,7 @@ export const scdQ9Definition: AssessmentDefinition = {
   intro:
     "请根据你最近的实际感受作答。此页面只记录回答和初步分数，不提供诊断结论。",
   questions,
+  scoreQuestion,
   scoreAnswers: (answers) => ({
     rawScore: sumScores(answers),
   }),

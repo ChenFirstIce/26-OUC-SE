@@ -91,3 +91,11 @@ export function getSubmissionsStorage() {
 export function setSubmissionsStorage(submissions: AssessmentSubmission[]) {
   writeJson(STORAGE_KEYS.submissions, submissions);
 }
+
+export function resetDemoStorage() {
+  window.localStorage.removeItem(STORAGE_KEYS.assignments);
+  window.localStorage.removeItem(STORAGE_KEYS.drafts);
+  window.localStorage.removeItem(STORAGE_KEYS.submissions);
+  window.localStorage.setItem(STORAGE_KEYS.currentPatientId, demoPatient.id);
+  ensureStorageSeed();
+}

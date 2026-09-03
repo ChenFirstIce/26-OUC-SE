@@ -27,10 +27,10 @@ function YesNoQuestion({
             key={option.label}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`min-h-14 rounded-2xl border px-5 py-4 text-left text-lg font-medium transition ${
+            className={`min-h-16 rounded-[24px] border px-5 py-5 text-left text-lg font-medium transition ${
               selected
-                ? "border-teal-600 bg-teal-600 text-white"
-                : "border-slate-200 bg-white text-slate-800 hover:border-teal-300"
+                ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-[0_16px_35px_rgba(15,118,110,0.18)]"
+                : "border-slate-200 bg-slate-50 text-slate-800 hover:border-teal-300 hover:bg-white"
             }`}
           >
             {option.label}
@@ -59,13 +59,18 @@ function SingleChoiceQuestion({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`min-h-14 rounded-2xl border px-5 py-4 text-left text-lg font-medium transition ${
+            className={`min-h-16 rounded-[24px] border px-5 py-5 text-left text-lg font-medium transition ${
               selected
-                ? "border-teal-600 bg-teal-600 text-white"
-                : "border-slate-200 bg-white text-slate-800 hover:border-teal-300"
+                ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-[0_16px_35px_rgba(15,118,110,0.18)]"
+                : "border-slate-200 bg-slate-50 text-slate-800 hover:border-teal-300 hover:bg-white"
             }`}
           >
-            {option.label}
+            <div className="font-medium">{option.label}</div>
+            {option.description ? (
+              <div className={`mt-2 text-sm leading-6 ${selected ? "text-teal-50" : "text-slate-500"}`}>
+                {option.description}
+              </div>
+            ) : null}
           </button>
         );
       })}

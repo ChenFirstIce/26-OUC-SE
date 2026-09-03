@@ -13,6 +13,7 @@ export type AnswerValue = boolean | string | string[] | number | null;
 export interface QuestionOption {
   label: string;
   value: string;
+  description?: string;
 }
 
 export interface AssessmentQuestion {
@@ -42,7 +43,9 @@ export interface AssessmentDefinition {
   title: string;
   estimatedMinutes: string;
   intro: string;
+  resultLabel?: string;
   questions: AssessmentQuestion[];
+  scoreQuestion: (questionId: string, value: AnswerValue) => number;
   scoreAnswers: (answers: ScoredAnswer[]) => AssessmentResult;
 }
 

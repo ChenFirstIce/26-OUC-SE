@@ -6,6 +6,7 @@ import {
   getDemoPatients,
   getDraftsStorage,
   getSubmissionsStorage,
+  resetDemoStorage,
   setAssignmentsStorage,
   setCurrentPatientId,
   setDraftsStorage,
@@ -24,11 +25,15 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}`;
 }
 
-function toScoredAnswer(questionId: string, value: AnswerValue): ScoredAnswer {
+function toScoredAnswer(
+  assessmentId: string,
+  questionId: string,
+  value: AnswerValue,
+): ScoredAnswer {
   return {
     questionId,
     value,
-    score: scoreAnswer(questionId, value),
+    score: scoreAnswer(assessmentId, questionId, value),
   };
 }
 
@@ -94,7 +99,11 @@ export const repository = {
     value: AnswerValue;
   }) {
     const drafts = getDraftsStorage();
-    const scoredAnswer = toScoredAnswer(input.questionId, input.value);
+    const scoredAnswer = toScoredAnswer(
+      input.assessmentId,
+      input.questionId,
+      input.value,
+    );
     const existingDraft = drafts.find((draft) => draft.assignmentId === input.assignmentId);
     const answers = existingDraft ? [...existingDraft.answers] : [];
     const answerIndex = answers.findIndex((answer) => answer.questionId === input.questionId);
@@ -146,7 +155,7 @@ export const repository = {
 
     const completedAt = new Date().toISOString();
     const answers = input.answers.map((answer) =>
-      toScoredAnswer(answer.questionId, answer.value),
+      toScoredAnswer(input.assessmentId, answer.questionId, answer.value),
     );
     const submission: AssessmentSubmission = {
       assignmentId: input.assignmentId,
@@ -188,5 +197,21 @@ export const repository = {
     return getSubmissionsStorage().find(
       (submission) => submission.assignmentId === assignmentId,
     );
+  },
+
+  getSubmissions(patientId?: string) {
+    const submissions = getSubmissionsStorage().sort((left, right) =>
+      right.completedAt.localeCompare(left.completedAt),
+    );
+
+    if (!patientId) {
+      return submissions;
+    }
+
+    return submissions.filter((submission) => submission.patientId === patientId);
+  },
+
+  resetAllDemoData() {
+    resetDemoStorage();
   },
 };

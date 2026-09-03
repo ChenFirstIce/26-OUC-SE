@@ -1,32 +1,68 @@
 import { useState } from "react";
+import { ActionButton, GlassCard, SurfaceCard } from "../components/ui";
 import { repository } from "../repositories/mockRepository";
+
+const assessmentOptions = [
+  { id: "scd-q9", label: "SCD-Q9 主观认知下降筛查" },
+  { id: "gds-15", label: "GDS-15 老年抑郁量表" },
+  { id: "ess", label: "ESS 爱泼沃斯嗜睡量表" },
+  { id: "edinburgh-handedness", label: "爱丁堡利手量表" },
+] as const;
 
 export function AdminPage() {
   const patients = repository.getPatients();
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id ?? "");
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>(
+    assessmentOptions[0]?.id ?? "",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
   const assignments = repository.getAssignments(selectedPatientId);
+  const submissions = repository.getSubmissions();
 
   function handleCreateAssignment() {
     setIsSubmitting(true);
     try {
       repository.setCurrentPatient(selectedPatientId);
-      const assignment = repository.createAssignment(selectedPatientId, "scd-q9");
-      setMessage(`已派发 SCD-Q9，任务编号：${assignment.assignmentId}`);
+      const assignment = repository.createAssignment(
+        selectedPatientId,
+        selectedAssessmentId,
+      );
+      const label =
+        assessmentOptions.find((option) => option.id === selectedAssessmentId)?.label ??
+        selectedAssessmentId;
+      setMessage(`已派发 ${label}，任务编号：${assignment.assignmentId}`);
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  function handleCreateBatchAssignments() {
+    setIsSubmitting(true);
+    try {
+      repository.setCurrentPatient(selectedPatientId);
+      assessmentOptions.forEach((option) => {
+        repository.createAssignment(selectedPatientId, option.id);
+      });
+      setMessage("已为当前患者派发 SCD-Q9、GDS-15、ESS、爱丁堡利手量表四项演示任务。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleResetDemoData() {
+    repository.resetAllDemoData();
+    setMessage("已重置演示任务、草稿和提交记录。");
+  }
+
   return (
-    <div className="grid gap-5">
-      <section className="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-medium text-teal-700">Admin / Test Mode</p>
-        <h2 className="mt-2 text-3xl font-semibold">派发演示任务</h2>
+    <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+      <GlassCard className="p-6">
+        <p className="text-sm font-medium text-[var(--gold)]">Admin / Test Mode</p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">派发演示任务</h2>
         <p className="mt-3 text-lg leading-8 text-slate-600">
-          第一版只派发 SCD-Q9，用于打通患者端核心业务流程。
+          当前支持派发 `SCD-Q9`、`GDS-15`、`ESS`、`爱丁堡利手量表`，用于打通首批 A 类量表业务闭环。
         </p>
         <label className="mt-6 block text-base font-medium text-slate-700" htmlFor="patient">
           选择患者
@@ -35,7 +71,7 @@ export function AdminPage() {
           id="patient"
           value={selectedPatientId}
           onChange={(event) => setSelectedPatientId(event.target.value)}
-          className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-lg"
+          className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg"
         >
           {patients.map((patient) => (
             <option key={patient.id} value={patient.id}>
@@ -43,23 +79,56 @@ export function AdminPage() {
             </option>
           ))}
         </select>
-        <button
+        <label className="mt-6 block text-base font-medium text-slate-700" htmlFor="assessment">
+          选择量表
+        </label>
+        <select
+          id="assessment"
+          value={selectedAssessmentId}
+          onChange={(event) => setSelectedAssessmentId(event.target.value)}
+          className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg"
+        >
+          {assessmentOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ActionButton
           type="button"
           disabled={isSubmitting}
           onClick={handleCreateAssignment}
-          className="mt-6 min-h-14 rounded-2xl bg-teal-600 px-5 py-4 text-lg font-medium text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-teal-300"
+          variant="navy"
+          className="mt-6 w-full"
         >
-          {isSubmitting ? "派发中..." : "派发任务"}
-        </button>
+          {isSubmitting ? "派发中..." : "派发当前量表"}
+        </ActionButton>
+        <ActionButton
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleCreateBatchAssignments}
+          variant="secondary"
+          className="mt-3 w-full"
+        >
+          派发全部 A 类演示量表
+        </ActionButton>
+        <ActionButton
+          type="button"
+          variant="secondary"
+          className="mt-3 w-full"
+          onClick={handleResetDemoData}
+        >
+          重置全部演示数据
+        </ActionButton>
         {message ? (
-          <p className="mt-4 rounded-2xl bg-teal-50 px-4 py-3 text-base text-teal-800">
+          <p className="mt-4 rounded-2xl bg-[var(--brand-soft)] px-4 py-3 text-base text-[var(--brand-dark)]">
             {message}
           </p>
         ) : null}
-      </section>
+      </GlassCard>
 
-      <section className="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <h3 className="text-2xl font-semibold">当前任务</h3>
+      <SurfaceCard className="p-6">
+        <h3 className="text-2xl font-semibold tracking-tight">当前任务</h3>
         <div className="mt-4 grid gap-3">
           {assignments.length === 0 ? (
             <p className="text-lg text-slate-600">当前患者还没有任务。</p>
@@ -67,14 +136,38 @@ export function AdminPage() {
             assignments.map((assignment) => (
               <div
                 key={assignment.assignmentId}
-                className="rounded-2xl bg-slate-50 px-4 py-4 text-base text-slate-700"
+                className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-base text-slate-700"
               >
-                {assignment.assessmentId} / {assignment.status} / {assignment.assignmentId}
+                <div className="font-medium text-slate-900">{assignment.assessmentId}</div>
+                <div className="mt-1 text-sm text-slate-500">状态：{assignment.status}</div>
+                <div className="mt-1 text-sm text-slate-500">
+                  任务号：{assignment.assignmentId}
+                </div>
               </div>
             ))
           )}
         </div>
-      </section>
+      </SurfaceCard>
+
+      <SurfaceCard className="p-6 xl:col-span-2">
+        <h3 className="text-2xl font-semibold tracking-tight">最近提交 JSON</h3>
+        <div className="mt-4 grid gap-3">
+          {submissions.length === 0 ? (
+            <p className="text-lg text-slate-600">当前还没有提交记录。</p>
+          ) : (
+            submissions.slice(0, 3).map((submission) => (
+              <div key={submission.assignmentId} className="rounded-[24px] bg-slate-50 p-4">
+                <div className="text-sm text-slate-500">
+                  {submission.assessmentId} / {submission.assignmentId}
+                </div>
+                <pre className="mt-3 overflow-x-auto whitespace-pre-wrap break-all text-sm leading-6 text-slate-700">
+                  {JSON.stringify(submission, null, 2)}
+                </pre>
+              </div>
+            ))
+          )}
+        </div>
+      </SurfaceCard>
     </div>
   );
 }

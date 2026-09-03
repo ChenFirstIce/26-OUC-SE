@@ -17,11 +17,11 @@ export function AssessmentRenderer({
   const question = definition.questions[currentIndex];
 
   return (
-    <section className="rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
-      <p className="text-sm font-medium text-teal-700">
+    <section className="rounded-[32px] border border-[var(--line)] bg-white/92 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] sm:p-8">
+      <p className="text-sm font-medium text-[var(--brand)]">
         第 {currentIndex + 1} 题，共 {definition.questions.length} 题
       </p>
-      <h2 className="mt-3 text-2xl font-semibold leading-tight sm:text-3xl">
+      <h2 className="mt-3 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
         {question.title}
       </h2>
       {question.description ? (
