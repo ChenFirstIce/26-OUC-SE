@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
 
 export function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    repository.getCurrentPatient();
+    void repository.getCurrentPatient();
   }, []);
 
   return (

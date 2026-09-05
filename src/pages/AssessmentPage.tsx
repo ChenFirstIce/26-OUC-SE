@@ -3,29 +3,41 @@ import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { AssessmentRenderer } from "../components/AssessmentRenderer";
 import { ActionButton, GlassCard, SurfaceCard } from "../components/ui";
 import { getAssessmentDefinition } from "../data/assessments";
-import { repository } from "../repositories/mockRepository";
-import type { AnswerValue } from "../types/assessment";
+import { repository } from "../repositories/apiRepository";
+import type { AnswerValue, AssessmentAssignment, Patient } from "../types/assessment";
 
 export function AssessmentPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const assignmentId = searchParams.get("assignmentId") ?? undefined;
-  const patient = repository.getCurrentPatient();
   const definition = id ? getAssessmentDefinition(id) : undefined;
-  const assignment = id
-    ? repository.getActiveAssignment(patient.id, id, assignmentId)
-    : undefined;
-  const draft = assignment ? repository.getDraft(assignment.assignmentId) : undefined;
-
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [assignment, setAssignment] = useState<AssessmentAssignment | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>(() =>
-    Object.fromEntries(
-      draft?.answers.map((answer) => [answer.questionId, answer.value]) ?? [],
-    ),
-  );
-  const [startedAt] = useState(() => draft?.startedAt ?? new Date().toISOString());
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [startedAt, setStartedAt] = useState(() => new Date().toISOString());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!id) { setLoaded(true); return; }
+    void repository.getCurrentPatient().then(async (currentPatient) => {
+      const assignments = await repository.getAssignments(currentPatient.id);
+      const currentAssignment = assignments.find((item) => assignmentId ? item.assignmentId === assignmentId : item.assessmentId === id && item.status !== "completed") ?? null;
+      setPatient(currentPatient);
+      setAssignment(currentAssignment);
+      if (currentAssignment) {
+        const draft = await repository.getDraft(currentAssignment.assignmentId);
+        if (draft) {
+          setAnswers(Object.fromEntries(draft.answers.map((answer) => [answer.questionId, answer.value])));
+          setStartedAt(draft.startedAt);
+        }
+      }
+      setLoaded(true);
+    }).catch((reason: unknown) => { setError(reason instanceof Error ? reason.message : "加载失败"); setLoaded(true); });
+  }, [assignmentId, id]);
 
   const questionIds = useMemo(
     () => definition?.questions.map((question) => question.id) ?? [],
@@ -35,7 +47,7 @@ export function AssessmentPage() {
   const progress = definition ? Math.round((answeredCount / definition.questions.length) * 100) : 0;
 
   useEffect(() => {
-    if (!assignment || !definition) {
+    if (!loaded || !assignment || !definition || !patient) {
       return;
     }
 
@@ -46,15 +58,18 @@ export function AssessmentPage() {
       return;
     }
 
-    repository.saveDraft({
+    void repository.saveDraft({
       assignmentId: assignment.assignmentId,
       patientId: patient.id,
       assessmentId: definition.id,
       startedAt,
       questionId,
       value,
-    });
-  }, [answers, assignment, currentIndex, definition, patient.id, questionIds, startedAt]);
+    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "草稿保存失败"));
+  }, [answers, assignment, currentIndex, definition, loaded, patient, questionIds, startedAt]);
+
+  if (!loaded) return <SurfaceCard className="p-6 text-lg text-slate-600">正在加载评估...</SurfaceCard>;
+  if (error) return <SurfaceCard className="p-6 text-lg text-red-700">{error}</SurfaceCard>;
 
   if (!id || !definition) {
     return (
@@ -64,7 +79,7 @@ export function AssessmentPage() {
     );
   }
 
-  if (!assignment) {
+  if (!assignment || !patient) {
     return (
       <SurfaceCard className="p-6 text-lg text-slate-600">
         当前没有可继续的任务，请先到管理员页面派发量表。
@@ -85,7 +100,7 @@ export function AssessmentPage() {
     }));
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (isSubmitting) {
       return;
     }
@@ -99,7 +114,7 @@ export function AssessmentPage() {
 
     setIsSubmitting(true);
     try {
-      repository.submitAssessment({
+      await repository.submitAssessment({
         assignmentId: resolvedAssignment.assignmentId,
         patientId: patient.id,
         assessmentId: resolvedDefinition.id,
@@ -112,6 +127,8 @@ export function AssessmentPage() {
       navigate(
         `/assessment/${resolvedDefinition.id}/complete?assignmentId=${resolvedAssignment.assignmentId}`,
       );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "提交失败");
     } finally {
       setIsSubmitting(false);
     }

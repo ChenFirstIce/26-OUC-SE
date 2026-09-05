@@ -22,6 +22,14 @@ npm install
 
 ## 启动开发服务器
 
+先在第一个终端启动答题后端：
+
+```bash
+npm run dev:server
+```
+
+再在第二个终端启动患者前端：
+
 ```bash
 npm run dev
 ```
@@ -56,5 +64,7 @@ npm run build
 
 ## 数据说明
 
-- 运行中的任务、草稿和提交都保存在浏览器 `localStorage`
-- 清空浏览器站点数据后，演示数据会被重置
+- 任务、草稿和提交通过 `/api` 保存到 `server/data/store.json`
+- 前端开发服务器会把 `/api` 代理到 `http://127.0.0.1:3001`
+- `server/data/store.json` 是本地运行数据，已加入 `.gitignore`
+- 管理员页面的“重置全部演示数据”会清空任务、草稿和提交

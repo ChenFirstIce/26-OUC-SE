@@ -1,12 +1,21 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MetricCard, GlassCard, StatusPill, SurfaceCard } from "../components/ui";
 import { getAssessmentDefinition } from "../data/assessments";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
+import type { AssessmentAssignment, Patient } from "../types/assessment";
 
 export function HomePage() {
-  const patient = repository.getCurrentPatient();
-  const assignments = repository.getAssignments(patient.id);
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [assignments, setAssignments] = useState<AssessmentAssignment[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    void repository.getCurrentPatient().then(async (current) => {
+      setPatient(current);
+      setAssignments(await repository.getAssignments(current.id));
+    }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "加载失败"));
+  }, []);
 
   const stats = useMemo(
     () => ({
@@ -16,6 +25,9 @@ export function HomePage() {
     }),
     [assignments],
   );
+
+  if (error) return <SurfaceCard className="p-6 text-lg text-red-700">{error}</SurfaceCard>;
+  if (!patient) return <SurfaceCard className="p-6 text-lg text-slate-600">正在加载任务...</SurfaceCard>;
 
   return (
     <div className="grid gap-5">

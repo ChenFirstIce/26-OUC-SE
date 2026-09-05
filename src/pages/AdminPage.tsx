@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActionButton, GlassCard, SurfaceCard } from "../components/ui";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
+import type { AssessmentAssignment, AssessmentSubmission, Patient } from "../types/assessment";
 
 const assessmentOptions = [
   { id: "scd-q9", label: "SCD-Q9 主观认知下降筛查" },
@@ -10,22 +11,32 @@ const assessmentOptions = [
 ] as const;
 
 export function AdminPage() {
-  const patients = repository.getPatients();
-  const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id ?? "");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState("");
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>(
     assessmentOptions[0]?.id ?? "",
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [assignments, setAssignments] = useState<AssessmentAssignment[]>([]);
+  const [submissions, setSubmissions] = useState<AssessmentSubmission[]>([]);
 
-  const assignments = repository.getAssignments(selectedPatientId);
-  const submissions = repository.getSubmissions();
+  const reload = useCallback(async (patientId?: string) => {
+    const loadedPatients = await repository.getPatients();
+    const resolvedPatientId = patientId || selectedPatientId || loadedPatients[0]?.id || "";
+    setPatients(loadedPatients);
+    if (!selectedPatientId && resolvedPatientId) setSelectedPatientId(resolvedPatientId);
+    setAssignments(resolvedPatientId ? await repository.getAssignments(resolvedPatientId) : []);
+    setSubmissions(await repository.getSubmissions());
+  }, [selectedPatientId]);
 
-  function handleCreateAssignment() {
+  useEffect(() => { void reload(); }, [reload]);
+
+  async function handleCreateAssignment() {
     setIsSubmitting(true);
     try {
-      repository.setCurrentPatient(selectedPatientId);
-      const assignment = repository.createAssignment(
+      await repository.setCurrentPatient(selectedPatientId);
+      const assignment = await repository.createAssignment(
         selectedPatientId,
         selectedAssessmentId,
       );
@@ -33,27 +44,38 @@ export function AdminPage() {
         assessmentOptions.find((option) => option.id === selectedAssessmentId)?.label ??
         selectedAssessmentId;
       setMessage(`已派发 ${label}，任务编号：${assignment.assignmentId}`);
+      await reload(selectedPatientId);
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "派发失败");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  function handleCreateBatchAssignments() {
+  async function handleCreateBatchAssignments() {
     setIsSubmitting(true);
     try {
-      repository.setCurrentPatient(selectedPatientId);
-      assessmentOptions.forEach((option) => {
-        repository.createAssignment(selectedPatientId, option.id);
-      });
+      await repository.setCurrentPatient(selectedPatientId);
+      for (const option of assessmentOptions) {
+        await repository.createAssignment(selectedPatientId, option.id);
+      }
       setMessage("已为当前患者派发 SCD-Q9、GDS-15、ESS、爱丁堡利手量表四项演示任务。");
+      await reload(selectedPatientId);
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "批量派发失败");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  function handleResetDemoData() {
-    repository.resetAllDemoData();
-    setMessage("已重置演示任务、草稿和提交记录。");
+  async function handleResetDemoData() {
+    try {
+      await repository.resetAllDemoData();
+      await reload("P001");
+      setMessage("已重置演示任务、草稿和提交记录。");
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "重置失败");
+    }
   }
 
   return (
@@ -70,7 +92,7 @@ export function AdminPage() {
         <select
           id="patient"
           value={selectedPatientId}
-          onChange={(event) => setSelectedPatientId(event.target.value)}
+          onChange={(event) => { setSelectedPatientId(event.target.value); void reload(event.target.value); }}
           className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg"
         >
           {patients.map((patient) => (

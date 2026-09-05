@@ -4,6 +4,8 @@ dist/
 *.log
 *.tsbuildinfo
 .vite/
+server/data/store.json
+server/data/store.json.tmp
 
 # Local collaboration / Codex files
 00_CODEX_START.md

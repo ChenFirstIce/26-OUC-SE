@@ -1,11 +1,20 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { GlassCard, StatusPill, SurfaceCard } from "../components/ui";
 import { getAssessmentDefinition } from "../data/assessments";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
+import type { AssessmentSubmission } from "../types/assessment";
 
 export function HistoryPage() {
-  const patient = repository.getCurrentPatient();
-  const submissions = repository.getSubmissions(patient.id);
+  const [submissions, setSubmissions] = useState<AssessmentSubmission[] | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    void repository.getCurrentPatient().then((patient) => repository.getSubmissions(patient.id)).then(setSubmissions).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "加载失败"));
+  }, []);
+
+  if (error) return <SurfaceCard className="p-6 text-lg text-red-700">{error}</SurfaceCard>;
+  if (!submissions) return <SurfaceCard className="p-6 text-lg text-slate-600">正在加载历史记录...</SurfaceCard>;
 
   return (
     <div className="grid gap-5">

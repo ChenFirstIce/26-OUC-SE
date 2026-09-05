@@ -1,18 +1,27 @@
+import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { GlassCard, StatusPill, SurfaceCard } from "../components/ui";
 import { getAssessmentDefinition } from "../data/assessments";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
+import type { AssessmentAssignment } from "../types/assessment";
 
 export function AssessmentIntroPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const assignmentId = searchParams.get("assignmentId") ?? undefined;
-  const patient = repository.getCurrentPatient();
   const definition = id ? getAssessmentDefinition(id) : undefined;
-  const assignment = id
-    ? repository.getActiveAssignment(patient.id, id, assignmentId)
-    : undefined;
+  const [assignment, setAssignment] = useState<AssessmentAssignment | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+    void repository.getCurrentPatient().then((patient) => repository.getAssignments(patient.id)).then((items) => {
+      setAssignment(items.find((item) => assignmentId ? item.assignmentId === assignmentId : item.assessmentId === id && item.status !== "completed") ?? null);
+      setLoaded(true);
+    });
+  }, [assignmentId, id]);
+
+  if (!loaded) return <SurfaceCard className="p-6 text-lg text-slate-600">正在加载任务...</SurfaceCard>;
   if (!definition || !assignment) {
     return (
       <SurfaceCard className="p-6 text-lg text-slate-600">

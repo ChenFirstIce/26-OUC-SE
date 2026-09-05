@@ -1,14 +1,23 @@
+import { useEffect, useState } from "react";
 import { Link, useSearchParams, useParams } from "react-router-dom";
 import { GlassCard, MetricCard, SurfaceCard } from "../components/ui";
 import { getAssessmentDefinition } from "../data/assessments";
-import { repository } from "../repositories/mockRepository";
+import { repository } from "../repositories/apiRepository";
+import type { AssessmentSubmission } from "../types/assessment";
 
 export function AssessmentCompletePage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const assignmentId = searchParams.get("assignmentId") ?? "";
   const definition = id ? getAssessmentDefinition(id) : undefined;
-  const submission = repository.getLatestSubmission(assignmentId);
+  const [submission, setSubmission] = useState<AssessmentSubmission | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!assignmentId) { setSubmission(null); return; }
+    void repository.getLatestSubmission(assignmentId).then(setSubmission).catch(() => setSubmission(null));
+  }, [assignmentId]);
+
+  if (submission === undefined) return <SurfaceCard className="p-6 text-lg text-slate-600">正在加载提交结果...</SurfaceCard>;
 
   if (!definition || !submission) {
     return (
