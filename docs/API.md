@@ -182,7 +182,7 @@ POST /api/v1/questionnaires/import-preview
 ```
 
 ```json
-{ "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": {}, "scoring_json": {} }], "conflict_strategy": "new_version", "publish": false }
+{ "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": { "administration_mode": "patient_self", "sections": [{ "key": "s1", "questions": [{ "key": "q1", "type": "short_text", "label": "示例", "required": true }] }] }, "scoring_json": { "strategy": "manual_review" } }], "conflict_strategy": "new_version", "publish": false }
 ```
 
 响应每项包括 `valid`、`errors`、`warnings`、`action`、`current_version`、`proposed_version`、`content_hash` 和 `diff`。`diff` 包含新增/删除/修改题目、问卷属性变化、计分变化和风险级别。预览不写数据库。
@@ -191,7 +191,7 @@ POST /api/v1/questionnaires/import-preview
 
 ```json
 {
-  "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": {}, "scoring_json": {} }],
+  "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": { "administration_mode": "patient_self", "sections": [{ "key": "s1", "questions": [{ "key": "q1", "type": "short_text", "label": "示例", "required": true }] }] }, "scoring_json": { "strategy": "manual_review" } }],
   "conflict_strategy": "new_version",
   "publish": false,
   "preview_hashes": { "CUSTOM_SCALE": "64位内容摘要" },
@@ -199,7 +199,7 @@ POST /api/v1/questionnaires/import-preview
 }
 ```
 
-内容或当前数据库版本在预览后发生变化返回 `409`。导入接口只能生成草稿，传 `publish: true` 返回 `422`。目录量表使用 `/import-preview/catalog` 预览，之后调用 `/import-catalog` 导入草稿。
+内容或当前数据库版本在预览后发生变化返回 `409`。导入接口只能生成草稿，传 `publish: true` 返回 `422`。目录量表使用 `/import-preview/catalog` 预览，之后调用 `/import-catalog` 并同样回传 `preview_hashes`、`preview_versions` 导入草稿。
 
 版本列表：`GET /questionnaires/{template_id}/versions`。比较版本：
 
@@ -359,5 +359,6 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 | --- | --- | --- |
 | `4cab2ca` | 统一到 yjj 的 `/api/v1`、版本化问卷、任务包、patient JWT、revision 和幂等提交模型。 | 旧 React/Node 接口不再是正式契约。 |
 | `e09911f` | `GET /patient-session/tasks/{item_id}` 首次打开即创建答卷并记录 UTC 起点；提交时计算真实 `duration_seconds`。 | 所有后端时间按 UTC 解析后转浏览器本地时间；历史 0 秒显示“历史记录未计时”。 |
+| `7b931ca` | 增加导入预览、版本差异、版本级发布/停用和预览并发校验；导入不再允许直接发布。 | 管理页面必须先预览再导入，发布和停用均需输入问卷编号确认。 |
 
 完整操作背景、验证和故障记录见 [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md)。

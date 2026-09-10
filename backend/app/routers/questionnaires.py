@@ -37,6 +37,8 @@ class ImportPackageInput(BaseModel):
 class CatalogImportInput(BaseModel):
     codes: list[str] = Field(min_length=1, max_length=30)
     publish: bool = False
+    preview_hashes: dict[str, str] = Field(default_factory=dict)
+    preview_versions: dict[str, int | None] = Field(default_factory=dict)
 
 
 class PublishInput(BaseModel):
@@ -155,7 +157,6 @@ def import_templates(payload: ImportPackageInput, user: User, db: Session, requi
             raise HTTPException(status_code=409, detail=f"以下问卷尚未预览或预览内容已变化：{', '.join(stale)}")
 
     results: list[dict[str, Any]] = []
-    now = datetime.now(timezone.utc)
     for item, preview in zip(payload.templates, previews, strict=True):
         template = db.scalar(select(QuestionnaireTemplate).where(QuestionnaireTemplate.code == item.code))
         if template and payload.conflict_strategy == "error":
@@ -172,17 +173,10 @@ def import_templates(payload: ImportPackageInput, user: User, db: Session, requi
             db.flush()
             version_number = 1
 
-        if payload.publish:
-            for previous in template.versions:
-                if previous.status == "published":
-                    previous.status, previous.retired_at = "retired", now
-                    previous.retired_by_id, previous.retirement_reason = user.id, f"由 v{version_number} 自动替代"
         version = QuestionnaireVersion(
             template_id=template.id, version=version_number, name=item.name, description=item.description,
             schema_json=item.questionnaire_schema, scoring_json=item.scoring_json,
-            status="published" if payload.publish else "draft", content_hash=preview["content_hash"],
-            created_by_id=user.id, published_at=now if payload.publish else None,
-            published_by_id=user.id if payload.publish else None,
+            status="draft", content_hash=preview["content_hash"], created_by_id=user.id,
         )
         template.versions.append(version)
         db.flush()
@@ -229,8 +223,11 @@ def import_package(payload: ImportPackageInput, user: User = Depends(admin_user)
 @router.post("/import-catalog")
 def import_catalog(payload: CatalogImportInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
     templates = catalog_templates(payload.codes)
-    package = ImportPackageInput(templates=templates, conflict_strategy="new_version", publish=payload.publish)
-    return {"items": import_templates(package, user, db, require_preview=False)}
+    package = ImportPackageInput(
+        templates=templates, conflict_strategy="new_version", publish=payload.publish,
+        preview_hashes=payload.preview_hashes, preview_versions=payload.preview_versions,
+    )
+    return {"items": import_templates(package, user, db, require_preview=True)}
 
 
 @router.post("", status_code=201)

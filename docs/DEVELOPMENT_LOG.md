@@ -118,6 +118,8 @@ Windows 环境下直接合并曾因中文路径/文件权限报错而无法完�
 - 新增 Alembic 迁移，兼容已有 SQLite 数据并补充旧库迁移测试；
 - 管理页面新增版本列表、治理检查、差异展示、发布和停用操作。
 
+对应提交：`7b931ca feat: add questionnaire version governance`。
+
 ### 3.8 前端按需组件与稳定分包
 
 路由原本已经使用动态导入，本次保留页面级懒加载，重点移除 Element Plus 全量插件注册：
@@ -129,6 +131,8 @@ Windows 环境下直接合并曾因中文路径/文件权限报错而无法完�
 - 最大业务入口 JS 从 1,020.52 kB（gzip 339.53 kB）拆分并降为首屏依赖合计约 608.60 kB（gzip 208.59 kB）；
 - 全局/组件 CSS 从 366.17 kB（gzip 52.34 kB）降为合计 188.67 kB（gzip 28.68 kB）；
 - 所有生成 chunk 均低于 500 kB，生产构建不再出现大 chunk 警告。
+
+对应提交：`ce1378f perf: reduce frontend initial bundle size`。
 
 ## 4. 关键文件变更索引
 

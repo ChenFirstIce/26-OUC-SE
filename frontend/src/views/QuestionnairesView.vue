@@ -73,7 +73,9 @@ async function previewCatalog() {
 async function importCatalog() {
   importing.value = true
   try {
-    const { data } = await api.post('/questionnaires/import-catalog', { codes:selected.value, publish:false })
+    const preview_hashes = Object.fromEntries(previewItems.value.map(item => [item.code, item.content_hash]))
+    const preview_versions = Object.fromEntries(previewItems.value.map(item => [item.code, item.current_version]))
+    const { data } = await api.post('/questionnaires/import-catalog', { codes:selected.value, publish:false, preview_hashes, preview_versions })
     ElMessage.success(`已导入 ${data.items.length} 个量表草稿`)
     importDialog.value = false
     selected.value = []

@@ -205,12 +205,22 @@ def test_admin_can_import_catalog_scales_and_create_new_versions():
             "OUC_SCD_Q9", "OUC_MMSE", "OUC_FAQ", "OUC_MOCA_B", "OUC_CDR", "OUC_ADAS_COG",
             "OUC_GDS_15", "OUC_ESS", "OUC_EDINBURGH",
         } <= codes
-        imported = client.post("/api/v1/questionnaires/import-catalog", headers=admin,
-                               json={"codes": ["OUC_SCD_Q9", "OUC_CDR"], "publish": False})
+        first_preview = client.post("/api/v1/questionnaires/import-preview/catalog", headers=admin,
+                                    json={"codes": ["OUC_SCD_Q9", "OUC_CDR"]}).json()["items"]
+        imported = client.post("/api/v1/questionnaires/import-catalog", headers=admin, json={
+            "codes": ["OUC_SCD_Q9", "OUC_CDR"], "publish": False,
+            "preview_hashes": {item["code"]: item["content_hash"] for item in first_preview},
+            "preview_versions": {item["code"]: item["current_version"] for item in first_preview},
+        })
         assert imported.status_code == 200, imported.text
         assert all(item["version"] == 1 for item in imported.json()["items"])
-        repeated = client.post("/api/v1/questionnaires/import-catalog", headers=admin,
-                               json={"codes": ["OUC_SCD_Q9"], "publish": False})
+        repeat_preview = client.post("/api/v1/questionnaires/import-preview/catalog", headers=admin,
+                                     json={"codes": ["OUC_SCD_Q9"]}).json()["items"]
+        repeated = client.post("/api/v1/questionnaires/import-catalog", headers=admin, json={
+            "codes": ["OUC_SCD_Q9"], "publish": False,
+            "preview_hashes": {item["code"]: item["content_hash"] for item in repeat_preview},
+            "preview_versions": {item["code"]: item["current_version"] for item in repeat_preview},
+        })
         assert repeated.status_code == 200 and repeated.json()["items"][0]["version"] == 2
         templates = client.get("/api/v1/questionnaires", headers=admin).json()
         scd = next(item for item in templates if item["code"] == "OUC_SCD_Q9")
