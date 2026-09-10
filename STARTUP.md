@@ -1,70 +1,69 @@
-# 启动说明
+# 本地启动说明
 
-## 环境要求
+## 环境
 
-- Node.js 20
-- npm 10 或兼容版本
-- 建议在 WSL 或 Linux 环境中运行
+- Python 3.12
+- Node.js 20+
+- PowerShell 5/7
 
-如果当前环境使用 `nvm`，先执行：
+## 一键初始化与启动
 
-```bash
-export NVM_DIR="/home/lfy/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-nvm use 20
+```powershell
+Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
+.\scripts\setup.ps1
+.\scripts\start.ps1
 ```
 
-## 安装依赖
+默认地址：
 
-```bash
-npm install
+- 前端：`http://127.0.0.1:5173`
+- 后端：`http://127.0.0.1:8000`
+- Swagger：`http://127.0.0.1:8000/docs`
+- 健康检查：`http://127.0.0.1:8000/health`
+
+演示账号：`doctor1 / Doctor123!`、`admin / Admin123!`；演示患者访问码 `123456`。患者链接以启动脚本输出为准。
+
+## 分别启动
+
+后端：
+
+```powershell
+Set-Location .\backend
+python run.py
 ```
 
-## 启动开发服务器
+前端（在项目根目录另开终端）：
 
-先在第一个终端启动答题后端：
-
-```bash
-npm run dev:server
+```powershell
+npm run dev --prefix .\frontend
 ```
 
-再在第二个终端启动患者前端：
+Vite 将 `/api` 和 `/health` 代理到 `127.0.0.1:8000`。Axios 的统一 Base URL 是 `/api/v1`。
 
-```bash
-npm run dev
+## 停止与测试
+
+```powershell
+.\scripts\stop.ps1
+.\scripts\test.ps1
 ```
 
-默认情况下，Vite 会输出本地访问地址，例如：
+`test.ps1` 依次执行后端 pytest 和前端 TypeScript/生产构建。
 
-```text
-http://localhost:5173/
-```
+## 配置
 
-如果端口被占用，可指定端口：
+复制 `.env.example` 中的配置到当前终端环境或部署环境。常用项：
 
-```bash
-npm run dev -- --port 4173
-```
+- `DATABASE_URL`：数据库连接；缺省时使用 `%TEMP%\ad_questionnaire_data\ad_questionnaire.db`。使用 PostgreSQL 时需另装对应 SQLAlchemy 驱动。
+- `JWT_SECRET`：JWT 签名密钥，生产环境必须更换。
+- `JWT_EXPIRE_MINUTES`：医生/管理员 token 有效期。
+- `PATIENT_SESSION_MINUTES`：患者会话 token 有效期。
+- `FRONTEND_ORIGIN`：后端 CORS 和患者链接的前端来源。
 
-## 生产构建
+## 演示闭环
 
-```bash
-npm run build
-```
-
-## MVP 测试路径
-
-1. 打开 `/login`
-2. 进入“管理员模式”
-3. 在 `/admin` 为演示患者派发 `SCD-Q9`
-4. 进入 `/home`
-5. 打开 `SCD-Q9`
-6. 逐题作答并提交
-7. 在完成页查看结构化提交结果
-
-## 数据说明
-
-- 任务、草稿和提交通过 `/api` 保存到 `server/data/store.json`
-- 前端开发服务器会把 `/api` 代理到 `http://127.0.0.1:3001`
-- `server/data/store.json` 是本地运行数据，已加入 `.gitignore`
-- 管理员页面的“重置全部演示数据”会清空任务、草稿和提交
+1. 管理员在“问卷管理”导入并发布目录量表。
+2. 医生创建/选择患者，选择已发布问卷版本并派发。
+3. 患者打开生成的 `/p/fill/{token}` 链接，输入访问码。
+4. 患者填写，等待“已自动保存”，刷新验证草稿恢复。
+5. 提交后由后端校验并计分。
+6. 医生在任务结果、患者详情和统计页查看数据。

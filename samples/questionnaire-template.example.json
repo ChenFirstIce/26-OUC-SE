@@ -1,0 +1,50 @@
+{
+  "code": "CUSTOM_EXAMPLE",
+  "name": "自定义演示问卷",
+  "description": "用于展示如何不修改前端代码而新增问卷。非临床内容。",
+  "questionnaire_schema": {
+    "title": "自定义演示问卷（非临床）",
+    "notice": "请根据实际情况填写。本内容仅供系统演示。",
+    "sections": [
+      {
+        "key": "basic",
+        "title": "基本问题",
+        "questions": [
+          {
+            "key": "has_change",
+            "type": "yes_no",
+            "label": "最近是否注意到状态变化？",
+            "required": true,
+            "dimension": "状态变化",
+            "options": [
+              { "value": "no", "label": "否", "score": 0 },
+              { "value": "yes", "label": "是", "score": 1 }
+            ]
+          },
+          {
+            "key": "impact",
+            "type": "scale",
+            "label": "影响程度",
+            "required": true,
+            "dimension": "日常影响",
+            "show_if": { "question_key": "has_change", "equals": "yes" },
+            "options": [
+              { "value": 0, "label": "无影响", "score": 0 },
+              { "value": 1, "label": "轻微", "score": 1 },
+              { "value": 2, "label": "明显", "score": 2 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scoring_json": {
+    "strategy": "metadata_sum",
+    "risk_thresholds": [
+      { "min": 0, "level": "low" },
+      { "min": 1, "level": "medium" },
+      { "min": 3, "level": "high" }
+    ]
+  }
+}
+

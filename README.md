@@ -1,261 +1,197 @@
-# 阿尔茨海默病认知评估系统：患者答题端与后端
+# 阿尔茨海默症筛查问卷与数据统计系统
 
-本仓库 `dl` 分支包含患者移动端 Web 和首版答题后端，已经打通：
+`dl` 分支已以 `yjj` 的医生派发工作流为主干完成整合：医生/管理员使用 Vue 管理端创建患者和派发问卷；患者通过链接与 6 位访问码进入移动答题端；FastAPI 后端保存草稿、校验并计分，再向医生端提供结果与统计。
 
-```text
-管理员派发量表 → 患者任务中心 → 逐题作答与草稿保存 → 后端校验和权威计分 → 结果及历史记录
-```
+> 医学声明：本仓库用于课程开发与流程验证，自动评分不等于诊断。正式临床使用前必须完成量表授权、评分规则、数据合规和专业人员复核。
 
-当前是课程项目 MVP，不构成医学诊断系统。患者端只展示中性完成提示；正式题目、评分规则和结果解释应由医学专业人员审核。
-
-## 1. 技术栈与当前功能
-
-前端使用 React 19、TypeScript 5.9、Vite 7、Tailwind CSS 4 和 React Router 7。后端使用 Node.js 20 原生 HTTP 服务、本地 JSON 持久化和 `node:test`，当前无额外后端运行时依赖。
-
-已实现演示患者入口、管理员派发、患者任务中心、配置驱动答题器、草稿保存与恢复、完成页、历史页，以及 SCD-Q9、GDS-15、ESS、爱丁堡利手量表的服务端权威计分。真实鉴权、正式数据库、Boston、STT、LLM 分析、医生复核和统计仍待实现。
-
-## 2. 仓库结构
-
-> 新增、删除、移动或重命名目录/关键文件时，必须在同一次修改中更新本节；接口变化时同时更新 [`docs/API.md`](docs/API.md)。
+## 1. 工作流与对接边界
 
 ```text
-.
-├─ AGENTS.md
-├─ README.md
-├─ STARTUP.md
-├─ package.json
-├─ package-lock.json
-├─ index.html
-├─ vite.config.ts
-├─ tsconfig.json
-├─ tsconfig.app.json
-├─ bootstrap_references.sh
-├─ assets/
-├─ docs/
-│  ├─ API.md
-│  ├─ BACKEND_INTEGRATION.md
-│  ├─ INTERACTIVE_TASKS.md
-│  ├─ PATIENT_SCALE_SPEC.md
-│  ├─ PROJECT_SPEC.md
-│  ├─ TEMPLATE_REFERENCES.md
-│  ├─ plan/
-│  ├─ sources/
-│  └─ status/
-├─ server/
-│  ├─ index.mjs
-│  ├─ assessments.mjs
-│  ├─ assessments.test.mjs
-│  ├─ store.mjs
-│  └─ data/                 # 运行时生成，不提交 Git
-└─ src/
-   ├─ main.tsx
-   ├─ App.tsx
-   ├─ components/
-   ├─ data/assessments/
-   ├─ lib/
-   ├─ pages/
-   ├─ repositories/
-   ├─ styles/
-   └─ types/
+管理员导入并发布问卷版本
+  -> 医生创建患者
+  -> 医生选择一个或多个 questionnaire_version_id 创建任务包
+  -> 后端生成患者链接 + 随机 token + 6 位访问码
+  -> 患者验证后获得短期 patient JWT
+  -> 患者读取任务、按 answers 对象自动保存草稿（revision 乐观锁）
+  -> 患者使用 Idempotency-Key 正式提交
+  -> 后端校验必答题、按已锁定问卷版本计分并保存 Assessment
+  -> 医生查看原始答案/结果，统计页和 CSV 同步更新
 ```
 
-### 2.1 根目录文件
+统一 API 前缀为 `/api/v1`。实际运行入口是 `backend/app/routers/` + `backend/app/services/` + `backend/app/models.py`；`backend/app/modules/` 是 yjj 保留的分模块草案，不由 `app/main.py` 注册，联调时不要调用其中的旧字段或旧路由。
 
-| 文件 | 作用 |
-| --- | --- |
-| `AGENTS.md` | 仓库维护约定，规定文档同步和分支边界。 |
-| `README.md` | 项目总入口：结构、职责、启动方式和对接机制。 |
-| `STARTUP.md` | 精简版本地启动和演示步骤。 |
-| `package.json` | 前后端启动、构建、测试脚本及前端依赖。 |
-| `package-lock.json` | 锁定 npm 依赖版本。 |
-| `index.html` | Vite 前端 HTML 入口。 |
-| `vite.config.ts` | Vite、React、Tailwind 和 `/api` 代理配置。 |
-| `tsconfig.json` | TypeScript 工程引用入口。 |
-| `tsconfig.app.json` | 前端 TypeScript 严格编译选项。 |
-| `bootstrap_references.sh` | 参考材料初始化脚本，非应用运行必需。 |
-| `.gitignore` | 忽略依赖、构建产物、本地数据和编辑器文件。 |
+## 2. 第一次运行
 
-### 2.2 `src/`：患者前端
+环境要求：Python 3.12、Node.js 20+、PowerShell 5/7。
+
+```powershell
+Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
+.\scripts\setup.ps1
+.\scripts\start.ps1
+```
+
+启动成功后：
+
+- 医生/管理端：<http://127.0.0.1:5173/login>
+- 患者演示端：以启动脚本输出的局域网地址为准
+- Swagger：<http://127.0.0.1:8000/docs>
+- 健康检查：<http://127.0.0.1:8000/health>
+
+演示账号：医生 `doctor1 / Doctor123!`，管理员 `admin / Admin123!`；演示患者访问码 `123456`。
+
+停止和检查：
+
+```powershell
+.\scripts\stop.ps1
+.\scripts\test.ps1
+```
+
+单独启动后端或前端见 [STARTUP.md](STARTUP.md)。完整接口契约见 [docs/API.md](docs/API.md)。
+
+## 3. 当前目录结构
+
+```text
+26-OUC-SE/
+├─ backend/                 FastAPI、SQLAlchemy、测试
+├─ frontend/                Vue 3 医生端、管理端、患者答题端
+├─ scripts/                 Windows 初始化、启动、停止、测试脚本
+├─ samples/                 问卷 JSON 导入示例
+├─ docs/                    统一接口与前后端对接文档
+├─ assets/                  历史临床材料视觉参考，不参与运行
+├─ .env.example             环境变量示例
+├─ .gitignore               本地依赖、运行数据和构建产物忽略规则
+├─ AGENTS.md                dl 分支协作、文档同步和测试约定
+├─ STARTUP.md               本地启动与演示流程
+└─ README.md                项目总入口和结构归档
+```
+
+### 3.1 `backend/`
 
 | 文件/目录 | 作用 |
 | --- | --- |
-| `src/main.tsx` | 创建 React 根节点、引入全局样式并启动应用。 |
-| `src/App.tsx` | 定义登录、任务中心、历史、管理员、答题和完成页路由。 |
-| `src/styles/globals.css` | 全局主题、颜色、排版和 Tailwind 样式入口。 |
-| `src/types/assessment.ts` | 题目、答案、量表、任务、草稿、结果和患者公共类型。 |
+| `backend/run.py` | 使用 Uvicorn 启动后端。 |
+| `backend/requirements.txt` | FastAPI、SQLAlchemy、JWT、测试等 Python 依赖。 |
+| `backend/app/main.py` | 创建应用、CORS、请求 ID、统一错误处理、数据库初始化和正式路由注册。 |
+| `backend/app/models.py` | 用户、权限、患者、问卷版本、任务包、答卷、评估、临床记录、审计表。 |
+| `backend/app/seed.py` | 初始化匿名演示科室、账号、患者、问卷与演示任务。 |
+| `backend/app/__init__.py` | Python 包标识。 |
 
-#### `src/components/`
-
-| 文件 | 作用 |
-| --- | --- |
-| `AppShell.tsx` | 页面公共布局和导航外壳。 |
-| `AssessmentRenderer.tsx` | 统一量表答题容器。 |
-| `QuestionRenderer.tsx` | 根据题型渲染是非题、单选题等交互。 |
-| `ui.tsx` | Card、按钮、状态标签、指标卡等 UI 原语。 |
-
-#### `src/data/assessments/`
+`backend/app/core/`：
 
 | 文件 | 作用 |
 | --- | --- |
-| `index.ts` | 汇总并按 ID 查找量表定义。 |
-| `scd-q9.ts` | SCD-Q9 题目、选项和前端初步计分。 |
-| `gds-15.ts` | GDS-15 题目及正反向初步计分。 |
-| `ess.ts` | ESS 八个场景、0～3 选项和初步计分。 |
-| `edinburgh-handedness.ts` | 爱丁堡利手量表及利手指数初步计算。 |
+| `config.py` | `/api/v1`、数据库、JWT 时长、前端地址等配置。 |
+| `database.py` | 正式 SQLAlchemy Engine、Session 和 Base。 |
+| `dependencies.py` | 医生/管理员/患者 JWT 身份与数据范围依赖。 |
+| `security.py` | 密码哈希、JWT、任务 token 和访问码安全函数。 |
+| `api.py`、`db.py` | yjj 早期公共接口/数据库草案，正式入口当前不引用。 |
+| `__init__.py` | 包标识。 |
 
-前端评分只用于即时展示和结构兼容，正式结果以后端 `server/assessments.mjs` 为准。
-
-#### `src/pages/`
-
-| 文件 | 路由/作用 |
-| --- | --- |
-| `LoginPage.tsx` | `/login`，患者端和管理员模式入口。 |
-| `AdminPage.tsx` | `/admin`，患者选择、任务派发、重置和提交查看。 |
-| `HomePage.tsx` | `/home`，患者任务列表和状态统计。 |
-| `AssessmentIntroPage.tsx` | `/assessment/:id/intro`，量表说明。 |
-| `AssessmentPage.tsx` | `/assessment/:id`，答题、草稿保存、恢复和提交。 |
-| `AssessmentCompletePage.tsx` | `/assessment/:id/complete`，提交完成结果。 |
-| `HistoryPage.tsx` | `/history`，患者历史提交列表。 |
-
-#### `src/repositories/` 与 `src/lib/`
+`backend/app/routers/`（正式 API）：
 
 | 文件 | 作用 |
 | --- | --- |
-| `repositories/apiRepository.ts` | 当前数据入口，将页面操作转换为 HTTP API 请求。 |
-| `repositories/mockRepository.ts` | 旧版 localStorage Mock，保留作离线和迁移参考。 |
-| `lib/storage.ts` | 旧版 localStorage 封装，仅供 mockRepository 使用。 |
-| `lib/cn.ts` | 合并组件 CSS class 名。 |
+| `auth.py` | 医生/管理员登录与当前身份。 |
+| `patients.py` | 患者主档、纵向分析、临床记录与归档。 |
+| `questionnaires.py` | 模板、版本、内置目录导入和发布。 |
+| `assignments.py` | 医生派发任务包、查看、修改、撤销和结果读取。 |
+| `patient_session.py` | 患者验证、任务读取、草稿 revision、幂等提交与计分。 |
+| `statistics.py` | 概览、漏斗、量表、风险、分数统计和 CSV 导出。 |
+| `admin.py` | 科室、账号、权限和审计管理。 |
+| `__init__.py` | 路由包标识。 |
 
-### 2.3 `server/`：答题后端
+`backend/app/services/`：
+
+| 文件 | 作用 |
+| --- | --- |
+| `assignment.py` | 任务过期判断和任务包状态汇总。 |
+| `audit.py` | 记录关键操作审计。 |
+| `permissions.py` | 独立业务权限读取与校验。 |
+| `questionnaire.py` | 动态问卷题型、条件显示、Schema 和答案校验。 |
+| `scale_catalog.py` | 内置量表目录；含 yjj 原目录和从 dl 迁入的 GDS-15、ESS、爱丁堡利手量表。 |
+| `scoring.py` | 后端权威计分；支持元数据求和、人工复核和利手指数。 |
+| `__init__.py` | 服务包标识。 |
+
+`backend/app/modules/` 是未接入正式运行入口的 yjj 领域化草案。其 `auth/`、`users/`、`departments/`、`patients/`、`questionnaires/`、`assignments/`、`assessments/`、`scoring/`、`audit/` 子目录中的 `models.py`、`router.py`、`schemas.py`、`service.py` 仅作后续重构参考；当前实现以同名 `routers/`、`services/` 和根 `models.py` 为准。
+
+| 文件 | 作用 |
+| --- | --- |
+| `backend/tests/test_flow.py` | 覆盖登录、权限、患者、派发、患者答题、草稿冲突、幂等提交、统计、目录导入及迁入量表计分。 |
+
+### 3.2 `frontend/`
 
 | 文件/目录 | 作用 |
 | --- | --- |
-| `server/index.mjs` | HTTP 入口、路由、请求校验、任务/草稿/提交编排。 |
-| `server/assessments.mjs` | 四张量表的权威计分和答案完整性校验。 |
-| `server/assessments.test.mjs` | 服务端计分及漏答校验测试。 |
-| `server/store.mjs` | JSON 读取、排队写入和临时文件原子替换。 |
-| `server/data/store.json` | 自动生成的本地运行数据，不提交 Git。 |
+| `frontend/package.json`、`package-lock.json` | Vue/Vite/Element Plus/ECharts/Axios 依赖及脚本。 |
+| `frontend/index.html` | Vite HTML 入口。 |
+| `frontend/vite.config.ts` | 前端端口 5173，并把 `/api`、`/health` 代理到 8000。 |
+| `frontend/tsconfig.json`、`tsconfig.app.json`、`tsconfig.node.json` | TypeScript 工程配置。 |
+| `frontend/src/main.ts` | Vue 应用、路由、Pinia、Element Plus 初始化。 |
+| `frontend/src/App.vue` | 根组件。 |
+| `frontend/src/router.ts` | 医生、管理员、患者路由与鉴权守卫。 |
+| `frontend/src/styles.css`、`advanced.css` | 全局和增强页面样式。 |
+| `frontend/src/api/client.ts` | Axios `/api/v1` 客户端，自动选择 staff/patient token。 |
+| `frontend/src/stores/auth.ts` | 医生/管理员登录状态和身份。 |
+| `frontend/src/layouts/StaffLayout.vue` | 医生/管理员公共布局。 |
+| `frontend/src/utils/idempotency.ts` | 为正式提交生成幂等键。 |
+| `frontend/src/utils/patient.ts` | 患者显示辅助函数。 |
+| `frontend/src/components/DynamicQuestion.vue` | 动态渲染文本、数字、日期、时间、是非、单选、多选和量表题。 |
+| `frontend/src/components/QuestionnaireDetailDialog.vue` | 问卷结构详情弹窗。 |
+| `frontend/src/components/ChartPanel.vue` | 统计图容器和导出。 |
+| `frontend/src/components/StatCard.vue` | 统计指标卡。 |
+| `frontend/src/views/LoginView.vue` | 医生/管理员登录页。 |
+| `frontend/src/views/DashboardView.vue` | 数据总览与统计图。 |
+| `frontend/src/views/PatientsView.vue` | 患者列表和创建。 |
+| `frontend/src/views/PatientDetailView.vue` | 患者主档、评估时间线和临床记录。 |
+| `frontend/src/views/QuestionnairesView.vue` | 问卷目录导入、模板管理和发布。 |
+| `frontend/src/views/CreateAssignmentView.vue` | 选择患者与问卷版本，创建任务并显示链接/二维码/访问码。 |
+| `frontend/src/views/AssignmentsView.vue` | 任务包查询、状态和管理。 |
+| `frontend/src/views/AdminCenterView.vue` | 科室、账号、权限和审计管理。 |
+| `frontend/src/views/patient/PatientPortal.vue` | 患者验证、任务列表、动态答题、5 秒自动保存和幂等提交。 |
 
-### 2.4 `docs/`：项目文档
+### 3.3 其他目录
 
 | 文件/目录 | 作用 |
 | --- | --- |
-| `docs/API.md` | 前后端统一接口契约，是接口联调主文档。 |
-| `docs/BACKEND_INTEGRATION.md` | 从 localStorage Mock 迁移到答题后端的说明。 |
-| `docs/PROJECT_SPEC.md` | 患者端业务范围、闭环和验收规格。 |
-| `docs/PATIENT_SCALE_SPEC.md` | 首批四张 A 类量表规格。 |
-| `docs/INTERACTIVE_TASKS.md` | Boston、STT、AI 访谈等后续任务规格。 |
-| `docs/TEMPLATE_REFERENCES.md` | UI/交互模板与参考来源。 |
-| `docs/plan/前端分析.md` | 前端技术路线、页面和答题引擎分析。 |
-| `docs/plan/前端构思.md` | 前端早期构思和交互方案。 |
-| `docs/status/PROJECT_STATUS_2026-09-03.md` | 阶段完成情况快照。 |
-| `docs/sources/README.md` | 原始材料文本化目录说明。 |
-| `docs/sources/01_SCD基线量表_文本版.md` | SCD 基线量表文本整理。 |
-| `docs/sources/02_Boston图片材料_状态说明.md` | Boston 图片材料状态说明。 |
-| `docs/sources/03_MoCA模板_说明.md` | MoCA 模板和可实现范围说明。 |
-| `docs/sources/04_评分手册_文本版.md` | 操作及评分手册文本整理。 |
-| `docs/sources/05_CDR_文本版.md` | CDR 访谈材料文本整理。 |
-| `docs/sources/06_ADAS-Cog_实现参考.md` | ADAS-Cog 资料与实现参考。 |
+| `scripts/setup.ps1` | 安装前后端依赖并初始化数据库。 |
+| `scripts/start.ps1` | 检查端口，后台启动两端，生成局域网患者链接并健康检查。 |
+| `scripts/stop.ps1` | 根据 `.runtime` PID 停止服务。 |
+| `scripts/test.ps1` | 执行后端 pytest 与前端生产构建。 |
+| `samples/questionnaire-template.example.json` | 外部问卷包 JSON 示例。 |
+| `docs/API.md` | 唯一统一接口契约。 |
+| `docs/BACKEND_INTEGRATION.md` | yjj 医生派发端与 dl 患者答题能力的整合决策。 |
+| `assets/gds_source_reference.png` | GDS 历史原始材料视觉参考，不被应用加载。 |
+| `assets/moca_b_template.png` | MoCA-B 模板视觉参考，不被应用加载。 |
+| `assets/stt_form_a_reference.png` | STT-A 连线材料参考，不被应用加载。 |
+| `assets/stt_form_b_practice_reference.png` | STT-B 练习材料参考，不被应用加载。 |
+| `assets/stt_form_b_test_reference.png` | STT-B 正式材料参考，不被应用加载。 |
 
-### 2.5 `assets/`：参考图片
+## 4. 问卷扩展方式
 
-| 文件 | 作用 |
-| --- | --- |
-| `gds_source_reference.png` | GDS 原始材料视觉参考。 |
-| `moca_b_template.png` | MoCA-B 模板视觉参考。 |
-| `stt_form_a_reference.png` | STT-A 连线任务参考。 |
-| `stt_form_b_practice_reference.png` | STT-B 练习任务参考。 |
-| `stt_form_b_test_reference.png` | STT-B 正式任务参考。 |
+简单量表通过 `questionnaire_schema` + `scoring_json` 扩展，无需修改患者页面。管理员先查看 `GET /api/v1/questionnaires/catalog`，再调用 `POST /api/v1/questionnaires/import-catalog` 导入为版本，核对后发布，医生才能派发。
 
-这些图片是需求和实现参考，不等同于已获得生产使用授权的公开资源。
+本次从旧 dl 答题端迁入：
 
-## 3. 如何启动
+| code | 题数 | 后端计分 |
+| --- | ---: | --- |
+| `OUC_GDS_15` | 15 | 是/否正反向元数据求和 |
+| `OUC_ESS` | 8 | 每题 0～3 分求和 |
+| `OUC_EDINBURGH` | 10 | `(右手累计-左手累计)/(两侧累计)*100` |
 
-环境要求：Node.js 20+，npm 10 或兼容版本。
+完整字段和调用示例见 [docs/API.md](docs/API.md)。
 
-```powershell
-cd D:\Desktop\ad-ouc-master\26-OUC-SE
-npm install
-```
+## 5. 数据与安全
 
-第一个终端启动后端：
+- 默认 SQLite 位于 `%TEMP%\ad_questionnaire_data\ad_questionnaire.db`，可用 `DATABASE_URL` 指向其他 ASCII 路径；切换 PostgreSQL 时还需安装对应 SQLAlchemy 驱动。
+- 生产前必须更换 `JWT_SECRET`、演示密码和访问机制。
+- 患者任务使用随机 token + 访问码，验证成功后才签发有限时长的 patient JWT。
+- 医生只能访问自己负责的患者；管理员拥有跨医生管理权限。
+- 不要向演示环境录入真实身份、联系方式或病历数据。
 
-```powershell
-npm run dev:server
-```
+## 6. 文档与分支约定
 
-后端默认监听 `http://127.0.0.1:3001`，健康检查为 `GET /api/health`。
-
-第二个终端启动前端：
-
-```powershell
-npm run dev
-```
-
-浏览器打开 Vite 输出地址，通常为 `http://localhost:5173`。
-
-测试与构建：
-
-```powershell
-npm run test:server
-npm run build
-```
-
-生产方式启动后端：
-
-```powershell
-npm run start:server
-```
-
-## 4. 前后端如何对接
-
-```text
-React 页面
-→ src/repositories/apiRepository.ts
-→ fetch /api/...
-→ Vite 开发代理
-→ http://127.0.0.1:3001
-→ server/index.mjs
-→ server/store.mjs / server/assessments.mjs
-```
-
-`vite.config.ts` 将开发环境中的 `/api` 请求代理到端口 `3001`，浏览器无需额外处理跨域。部署到不同地址时可设置：
-
-```text
-VITE_API_BASE_URL=https://example.com/api
-```
-
-核心流程：
-
-```text
-POST /api/assignments                         创建任务
-GET  /api/patients/:patientId/assignments    获取任务
-PUT  /api/assignments/:id/draft              保存草稿
-POST /api/assignments/:id/submit             提交原始答案并计分
-GET  /api/assignments/:id/submission         获取权威结果
-```
-
-完整请求、响应和错误码见 [`docs/API.md`](docs/API.md)。
-
-## 5. npm 脚本
-
-| 命令 | 作用 |
-| --- | --- |
-| `npm run dev` | 启动 Vite 前端开发服务。 |
-| `npm run dev:server` | watch 模式启动答题后端。 |
-| `npm run start:server` | 非 watch 模式启动答题后端。 |
-| `npm run test:server` | 运行服务端计分测试。 |
-| `npm run build` | TypeScript 检查并构建前端。 |
-| `npm run preview` | 预览前端生产构建。 |
-
-## 6. 文档维护约定
-
-1. 目录或关键文件结构变化：同步更新 README 第 2 节；
-2. 启动命令、端口或环境变量变化：同步更新 README、`STARTUP.md`；
-3. API 请求、响应、错误码或行为变化：同步更新 `docs/API.md`；
-4. 前后端调用链或数据源变化：同步更新 README 和 `docs/BACKEND_INTEGRATION.md`；
-5. 提交前运行相关测试并核对文档路径。
-
-## 7. 分支约定
-
-当前工作仅在 `dl` 分支进行。未经项目负责人明确授权，不修改、合并或推送 `main`、`lfy` 等其他分支。
+1. 目录或关键文件变化时同步更新本 README。
+2. 命令、端口或环境变量变化时同步更新 README 和 `STARTUP.md`。
+3. API 变化时同步更新 `docs/API.md`。
+4. 调用链或数据源变化时同步更新 `docs/BACKEND_INTEGRATION.md`。
+5. 所有开发、提交和允许的推送仅在 `dl`；未经负责人授权不得修改或推送其他分支。
