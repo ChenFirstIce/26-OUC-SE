@@ -105,6 +105,19 @@ Windows 环境下直接合并曾因中文路径/文件权限报错而无法完�
 
 对应提交：`e09911f fix: correct assessment timing and timezone display`。
 
+### 3.7 问卷版本治理
+
+在不删除历史任务和结果的前提下，将发布控制从模板级细化到版本级：
+
+- 引入 `draft -> published -> retired` 版本状态；
+- 导入前执行无写入治理预览，返回错误、警告、内容摘要和版本差异；
+- 正式导入校验 `content_hash` 和预览时的基础版本，内容或并发状态变化必须重新预览；
+- 导入只生成草稿，发布必须针对具体版本输入问卷编号、变更说明并确认警告；
+- 新版本发布时自动停用旧版本的新派发能力；已派发旧版本仍可继续完成；
+- 停用要求填写原因，不删除问卷、答卷或评估；
+- 新增 Alembic 迁移，兼容已有 SQLite 数据并补充旧库迁移测试；
+- 管理页面新增版本列表、治理检查、差异展示、发布和停用操作。
+
 ## 4. 关键文件变更索引
 
 | 文件 | 本轮作用 |
@@ -113,6 +126,8 @@ Windows 环境下直接合并曾因中文路径/文件权限报错而无法完�
 | `backend/app/routers/patient_session.py` | 首次打开问卷起算、草稿、幂等提交和填写时长计算。 |
 | `backend/app/services/scale_catalog.py` | 内置问卷目录及迁入量表定义。 |
 | `backend/app/services/scoring.py` | 后端权威计分策略。 |
+| `backend/app/services/questionnaire_governance.py` | 导入治理校验、内容摘要和版本差异。 |
+| `backend/alembic/` | 问卷治理字段的兼容数据库迁移。 |
 | `backend/tests/test_flow.py` | 闭环、权限、并发草稿、幂等、计分、时长和时区测试。 |
 | `frontend/src/api/client.ts` | `/api/v1` 客户端和 staff/patient token 分流。 |
 | `frontend/src/views/patient/PatientPortal.vue` | 患者验证、任务列表、动态答题、自动保存和提交。 |

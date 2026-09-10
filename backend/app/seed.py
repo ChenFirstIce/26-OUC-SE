@@ -157,7 +157,11 @@ def seed_database(db: Session) -> None:
         template = QuestionnaireTemplate(code=code, name=name, description=description, status="published", created_by_id=admin.id)
         db.add(template)
         db.flush()
-        version = QuestionnaireVersion(template_id=template.id, version=1, schema_json=schema, scoring_json=scoring, published_at=datetime.now(timezone.utc))
+        version = QuestionnaireVersion(
+            template_id=template.id, version=1, name=name, description=description,
+            schema_json=schema, scoring_json=scoring, status="published",
+            created_by_id=admin.id, published_at=datetime.now(timezone.utc), published_by_id=admin.id,
+        )
         db.add(version)
         templates.append((template, version))
     db.flush()

@@ -43,6 +43,8 @@ Vue 患者端
 | 后端计分结果 | `Assessment` | 保存总分、分域、风险、复核状态。 |
 | 问卷定义 | `QuestionnaireTemplate` + `QuestionnaireVersion` | 模板可产生多个版本，只派发已发布版本。 |
 
+问卷状态保存在版本层：`draft -> published -> retired`。发布新版本会停止旧版本的新派发，但 `AssignmentItem` 已锁定的旧版本仍可继续填写、计分和查阅。数据库结构通过 Alembic 在启动时兼容升级。
+
 ## 状态
 
 - 任务包：`pending -> in_progress -> submitted -> reviewed`；也可能为 `revoked`、`expired`。
@@ -55,9 +57,24 @@ Vue 患者端
 1. 在 `backend/app/services/scale_catalog.py` 增加稳定 code、schema 和 scoring 配置。
 2. 简单求和使用 `metadata_sum`；复杂算法在 `backend/app/services/scoring.py` 增加明确策略。
 3. 在 `backend/tests/test_flow.py` 增加边界和期望分数。
-4. 管理员通过目录导入，核对并发布版本。
+4. 管理员先执行无写入预览，再导入草稿，核对版本差异并二次确认发布。
 5. 医生派发返回的 `questionnaire_version_id`，患者端动态渲染，无需为每张简单量表新增页面。
 6. 同步更新 README 和 `docs/API.md`。
+
+## 问卷治理调用链
+
+```text
+目录选择/JSON 文件
+  -> import-preview（结构、题型、条件、计分、来源校验）
+  -> content_hash + 当前版本 + 差异摘要
+  -> import（再次校验摘要与基础版本，写入 draft）
+  -> versions / diff（管理员复核）
+  -> publish（问卷编号 + 变更说明 + 警告确认）
+  -> 原 published 版本转 retired，新版本转 published
+  -> assignments 只允许新建到 published 版本
+```
+
+停用版本只改变未来派发资格，不级联修改 `AssignmentItem`、`Response` 或 `Assessment`。所有导入、发布和停用操作进入审计日志。
 
 ## 兼容提醒
 

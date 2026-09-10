@@ -91,9 +91,9 @@ def tasks(identity: PatientIdentity = Depends(patient_identity), db: Session = D
         "assignment": assignment_summary(assignment),
         "items": [{
             "id": item.id, "status": item.status,
-            "name": item.questionnaire_version.template.name,
+            "name": item.questionnaire_version.name or item.questionnaire_version.template.name,
             "code": item.questionnaire_version.template.code,
-            "description": item.questionnaire_version.template.description,
+            "description": item.questionnaire_version.description if item.questionnaire_version.description is not None else item.questionnaire_version.template.description,
             "version": item.questionnaire_version.version,
         } for item in assignment.items],
     }
@@ -113,8 +113,8 @@ def task(item_id: int, identity: PatientIdentity = Depends(patient_identity), db
         db.refresh(response)
     return {
         "id": item.id, "status": item.status,
-        "name": item.questionnaire_version.template.name,
-        "description": item.questionnaire_version.template.description,
+        "name": item.questionnaire_version.name or item.questionnaire_version.template.name,
+        "description": item.questionnaire_version.description if item.questionnaire_version.description is not None else item.questionnaire_version.template.description,
         "schema": item.questionnaire_version.schema_json,
         "answers": response.answers_json if response else {},
         "revision": response.revision if response else 0,

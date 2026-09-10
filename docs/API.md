@@ -41,10 +41,15 @@
 | 职员 | PATCH | `/api/v1/patients/{patient_id}/clinical-records/{record_id}` | 修改临床记录 |
 | 职员 | GET | `/api/v1/questionnaires` | 可见问卷模板和最新版本 |
 | 管理员 | GET | `/api/v1/questionnaires/catalog` | 内置量表目录 |
+| 管理员 | POST | `/api/v1/questionnaires/import-preview` | 无写入预览外部 JSON 包 |
+| 管理员 | POST | `/api/v1/questionnaires/import-preview/catalog` | 无写入预览目录量表 |
 | 管理员 | POST | `/api/v1/questionnaires/import-catalog` | 从目录导入新版本 |
 | 管理员 | POST | `/api/v1/questionnaires/import-package` | 导入外部 JSON 包 |
 | 管理员 | POST | `/api/v1/questionnaires` | 创建模板和首版本 |
-| 管理员 | POST | `/api/v1/questionnaires/{template_id}/publish` | 发布最新版本 |
+| 管理员 | GET | `/api/v1/questionnaires/{template_id}/versions` | 版本、治理检查和状态列表 |
+| 管理员 | GET | `/api/v1/questionnaires/versions/{version_id}/diff` | 与指定基础版本比较 |
+| 管理员 | POST | `/api/v1/questionnaires/versions/{version_id}/publish` | 二次确认发布草稿版本 |
+| 管理员 | POST | `/api/v1/questionnaires/versions/{version_id}/retire` | 停止版本的新派发 |
 | 职员 | GET/POST | `/api/v1/assignments` | 任务包列表/派发 |
 | 职员 | GET/PATCH | `/api/v1/assignments/{assignment_id}` | 任务详情/修改未完成任务 |
 | 职员 | POST | `/api/v1/assignments/{assignment_id}/revoke` | 撤销未提交任务 |
@@ -168,7 +173,56 @@
 { "codes": ["OUC_GDS_15", "OUC_ESS", "OUC_EDINBURGH"], "publish": false }
 ```
 
-建议先以草稿导入、核对来源与计分，再调用 `/questionnaires/{template_id}/publish`。外部包导入请求为 `{templates: [...], conflict_strategy: "new_version|skip|error", publish: false}`。
+版本状态：`draft -> published -> retired`。发布新版本会自动将原 `published` 版本转为 `retired`。停用版本不能用于新任务，但已锁定该版本的任务、答案和结果不受影响；已发布版本不可原地修改。
+
+外部包必须先预览：
+
+```http
+POST /api/v1/questionnaires/import-preview
+```
+
+```json
+{ "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": {}, "scoring_json": {} }], "conflict_strategy": "new_version", "publish": false }
+```
+
+响应每项包括 `valid`、`errors`、`warnings`、`action`、`current_version`、`proposed_version`、`content_hash` 和 `diff`。`diff` 包含新增/删除/修改题目、问卷属性变化、计分变化和风险级别。预览不写数据库。
+
+正式导入时必须回传预览摘要和基础版本：
+
+```json
+{
+  "templates": [{ "code": "CUSTOM_SCALE", "name": "自定义问卷", "questionnaire_schema": {}, "scoring_json": {} }],
+  "conflict_strategy": "new_version",
+  "publish": false,
+  "preview_hashes": { "CUSTOM_SCALE": "64位内容摘要" },
+  "preview_versions": { "CUSTOM_SCALE": null }
+}
+```
+
+内容或当前数据库版本在预览后发生变化返回 `409`。导入接口只能生成草稿，传 `publish: true` 返回 `422`。目录量表使用 `/import-preview/catalog` 预览，之后调用 `/import-catalog` 导入草稿。
+
+版本列表：`GET /questionnaires/{template_id}/versions`。比较版本：
+
+```http
+GET /api/v1/questionnaires/versions/12/diff?base_version_id=11
+```
+
+发布草稿：
+
+```json
+{
+  "expected_content_hash": "版本列表返回的64位摘要",
+  "confirmation_code": "CUSTOM_SCALE",
+  "change_summary": "新增随访问题并核对计分规则",
+  "acknowledge_warnings": true
+}
+```
+
+存在治理错误时返回 `422`；存在警告但未确认时返回 `409`。停用请求：
+
+```json
+{ "confirmation_code": "CUSTOM_SCALE", "reason": "等待授权续期" }
+```
 
 ## 6. 医生派发
 

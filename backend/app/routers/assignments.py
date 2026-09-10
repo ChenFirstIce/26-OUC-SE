@@ -47,7 +47,7 @@ def assignment_view(assignment: AssignmentPackage, include_secret: dict | None =
             "id": item.id, "status": item.status,
             "questionnaire_version_id": item.questionnaire_version_id,
             "questionnaire_code": item.questionnaire_version.template.code,
-            "questionnaire_name": item.questionnaire_version.template.name,
+            "questionnaire_name": item.questionnaire_version.name or item.questionnaire_version.template.name,
             "version": item.questionnaire_version.version,
         } for item in assignment.items],
     }
@@ -78,7 +78,7 @@ def create_assignment(payload: AssignmentInput, user: User = Depends(current_use
     versions = db.scalars(select(QuestionnaireVersion).where(QuestionnaireVersion.id.in_(payload.questionnaire_version_ids))).all()
     if len(versions) != len(set(payload.questionnaire_version_ids)):
         raise HTTPException(status_code=422, detail="包含无效问卷版本")
-    if any(v.template.status != "published" or not v.published_at for v in versions):
+    if any(v.status != "published" or not v.published_at for v in versions):
         raise HTTPException(status_code=422, detail="只能派发已发布问卷")
     raw_token = new_assignment_token()
     access_code = new_access_code()
@@ -178,7 +178,7 @@ def get_item_result(
         "patient_code": assignment.patient.patient_code,
         "patient_name": assignment.patient.profile.full_name if assignment.patient.profile else None,
         "questionnaire_code": item.questionnaire_version.template.code,
-        "questionnaire_name": item.questionnaire_version.template.name,
+        "questionnaire_name": item.questionnaire_version.name or item.questionnaire_version.template.name,
         "questionnaire_version": item.questionnaire_version.version,
         "submitted_at": item.response.submitted_at,
         "duration_seconds": item.response.duration_seconds,

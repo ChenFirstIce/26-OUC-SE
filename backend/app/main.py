@@ -1,5 +1,9 @@
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from alembic import command
+from alembic.config import Config
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -15,6 +19,12 @@ from .seed import seed_database
 
 def initialize_database() -> None:
     Base.metadata.create_all(engine)
+    backend_root = Path(__file__).resolve().parents[1]
+    alembic_config = Config(str(backend_root / "alembic.ini"))
+    alembic_config.set_main_option("script_location", str(backend_root / "alembic"))
+    with engine.begin() as connection:
+        alembic_config.attributes["connection"] = connection
+        command.upgrade(alembic_config, "head")
     with SessionLocal() as db:
         seed_database(db)
 

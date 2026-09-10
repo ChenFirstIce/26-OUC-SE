@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -215,6 +216,131 @@ def test_admin_can_import_catalog_scales_and_create_new_versions():
         scd = next(item for item in templates if item["code"] == "OUC_SCD_Q9")
         assert scd["status"] == "draft" and scd["latest_version"] == 2
         assert sum(len(section["questions"]) for section in scd["schema_json"]["sections"]) == 9
+
+
+def test_questionnaire_preview_publish_diff_and_retire_governance():
+    with TestClient(app) as client:
+        admin = auth(client, "admin", "Admin123!")
+        doctor = auth(client, "doctor1", "Doctor123!")
+        code = f"GOV_{uuid4().hex[:8].upper()}"
+        template = {
+            "code": code, "name": "治理流程测试问卷", "description": "验证预览、发布与停用",
+            "questionnaire_schema": {
+                "title": "治理流程测试问卷", "administration_mode": "patient_self",
+                "source": {"file_name": "自动化测试", "review_note": "仅测试"},
+                "sections": [{"key": "basic", "title": "基本题", "questions": [{
+                    "key": "q1", "type": "yes_no", "label": "测试问题", "required": True,
+                    "options": [{"value": "yes", "label": "是", "score": 1}, {"value": "no", "label": "否", "score": 0}],
+                }]}],
+            },
+            "scoring_json": {"strategy": "metadata_sum", "risk_thresholds": []},
+        }
+        package = {"templates": [template], "conflict_strategy": "new_version", "publish": False}
+        preview = client.post("/api/v1/questionnaires/import-preview", headers=admin, json=package)
+        assert preview.status_code == 200, preview.text
+        preview_item = preview.json()["items"][0]
+        assert preview_item["valid"] is True and preview_item["action"] == "create"
+
+        missing_preview = client.post("/api/v1/questionnaires/import-package", headers=admin, json=package)
+        assert missing_preview.status_code == 409
+        package["preview_hashes"] = {code: preview_item["content_hash"]}
+        package["preview_versions"] = {code: preview_item["current_version"]}
+        imported = client.post("/api/v1/questionnaires/import-package", headers=admin, json=package)
+        assert imported.status_code == 200, imported.text
+        row = next(item for item in client.get("/api/v1/questionnaires", headers=admin).json() if item["code"] == code)
+        versions = client.get(f"/api/v1/questionnaires/{row['id']}/versions", headers=admin).json()
+        version = versions[0]
+        assert version["status"] == "draft" and not version["errors"] and not version["warnings"]
+
+        published = client.post(f"/api/v1/questionnaires/versions/{version['id']}/publish", headers=admin, json={
+            "expected_content_hash": version["content_hash"], "confirmation_code": code,
+            "change_summary": "首次审核发布", "acknowledge_warnings": False,
+        })
+        assert published.status_code == 200, published.text
+        assert published.json()["status"] == "published"
+        doctor_row = next(item for item in client.get("/api/v1/questionnaires", headers=doctor).json() if item["code"] == code)
+        assert doctor_row["latest_version_id"] == version["id"]
+
+        patient = client.get("/api/v1/patients", headers=doctor).json()["items"][0]
+        assignment = client.post("/api/v1/assignments", headers=doctor, json={
+            "patient_id": patient["id"], "questionnaire_version_ids": [version["id"]], "title": "治理历史任务",
+        })
+        assert assignment.status_code == 201, assignment.text
+
+        retired = client.post(f"/api/v1/questionnaires/versions/{version['id']}/retire", headers=admin, json={
+            "confirmation_code": code, "reason": "自动化测试停用",
+        })
+        assert retired.status_code == 200 and retired.json()["status"] == "retired"
+        assert all(item["code"] != code for item in client.get("/api/v1/questionnaires", headers=doctor).json())
+        denied = client.post("/api/v1/assignments", headers=doctor, json={
+            "patient_id": patient["id"], "questionnaire_version_ids": [version["id"]], "title": "不应创建",
+        })
+        assert denied.status_code == 422
+        verified = client.post("/api/v1/patient-session/verify", json={
+            "token": assignment.json()["token"], "access_code": assignment.json()["access_code"],
+        })
+        assert verified.status_code == 200
+
+        updated_template = {**template, "questionnaire_schema": {
+            **template["questionnaire_schema"],
+            "sections": [{"key": "basic", "title": "基本题", "questions": [
+                *template["questionnaire_schema"]["sections"][0]["questions"],
+                {"key": "q2", "type": "short_text", "label": "新增问题", "required": False},
+            ]}],
+        }}
+        next_package = {"templates": [updated_template], "conflict_strategy": "new_version", "publish": False}
+        next_preview = client.post("/api/v1/questionnaires/import-preview", headers=admin, json=next_package).json()["items"][0]
+        next_package["preview_hashes"] = {code: next_preview["content_hash"]}
+        next_package["preview_versions"] = {code: next_preview["current_version"]}
+        assert client.post("/api/v1/questionnaires/import-package", headers=admin, json=next_package).status_code == 200
+        updated_versions = client.get(f"/api/v1/questionnaires/{row['id']}/versions", headers=admin).json()
+        compared = client.get(
+            f"/api/v1/questionnaires/versions/{updated_versions[0]['id']}/diff",
+            headers=admin, params={"base_version_id": updated_versions[1]["id"]},
+        )
+        assert compared.status_code == 200 and compared.json()["added_questions"] == ["q2"]
+
+
+def test_questionnaire_governance_migration_upgrades_legacy_sqlite():
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import NullPool
+
+    # Alembic/SQLite may keep a transient Windows file handle until interpreter teardown.
+    with tempfile.TemporaryDirectory(prefix="ad-governance-migration-", ignore_cleanup_errors=True) as directory:
+        database_path = Path(directory) / "legacy.db"
+        with sqlite3.connect(database_path) as connection:
+            connection.executescript("""
+                CREATE TABLE questionnaire_templates (
+                    id INTEGER PRIMARY KEY, name VARCHAR(120), description TEXT, status VARCHAR(20)
+                );
+                CREATE TABLE questionnaire_versions (
+                    id INTEGER PRIMARY KEY, template_id INTEGER, version INTEGER,
+                    schema_json JSON, scoring_json JSON, published_at DATETIME
+                );
+                INSERT INTO questionnaire_templates VALUES (1, '旧问卷', '旧说明', 'draft');
+                INSERT INTO questionnaire_versions VALUES (1, 1, 1, '{}', '{}', '2026-01-01 00:00:00');
+                INSERT INTO questionnaire_versions VALUES (2, 1, 2, '{}', '{}', NULL);
+            """)
+        backend_root = Path(__file__).resolve().parents[1]
+        config = Config(str(backend_root / "alembic.ini"))
+        config.set_main_option("script_location", str(backend_root / "alembic"))
+        config.set_main_option("sqlalchemy.url", f"sqlite:///{database_path.as_posix()}")
+        migration_engine = create_engine(config.get_main_option("sqlalchemy.url"), poolclass=NullPool)
+        try:
+            with migration_engine.begin() as connection:
+                config.attributes["connection"] = connection
+                command.upgrade(config, "head")
+        finally:
+            migration_engine.dispose()
+        with sqlite3.connect(database_path) as connection:
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(questionnaire_versions)")}
+            statuses = connection.execute("SELECT version, status FROM questionnaire_versions ORDER BY version").fetchall()
+            template_status = connection.execute("SELECT status FROM questionnaire_templates WHERE id = 1").fetchone()[0]
+        assert {"status", "content_hash", "retired_at", "retirement_reason"} <= columns
+        assert statuses == [(1, "published"), (2, "draft")]
+        assert template_status == "published"
 
 
 def test_migrated_patient_scales_keep_authoritative_backend_scoring():

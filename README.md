@@ -7,7 +7,7 @@
 ## 1. 工作流与对接边界
 
 ```text
-管理员导入并发布问卷版本
+管理员预览导入、核对版本差异并二次确认发布问卷版本
   -> 医生创建患者
   -> 医生选择一个或多个 questionnaire_version_id 创建任务包
   -> 后端生成患者链接 + 随机 token + 6 位访问码
@@ -72,6 +72,8 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | --- | --- |
 | `backend/run.py` | 使用 Uvicorn 启动后端。 |
 | `backend/requirements.txt` | FastAPI、SQLAlchemy、JWT、测试等 Python 依赖。 |
+| `backend/alembic.ini` | Alembic 数据库迁移配置。 |
+| `backend/alembic/` | 数据库迁移运行环境和版本脚本；启动时自动升级旧数据库。 |
 | `backend/app/main.py` | 创建应用、CORS、请求 ID、统一错误处理、数据库初始化和正式路由注册。 |
 | `backend/app/models.py` | 用户、权限、患者、问卷版本、任务包、答卷、评估、临床记录、审计表。 |
 | `backend/app/seed.py` | 初始化匿名演示科室、账号、患者、问卷与演示任务。 |
@@ -94,7 +96,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | --- | --- |
 | `auth.py` | 医生/管理员登录与当前身份。 |
 | `patients.py` | 患者主档、纵向分析、临床记录与归档。 |
-| `questionnaires.py` | 模板、版本、内置目录导入和发布。 |
+| `questionnaires.py` | 导入预览、版本列表/差异、二次确认发布和停用。 |
 | `assignments.py` | 医生派发任务包、查看、修改、撤销和结果读取。 |
 | `patient_session.py` | 患者验证、任务读取、草稿 revision、幂等提交与计分。 |
 | `statistics.py` | 概览、漏斗、量表、风险、分数统计和 CSV 导出。 |
@@ -109,6 +111,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | `audit.py` | 记录关键操作审计。 |
 | `permissions.py` | 独立业务权限读取与校验。 |
 | `questionnaire.py` | 动态问卷题型、条件显示、Schema 和答案校验。 |
+| `questionnaire_governance.py` | 内容摘要、治理校验和版本差异计算。 |
 | `scale_catalog.py` | 内置量表目录；含 yjj 原目录和从 dl 迁入的 GDS-15、ESS、爱丁堡利手量表。 |
 | `scoring.py` | 后端权威计分；支持元数据求和、人工复核和利手指数。 |
 | `__init__.py` | 服务包标识。 |
@@ -117,7 +120,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 
 | 文件 | 作用 |
 | --- | --- |
-| `backend/tests/test_flow.py` | 覆盖登录、权限、患者、派发、患者答题、草稿冲突、幂等提交、统计、目录导入及迁入量表计分。 |
+| `backend/tests/test_flow.py` | 覆盖登录、权限、患者、派发、答题、幂等、统计、问卷治理、旧库迁移及量表计分。 |
 
 ### 3.2 `frontend/`
 
@@ -145,7 +148,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | `frontend/src/views/DashboardView.vue` | 数据总览与统计图。 |
 | `frontend/src/views/PatientsView.vue` | 患者列表和创建。 |
 | `frontend/src/views/PatientDetailView.vue` | 患者主档、评估时间线和临床记录。 |
-| `frontend/src/views/QuestionnairesView.vue` | 问卷目录导入、模板管理和发布。 |
+| `frontend/src/views/QuestionnairesView.vue` | 导入预览、治理校验、版本差异、发布确认和停用。 |
 | `frontend/src/views/CreateAssignmentView.vue` | 选择患者与问卷版本，创建任务并显示链接/二维码/访问码。 |
 | `frontend/src/views/AssignmentsView.vue` | 任务包查询、状态和管理。 |
 | `frontend/src/views/AdminCenterView.vue` | 科室、账号、权限和审计管理。 |
@@ -171,7 +174,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 
 ## 4. 问卷扩展方式
 
-简单量表通过 `questionnaire_schema` + `scoring_json` 扩展，无需修改患者页面。管理员先查看 `GET /api/v1/questionnaires/catalog`，再调用 `POST /api/v1/questionnaires/import-catalog` 导入为版本，核对后发布，医生才能派发。
+简单量表通过 `questionnaire_schema` + `scoring_json` 扩展，无需修改患者页面。管理员必须先执行导入预览，再导入为草稿，核对版本差异后输入问卷编号并填写变更说明发布。发布新版本会自动停用旧版本的新派发能力；已有任务继续使用其锁定版本。
 
 本次从旧 dl 答题端迁入：
 
