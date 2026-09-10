@@ -12,7 +12,8 @@
   -> 医生选择一个或多个 questionnaire_version_id 创建任务包
   -> 后端生成患者链接 + 随机 token + 6 位访问码
   -> 患者验证后获得短期 patient JWT
-  -> 患者读取任务、按 answers 对象自动保存草稿（revision 乐观锁）
+  -> 患者打开具体问卷时创建答卷并记录 UTC 开始时间
+  -> 患者按 answers 对象自动保存草稿（revision 乐观锁）
   -> 患者使用 Idempotency-Key 正式提交
   -> 后端校验必答题、按已锁定问卷版本计分并保存 Assessment
   -> 医生查看原始答案/结果，统计页和 CSV 同步更新
@@ -135,6 +136,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | `frontend/src/layouts/StaffLayout.vue` | 医生/管理员公共布局。 |
 | `frontend/src/utils/idempotency.ts` | 为正式提交生成幂等键。 |
 | `frontend/src/utils/patient.ts` | 患者显示辅助函数。 |
+| `frontend/src/utils/date.ts` | 将后端 UTC 时间（含历史无时区值）统一转换为浏览器本地时间。 |
 | `frontend/src/components/DynamicQuestion.vue` | 动态渲染文本、数字、日期、时间、是非、单选、多选和量表题。 |
 | `frontend/src/components/QuestionnaireDetailDialog.vue` | 问卷结构详情弹窗。 |
 | `frontend/src/components/ChartPanel.vue` | 统计图容器和导出。 |

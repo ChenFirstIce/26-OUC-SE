@@ -26,7 +26,7 @@ Vue 患者端
   -> /p/fill/{token}
   -> POST /api/v1/patient-session/verify（token + access_code）
   -> patient JWT
-  -> GET tasks / GET task
+  -> GET tasks / GET task（首次打开记录 UTC started_at）
   -> PUT draft（answers 对象 + revision）
   -> POST submit（answers 对象 + revision + Idempotency-Key）
   -> validate_answers + score_questionnaire
@@ -48,6 +48,7 @@ Vue 患者端
 - 任务包：`pending -> in_progress -> submitted -> reviewed`；也可能为 `revoked`、`expired`。
 - 单项任务：`not_started -> draft -> submitted -> reviewed`。
 - 已提交/已复核单项不可继续保存草稿。
+- `duration_seconds` 从患者首次打开具体问卷起算，到正式提交为止；后端按 UTC 计算，前端仅负责本地化显示。
 
 ## 接入新增量表
 

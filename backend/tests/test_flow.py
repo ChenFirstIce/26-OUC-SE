@@ -1,5 +1,6 @@
 import os
 import tempfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -10,7 +11,8 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app.main import app
-from app.core.database import engine
+from app.core.database import SessionLocal, engine
+from app.models import Response
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -76,6 +78,12 @@ def test_staff_patient_assignment_submission_statistics_flow():
         assert tasks["assignment"]["patient_name"] == "闭环测试患者"
         item_id = tasks["items"][0]["id"]
         task = client.get(f"/api/v1/patient-session/tasks/{item_id}", headers=patient_headers).json()
+        assert task["revision"] == 0
+        with SessionLocal() as db:
+            response = db.get(Response, item_id)
+            assert response is not None
+            response.started_at = datetime.now(timezone.utc) - timedelta(seconds=75)
+            db.commit()
         answers = valid_answers(task["schema"])
 
         draft = client.put(f"/api/v1/patient-session/tasks/{item_id}/draft", headers=patient_headers,
@@ -86,6 +94,10 @@ def test_staff_patient_assignment_submission_statistics_flow():
                                 json={"answers": answers, "revision": draft.json()["revision"]})
         assert submitted.status_code == 200, submitted.text
         assert submitted.json()["risk_level"] in {"low", "medium", "high", "unknown"}
+        result = client.get(f"/api/v1/assignments/{secret['id']}/items/{item_id}/result", headers=doctor)
+        assert result.status_code == 200, result.text
+        assert 75 <= result.json()["duration_seconds"] <= 76
+        assert result.json()["submitted_at"].endswith("+00:00")
         repeated = client.post(f"/api/v1/patient-session/tasks/{item_id}/submit", headers=submit_headers,
                                json={"answers": answers, "revision": draft.json()["revision"]})
         assert repeated.status_code == 200

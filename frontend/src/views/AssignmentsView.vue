@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { api } from '../api/client'
 import { useAuthStore } from '../stores/auth'
 import { patientLabel } from '../utils/patient'
+import { formatDateTime } from '../utils/date'
 
 const auth = useAuthStore()
 const items = ref<any[]>([])
@@ -74,6 +75,7 @@ async function revoke(row: any) {
 
 function durationText(seconds: number | null) {
   if (seconds == null) return '—'
+  if (seconds <= 0) return '历史记录未计时'
   if (seconds < 60) return `${seconds} 秒`
   return `${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`
 }
@@ -93,7 +95,7 @@ onMounted(load)
         <el-table-column label="患者" min-width="150"><template #default="s"><b>{{s.row.patient_name || '姓名待补充'}}</b><small class="table-sub">{{s.row.patient_code}}</small></template></el-table-column>
         <el-table-column label="问卷与进度" min-width="240"><template #default="s"><div class="item-status-list"><span v-for="item in s.row.items" :key="item.id"><b>{{item.questionnaire_name}}</b><small>{{labels[item.status] || item.status}}</small></span></div></template></el-table-column>
         <el-table-column label="状态" width="100"><template #default="s"><el-tag :type="tags[s.row.status]">{{labels[s.row.status]}}</el-tag></template></el-table-column>
-        <el-table-column label="截止时间" min-width="155"><template #default="s">{{s.row.deadline ? new Date(s.row.deadline).toLocaleString() : '不限时'}}</template></el-table-column>
+        <el-table-column label="截止时间" min-width="155"><template #default="s">{{s.row.deadline ? formatDateTime(s.row.deadline) : '不限时'}}</template></el-table-column>
         <el-table-column label="操作" width="225" fixed="right"><template #default="s"><el-button v-if="completedItems(s.row).length" link type="primary" @click="openResult(s.row)">查看结果</el-button><el-button v-if="canEdit(s.row)" link type="primary" @click="openEdit(s.row)">修改/转交</el-button><el-button v-if="canEdit(s.row)" link type="danger" @click="revoke(s.row)">撤销</el-button></template></el-table-column>
       </el-table>
     </article>
@@ -102,7 +104,7 @@ onMounted(load)
       <div v-loading="resultLoading" class="result-dialog">
         <div v-if="selectedAssignment && completedItems(selectedAssignment).length > 1" class="result-tabs"><el-button v-for="item in completedItems(selectedAssignment)" :key="item.id" :type="result?.item_id === item.id ? 'primary' : 'default'" @click="openResult(selectedAssignment,item.id)">{{item.questionnaire_name}}</el-button></div>
         <template v-if="result">
-          <div class="result-title"><div><span class="eyebrow">{{result.questionnaire_code}} · V{{result.questionnaire_version}}</span><h2>{{result.questionnaire_name}}</h2><p>患者 {{patientLabel(result)}} · {{new Date(result.submitted_at).toLocaleString()}} 提交</p></div><el-tag size="large" :type="result.assessment.risk_level === 'high' ? 'danger' : result.assessment.risk_level === 'medium' ? 'warning' : 'success'">{{riskLabels[result.assessment.risk_level]}}</el-tag></div>
+          <div class="result-title"><div><span class="eyebrow">{{result.questionnaire_code}} · V{{result.questionnaire_version}}</span><h2>{{result.questionnaire_name}}</h2><p>患者 {{patientLabel(result)}} · {{formatDateTime(result.submitted_at)}} 提交</p></div><el-tag size="large" :type="result.assessment.risk_level === 'high' ? 'danger' : result.assessment.risk_level === 'medium' ? 'warning' : 'success'">{{riskLabels[result.assessment.risk_level]}}</el-tag></div>
           <div class="result-summary"><div><small>总分</small><strong>{{result.assessment.total_score ?? '待复核'}}</strong></div><div><small>填写用时</small><strong>{{durationText(result.duration_seconds)}}</strong></div><div><small>复核状态</small><strong>{{result.assessment.review_status === 'pending' ? '待医生复核' : '自动计分'}}</strong></div></div>
           <div v-if="Object.keys(result.assessment.dimension_scores || {}).length" class="dimension-row"><b>维度得分</b><el-tag v-for="(score,name) in result.assessment.dimension_scores" :key="name">{{name}}：{{score}}</el-tag></div>
           <h3 class="answer-heading">逐题答案</h3>

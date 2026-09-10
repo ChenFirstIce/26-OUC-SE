@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from math import ceil
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Header
@@ -102,6 +103,14 @@ def tasks(identity: PatientIdentity = Depends(patient_identity), db: Session = D
 def task(item_id: int, identity: PatientIdentity = Depends(patient_identity), db: Session = Depends(get_db)):
     item = item_for_identity(item_id, identity, db)
     response = item.response
+    if not response and item.status not in {"submitted", "reviewed"}:
+        response = Response(assignment_item_id=item.id, answers_json={}, revision=0)
+        db.add(response)
+        item.status = "draft"
+        item.assignment.status = "in_progress"
+        audit(db, "patient-link", item.assignment_id, "response.start", "assignment_item", item.id)
+        db.commit()
+        db.refresh(response)
     return {
         "id": item.id, "status": item.status,
         "name": item.questionnaire_version.template.name,
@@ -161,7 +170,7 @@ def submit(
     start = response.started_at
     if start.tzinfo is None:
         start = start.replace(tzinfo=timezone.utc)
-    response.duration_seconds = max(0, int((now - start).total_seconds()))
+    response.duration_seconds = max(1, ceil((now - start).total_seconds()))
     response.revision += 1
     total, dimensions, risk, review_status = score_questionnaire(
         item.questionnaire_version.schema_json, item.questionnaire_version.scoring_json, payload.answers

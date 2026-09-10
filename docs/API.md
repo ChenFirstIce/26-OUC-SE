@@ -8,7 +8,7 @@
 - 业务前缀：`/api/v1`
 - Swagger：`GET /docs`
 - 健康检查：`GET /health`，响应 `{"status":"ok","service":"..."}`
-- JSON 字段使用 `snake_case`，时间使用 ISO 8601。
+- JSON 字段使用 `snake_case`，时间使用 ISO 8601。后端统一以 UTC 保存并返回时间；SQLite 历史无偏移时间也按 UTC 解释，前端再转换为浏览器本地时区。
 - 医生/管理员接口：`Authorization: Bearer {staff_access_token}`。
 - 患者任务接口：`Authorization: Bearer {patient_access_token}`。
 - 每个响应含 `X-Request-ID`；请求也可主动传入该头便于追踪。
@@ -222,7 +222,7 @@
 }
 ```
 
-`GET /patient-session/tasks/{item_id}` 返回 `{id,status,name,description,schema,answers,revision}`。`answers` 是按题目 key 索引的对象，而不是数组：
+`GET /patient-session/tasks/{item_id}` 在患者第一次打开具体问卷时创建 revision 为 0 的答卷并记录 `started_at`，填写时长从这一刻开始。接口返回 `{id,status,name,description,schema,answers,revision}`。`answers` 是按题目 key 索引的对象，而不是数组：
 
 ```json
 { "gds_1": "yes", "gds_2": "no" }
@@ -264,6 +264,8 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 ```
 
 相同 `Idempotency-Key` 重试返回首次结果，不创建重复评估；不同键重复提交返回 `409`。前端不得上传或覆盖分数，正式结果只由后端根据任务锁定版本生成。
+
+`duration_seconds` 使用 UTC 的 `submitted_at - started_at` 向上取整，正常的新答卷最少记录 1 秒。修复前已经保存为 0 的历史结果无法还原真实起点，前端显示为“历史记录未计时”。
 
 ## 8. 统计与权限
 

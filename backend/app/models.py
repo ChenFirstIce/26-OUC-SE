@@ -5,12 +5,34 @@ from typing import Any
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import TypeDecorator
 
 from .core.database import Base
 
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+class UTCDateTime(TypeDecorator[datetime]):
+    """Store UTC consistently and restore tzinfo lost by SQLite."""
+
+    impl = DateTime
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        return dialect.type_descriptor(DateTime(timezone=dialect.name != "sqlite"))
+
+    def process_bind_param(self, value: datetime | None, dialect):
+        if value is None:
+            return None
+        normalized = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+        return normalized.replace(tzinfo=None) if dialect.name == "sqlite" else normalized
+
+    def process_result_value(self, value: datetime | None, _dialect):
+        if value is None:
+            return None
+        return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
 
 
 class Department(Base):
@@ -42,7 +64,7 @@ class UserPermission(Base):
     can_assign_questionnaires: Mapped[bool] = mapped_column(Boolean, default=True)
     can_review_results: Mapped[bool] = mapped_column(Boolean, default=True)
     can_manage_templates: Mapped[bool] = mapped_column(Boolean, default=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
     user: Mapped[User] = relationship()
 
 
@@ -57,7 +79,7 @@ class Patient(Base):
     department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"), index=True)
     assigned_doctor_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
     department: Mapped[Department] = relationship()
     assigned_doctor: Mapped[User] = relationship()
     profile: Mapped[PatientProfile | None] = relationship(back_populates="patient", uselist=False, cascade="all, delete-orphan")
@@ -79,7 +101,7 @@ class PatientProfile(Base):
     allergy_history: Mapped[str | None] = mapped_column(Text, nullable=True)
     emergency_contact: Mapped[str | None] = mapped_column(String(80), nullable=True)
     emergency_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
     patient: Mapped[Patient] = relationship(back_populates="profile")
 
 
@@ -91,7 +113,7 @@ class QuestionnaireTemplate(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="draft", index=True)
     created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
     versions: Mapped[list[QuestionnaireVersion]] = relationship(back_populates="template")
 
 
@@ -103,7 +125,7 @@ class QuestionnaireVersion(Base):
     version: Mapped[int] = mapped_column(Integer)
     schema_json: Mapped[dict[str, Any]] = mapped_column(JSON)
     scoring_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
-    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     template: Mapped[QuestionnaireTemplate] = relationship(back_populates="versions")
 
 
@@ -115,10 +137,10 @@ class AssignmentPackage(Base):
     title: Mapped[str] = mapped_column(String(120))
     note: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
-    deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     access_code_hash: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
     patient: Mapped[Patient] = relationship()
     doctor: Mapped[User] = relationship()
     items: Mapped[list[AssignmentItem]] = relationship(back_populates="assignment", cascade="all, delete-orphan")
@@ -143,8 +165,8 @@ class Response(Base):
     answers_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     revision: Mapped[int] = mapped_column(Integer, default=0)
     idempotency_key: Mapped[str | None] = mapped_column(String(100), unique=True, nullable=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    submitted_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     assignment_item: Mapped[AssignmentItem] = relationship(back_populates="response")
 
@@ -160,7 +182,7 @@ class Assessment(Base):
     dimension_scores: Mapped[dict[str, float]] = mapped_column(JSON, default=dict)
     risk_level: Mapped[str] = mapped_column(String(20), default="unknown", index=True)
     review_status: Mapped[str] = mapped_column(String(20), default="auto", index=True)
-    assessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    assessed_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
 
 
 class ClinicalRecord(Base):
@@ -174,10 +196,10 @@ class ClinicalRecord(Base):
     title: Mapped[str] = mapped_column(String(120))
     diagnosis_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
     content: Mapped[str] = mapped_column(Text)
-    event_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    event_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
     status: Mapped[str] = mapped_column(String(20), default="active", index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
     patient: Mapped[Patient] = relationship()
     doctor: Mapped[User] = relationship()
 
@@ -191,4 +213,4 @@ class AuditLog(Base):
     target_type: Mapped[str] = mapped_column(String(40))
     target_id: Mapped[str] = mapped_column(String(50))
     result: Mapped[str] = mapped_column(String(20), default="success")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
