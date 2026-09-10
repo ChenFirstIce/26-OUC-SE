@@ -57,7 +57,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 ├─ frontend/                Vue 3 医生端、管理端、患者答题端
 ├─ scripts/                 Windows 初始化、启动、停止、测试脚本
 ├─ samples/                 问卷 JSON 导入示例
-├─ docs/                    统一接口与前后端对接文档
+├─ docs/                    统一接口、前后端对接与开发操作日志
 ├─ assets/                  历史临床材料视觉参考，不参与运行
 ├─ .env.example             环境变量示例
 ├─ .gitignore               本地依赖、运行数据和构建产物忽略规则
@@ -162,6 +162,7 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | `samples/questionnaire-template.example.json` | 外部问卷包 JSON 示例。 |
 | `docs/API.md` | 唯一统一接口契约。 |
 | `docs/BACKEND_INTEGRATION.md` | yjj 医生派发端与 dl 患者答题能力的整合决策。 |
+| `docs/DEVELOPMENT_LOG.md` | dl 分支的变更时间线、验证结果、故障恢复与待办。 |
 | `assets/gds_source_reference.png` | GDS 历史原始材料视觉参考，不被应用加载。 |
 | `assets/moca_b_template.png` | MoCA-B 模板视觉参考，不被应用加载。 |
 | `assets/stt_form_a_reference.png` | STT-A 连线材料参考，不被应用加载。 |
@@ -197,3 +198,4 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 3. API 变化时同步更新 `docs/API.md`。
 4. 调用链或数据源变化时同步更新 `docs/BACKEND_INTEGRATION.md`。
 5. 所有开发、提交和允许的推送仅在 `dl`；未经负责人授权不得修改或推送其他分支。
+6. 完整操作历史和已知问题见 [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md)。

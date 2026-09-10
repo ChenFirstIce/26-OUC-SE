@@ -62,3 +62,12 @@ Vue 患者端
 ## 兼容提醒
 
 `backend/app/modules/` 是 yjj 留下的分模块草案，存在 `due_at/deadline`、`patient_url/patient_link` 等字段差异。`backend/app/main.py` 当前只注册 `backend/app/routers/`，因此所有联调和文档均以后者为准。
+
+## 整合记录
+
+- `9e3e85b`：建立 dl 患者答题后端原型和迁入量表能力。
+- `65c0c93`：建立 README、启动说明、统一接口和文档维护约定。
+- `4cab2ca`：以 yjj 为主干完成 FastAPI/Vue 架构整合；yjj 分支始终只读。
+- `e09911f`：首次打开问卷起算填写时长，后端统一 UTC，前端统一本地化展示。
+
+逐项操作、验证结果、服务故障和恢复方法见 [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md)。

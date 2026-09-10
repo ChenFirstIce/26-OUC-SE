@@ -298,3 +298,12 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 | `CreateAssignmentView.vue` / `AssignmentsView.vue` | `/assignments*` |
 | `PatientPortal.vue` | `/patient-session/verify`、`tasks`、`draft`、`submit` |
 | `DashboardView.vue` | `/statistics/*`、`/exports/assessments.csv` |
+
+## 10. 接口变更记录
+
+| 提交 | 变更 | 前端影响 |
+| --- | --- | --- |
+| `4cab2ca` | 统一到 yjj 的 `/api/v1`、版本化问卷、任务包、patient JWT、revision 和幂等提交模型。 | 旧 React/Node 接口不再是正式契约。 |
+| `e09911f` | `GET /patient-session/tasks/{item_id}` 首次打开即创建答卷并记录 UTC 起点；提交时计算真实 `duration_seconds`。 | 所有后端时间按 UTC 解析后转浏览器本地时间；历史 0 秒显示“历史记录未计时”。 |
+
+完整操作背景、验证和故障记录见 [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md)。
