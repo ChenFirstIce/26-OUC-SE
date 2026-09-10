@@ -202,3 +202,13 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 4. 调用链或数据源变化时同步更新 `docs/BACKEND_INTEGRATION.md`。
 5. 所有开发、提交和允许的推送仅在 `dl`；未经负责人授权不得修改或推送其他分支。
 6. 完整操作历史和已知问题见 [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md)。
+
+## 7. 最近交付记录
+
+| 提交 | 内容 | 验证 |
+| --- | --- | --- |
+| `7b931ca` | 版本级问卷治理、导入预览、版本差异、二次确认发布/停用及 Alembic 兼容迁移。 | 后端闭环和旧 SQLite 迁移测试通过。 |
+| `ce1378f` | Element Plus 按需注册，Vue、Element Plus、ECharts、zrender 稳定分包。 | 前端生产构建通过，所有 chunk 低于 500 kB。 |
+| `e4fcf05` | 内置目录与外部 JSON 导入统一强制回传预览摘要和基础版本。 | 前后端完整检查通过，后端共 10 项测试。 |
+
+以上提交均只位于 `dl`。当前本地是否已同步远端以 `git status -sb` 为准。

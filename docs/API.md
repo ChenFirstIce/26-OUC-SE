@@ -360,5 +360,6 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 | `4cab2ca` | 统一到 yjj 的 `/api/v1`、版本化问卷、任务包、patient JWT、revision 和幂等提交模型。 | 旧 React/Node 接口不再是正式契约。 |
 | `e09911f` | `GET /patient-session/tasks/{item_id}` 首次打开即创建答卷并记录 UTC 起点；提交时计算真实 `duration_seconds`。 | 所有后端时间按 UTC 解析后转浏览器本地时间；历史 0 秒显示“历史记录未计时”。 |
 | `7b931ca` | 增加导入预览、版本差异、版本级发布/停用和预览并发校验；导入不再允许直接发布。 | 管理页面必须先预览再导入，发布和停用均需输入问卷编号确认。 |
+| `e4fcf05` | 内置目录导入与外部 JSON 导入统一要求 `preview_hashes`、`preview_versions`。 | 任一来源在未预览、内容变化或基础版本变化时均返回 `409`。 |
 
 完整操作背景、验证和故障记录见 [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md)。

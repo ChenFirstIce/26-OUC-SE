@@ -86,5 +86,8 @@ Vue 患者端
 - `65c0c93`：建立 README、启动说明、统一接口和文档维护约定。
 - `4cab2ca`：以 yjj 为主干完成 FastAPI/Vue 架构整合；yjj 分支始终只读。
 - `e09911f`：首次打开问卷起算填写时长，后端统一 UTC，前端统一本地化展示。
+- `7b931ca`：引入问卷版本治理、Alembic 迁移和管理端治理页面。
+- `ce1378f`：按需注册 Element Plus 并拆分前端公共依赖。
+- `e4fcf05`：目录和 JSON 问卷统一强制“先预览、后导入”。
 
 逐项操作、验证结果、服务故障和恢复方法见 [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md)。
