@@ -128,10 +128,10 @@ Set-Location D:\Desktop\ad-ouc-master\26-OUC-SE
 | --- | --- |
 | `frontend/package.json`、`package-lock.json` | Vue/Vite/Element Plus/ECharts/Axios 依赖及脚本。 |
 | `frontend/index.html` | Vite HTML 入口。 |
-| `frontend/vite.config.ts` | 前端端口 5173，并把 `/api`、`/health` 代理到 8000。 |
+| `frontend/vite.config.ts` | 前端端口/代理及 Vue、Element Plus、ECharts 稳定分包。 |
 | `frontend/tsconfig.json`、`tsconfig.app.json`、`tsconfig.node.json` | TypeScript 工程配置。 |
-| `frontend/src/main.ts` | Vue 应用、路由、Pinia、Element Plus 初始化。 |
-| `frontend/src/App.vue` | 根组件。 |
+| `frontend/src/main.ts` | Vue 应用初始化，并只注册项目实际使用的 Element Plus 组件和样式。 |
+| `frontend/src/App.vue` | 根组件和 Element Plus 中文区域配置。 |
 | `frontend/src/router.ts` | 医生、管理员、患者路由与鉴权守卫。 |
 | `frontend/src/styles.css`、`advanced.css` | 全局和增强页面样式。 |
 | `frontend/src/api/client.ts` | Axios `/api/v1` 客户端，自动选择 staff/patient token。 |
