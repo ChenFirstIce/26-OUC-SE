@@ -1,0 +1,3753 @@
+{
+  "sources": {
+    "main": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+    "yjj": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+    "dl": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+    "lfy": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef"
+  },
+  "summaries": {
+    "main": {
+      "files": 46,
+      "code_files": 19
+    },
+    "yjj": {
+      "files": 119,
+      "code_files": 83
+    },
+    "dl": {
+      "files": 112,
+      "code_files": 87
+    },
+    "lfy": {
+      "files": 52,
+      "code_files": 23
+    }
+  },
+  "comparison": {
+    "yjj_code_missing_in_dl": [],
+    "yjj_code_changed_in_dl": [
+      "backend/app/main.py",
+      "backend/app/models.py",
+      "backend/app/routers/assignments.py",
+      "backend/app/routers/patient_session.py",
+      "backend/app/routers/questionnaires.py",
+      "backend/app/seed.py",
+      "backend/app/services/scale_catalog.py",
+      "backend/app/services/scoring.py",
+      "backend/tests/test_flow.py",
+      "frontend/src/App.vue",
+      "frontend/src/main.ts",
+      "frontend/src/views/AdminCenterView.vue",
+      "frontend/src/views/AssignmentsView.vue",
+      "frontend/src/views/PatientDetailView.vue",
+      "frontend/src/views/QuestionnairesView.vue",
+      "frontend/vite.config.ts"
+    ],
+    "yjj_code_identical_in_dl": 63
+  },
+  "files": [
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "README.md",
+      "bytes": 5549,
+      "sha256": "a2450ee472c2700b125fce12e5f6a93757b1f3509e2efc14b376dd05103f9c3b",
+      "destination": "README.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/github项目网址.md",
+      "bytes": 595,
+      "sha256": "4da37a851af2502391e4944e5624badd2ae42d4ca8038d8d20c3d266fa3a6e3a",
+      "destination": "docs/github项目网址.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/plan/week1/admin/项目架构技术与功能实现说明.md",
+      "bytes": 31511,
+      "sha256": "856b3c1c50b6d6c4957100e743ef1f5deb04981286631bdbee5052fbe3bcc9bf",
+      "destination": "docs/plan/week1/admin/项目架构技术与功能实现说明.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/plan/week1/patient/前端分析.md",
+      "bytes": 27903,
+      "sha256": "9dff7a2c380e950f71c92b96583163046830ff8e2156c42e137cf88e8fbf129b",
+      "destination": "docs/plan/week1/patient/前端分析.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/plan/week1/总体计划/第一阶段MVP设计方案_web.md",
+      "bytes": 12728,
+      "sha256": "68d80d8057ae86008f2acd991ab1d958c45e18e08390c38fa4ac200c4be05d7b",
+      "destination": "docs/plan/week1/总体计划/第一阶段MVP设计方案_web.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/plan/week1/总体计划/第一阶段MVP设计方案_小程序.md",
+      "bytes": 10973,
+      "sha256": "85ae5707b2407ecfe135debf7b4177d49d240ec561443ed31b9e57ee30a74d24",
+      "destination": "docs/plan/week1/总体计划/第一阶段MVP设计方案_小程序.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/.github/copilot-instructions.md",
+      "bytes": 301,
+      "sha256": "cbbe3cd8d3322c23189b8786e5e80f6e9156aa3634a715955e6f5aeca945e341",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/.github/copilot-instructions.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/1_AD临床前期SCD筛查量表-基线期-加上情景选择题.pdf",
+      "bytes": 1623347,
+      "sha256": "663c18bb5f84cbf6569f7b3c51b805fd318b4a6705dba84851cf5723a526f70c",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/1_AD临床前期SCD筛查量表-基线期-加上情景选择题.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/2.量表模板.pdf",
+      "bytes": 6626443,
+      "sha256": "58eb2a6044b1fd860a05a7818aca45bba4f95bef6a65a3b25a0a62b90d03be33",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/2.量表模板.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/3.量表MoCA模板.pdf",
+      "bytes": 102890,
+      "sha256": "9e7799fdc68a88c364777fb53c6a0e50eb46958b6844639c3010190cdd5af125",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/3.量表MoCA模板.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/4.最新量表操作说明修订版.pdf",
+      "bytes": 484351,
+      "sha256": "e1975f34e393d88d0942d4d741608ca415930d735a8ef66507b6d6de092c9ed9",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/4.最新量表操作说明修订版.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/5.CDR.pdf",
+      "bytes": 346170,
+      "sha256": "77752ede9daebc052b92de094821a53805b451180e37903c74f5ba43e45aba75",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/5.CDR.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/6.ADAS-cog.pdf",
+      "bytes": 1372842,
+      "sha256": "3aa3de6fa8471bfa68c9eeded26430cb0f4dcd1528ff8c8976b4020974c10b70",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/6.ADAS-cog.pdf",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/requirements/ad-ouc-master/ad-ouc-master/docs/document-readability-audit.md",
+      "bytes": 1714,
+      "sha256": "f07ca4ed24d53e1c99ffcb9a9837c6f567550d6e77ca8449ebef0dd39b986d4e",
+      "destination": "docs/requirements/ad-ouc-master/ad-ouc-master/docs/document-readability-audit.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/~$签到表.xlsx",
+      "bytes": 165,
+      "sha256": "2324ea7b72e16452cf92361f37ae7485ca3d18d5db4aae49b19879902d1b36e7",
+      "destination": "docs/~$签到表.xlsx",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/签到表.xlsx",
+      "bytes": 9508,
+      "sha256": "b9e136121e5ee42cd4038dca646463a03314f7341a69a83f0b4264fa53e46359",
+      "destination": "docs/签到表.xlsx",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "docs/软件工程实践.md",
+      "bytes": 7238,
+      "sha256": "d7ab4d72b7a5c3e628b19a3edd3f04d4e163a5b53f819a9e2d233af10c25a4b5",
+      "destination": "docs/软件工程实践.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/.env.example",
+      "bytes": 121,
+      "sha256": "d72431d850ddd11be3f10833e2b39cb1b88fa2344be09fefd262cdb7e8b8db4f",
+      "destination": "patient-web/c2b/Frontend/.env.example",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/.gitignore",
+      "bytes": 54,
+      "sha256": "3a5672e11a0a68005f7322ce47d435f9e2e9180cf74289cb06ef2f25c65b592a",
+      "destination": "patient-web/c2b/Frontend/.gitignore",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/README.md",
+      "bytes": 1000,
+      "sha256": "3c0ba7952cbcff4fbf79e273391728f66647836da2bb9e15d930127af0faaffe",
+      "destination": "patient-web/c2b/Frontend/README.md",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/index.html",
+      "bytes": 428,
+      "sha256": "ea05ce3a37abc37cf09e09199d02581e7b55167f31b28b291dc4ecead2e9fa78",
+      "destination": "patient-web/c2b/Frontend/index.html",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/package-lock.json",
+      "bytes": 126225,
+      "sha256": "5129a1082b473b6287883cdcca2c7d017ad0d43cf524ca180514aff509cc35eb",
+      "destination": "patient-web/c2b/Frontend/package-lock.json",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/package.json",
+      "bytes": 844,
+      "sha256": "1b32bdd4f052fa5c749ebe3fe450fd887a9292840f7c1e3bcd6fbbb057a66875",
+      "destination": "patient-web/c2b/Frontend/package.json",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/App.tsx",
+      "bytes": 972,
+      "sha256": "75f6f4fa3e5ee4a25e272990e2794c7bd25b2c8e0c1e17f136de2ac849411cbe",
+      "destination": "patient-web/c2b/Frontend/src/App.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 23
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/api/llm.ts",
+      "bytes": 3494,
+      "sha256": "3a8c6901ac05c31303c15e5194ddf14f5f0cfdae1ab8dcda46500d9d02c31d9f",
+      "destination": "patient-web/c2b/Frontend/src/api/llm.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 92
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/components/PageShell.tsx",
+      "bytes": 1082,
+      "sha256": "e8a10145374ac0ea5f20359ba9f0237f091ab9a52fbb6ef3c49074a10bd23600",
+      "destination": "patient-web/c2b/Frontend/src/components/PageShell.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 26
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/components/ui.tsx",
+      "bytes": 1460,
+      "sha256": "6564b22504697d1a6334a6ec75a4ba0f7765663bf4ee0c53ae52cba69dad832b",
+      "destination": "patient-web/c2b/Frontend/src/components/ui.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 31
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/data/demo-data.ts",
+      "bytes": 1992,
+      "sha256": "084844f638cac75af7b5178637d5406548f903285a151f75b6927ee7a2a9e403",
+      "destination": "patient-web/c2b/Frontend/src/data/demo-data.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 33
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/main.tsx",
+      "bytes": 325,
+      "sha256": "824e6aabaede287055220fda22d0b88c1a05049745b2d8a8d16142210162a0b0",
+      "destination": "patient-web/c2b/Frontend/src/main.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 13
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/BostonNamingPage.tsx",
+      "bytes": 5387,
+      "sha256": "b2a78849a847b72a7f001c5fc4ec5680eab2dcd89dfd9949df3ce74d49097dbb",
+      "destination": "patient-web/c2b/Frontend/src/pages/BostonNamingPage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 97
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/HomePage.tsx",
+      "bytes": 3050,
+      "sha256": "4d5889eb57f919a39b290077b20e188b9d4d6b800d31e5b699c037a81499053f",
+      "destination": "patient-web/c2b/Frontend/src/pages/HomePage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 46
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/MocaOpenAnswerPage.tsx",
+      "bytes": 4133,
+      "sha256": "be177f521cb6b9cd1e1298819e5b6d3bfc1e7582cf67d4d77c02c8df985522ef",
+      "destination": "patient-web/c2b/Frontend/src/pages/MocaOpenAnswerPage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 73
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/NotFoundPage.tsx",
+      "bytes": 311,
+      "sha256": "727a029a28f434d96ea416caf578442f9307cd5495d5201525dc57eaa00c203d",
+      "destination": "patient-web/c2b/Frontend/src/pages/NotFoundPage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 7
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/ScdInterviewPage.tsx",
+      "bytes": 6023,
+      "sha256": "59e9df3145697b97d36b74af0ee55ff190e9b8ce4aae988bbea64ddb5bdd5bc2",
+      "destination": "patient-web/c2b/Frontend/src/pages/ScdInterviewPage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 118
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/pages/TrailMakingPage.tsx",
+      "bytes": 5653,
+      "sha256": "d71d3041a3d39be4908d3e2fbce6b0affadc56f446b145f17fb9118e521e73af",
+      "destination": "patient-web/c2b/Frontend/src/pages/TrailMakingPage.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 96
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/store/use-demo-store.ts",
+      "bytes": 2556,
+      "sha256": "31f8534e3207709b25f781e86706db96cfc647a4999ed7a6d5f26ed410655b6e",
+      "destination": "patient-web/c2b/Frontend/src/store/use-demo-store.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 59
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/styles.css",
+      "bytes": 13081,
+      "sha256": "12b534a198e7965aefcae387dffd4678e16b8596ce7cd47e3248d30a3bb12057",
+      "destination": "patient-web/c2b/Frontend/src/styles.css",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/test/HomePage.test.tsx",
+      "bytes": 1102,
+      "sha256": "61a086ea57c190f00c4e73986f9aee3b00bcedf44a5c395b5e7c22dabe4d3577",
+      "destination": "patient-web/c2b/Frontend/src/test/HomePage.test.tsx",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 23
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/test/demo-data.test.ts",
+      "bytes": 874,
+      "sha256": "bdd1cd3fdb6b66c4ee7f30a93766c343ba45203cde573b0e61ac8071e7808edf",
+      "destination": "patient-web/c2b/Frontend/src/test/demo-data.test.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 20
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/test/setup.ts",
+      "bytes": 131,
+      "sha256": "2673bd6e675734fc1722fb1c1c9d2035234031bb8d891becd4c309f4d2eea72c",
+      "destination": "patient-web/c2b/Frontend/src/test/setup.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 3
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/types.ts",
+      "bytes": 1670,
+      "sha256": "eceae9a8ca2dc4d911d0bacfa475537e98ef4ba826d50ed258969fe09b16e002",
+      "destination": "patient-web/c2b/Frontend/src/types.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 84
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/src/vite-env.d.ts",
+      "bytes": 202,
+      "sha256": "8fc3926d58efaf125264f143f41151324ec6bca67c364b1d9e8cbb3eaf0c7f81",
+      "destination": "patient-web/c2b/Frontend/src/vite-env.d.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 10
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/tsconfig.app.json",
+      "bytes": 578,
+      "sha256": "18eef6f87ef638fb29585831d4c1898a1d06b725164f01d36be48120f6afa6d7",
+      "destination": "patient-web/c2b/Frontend/tsconfig.app.json",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/tsconfig.json",
+      "bytes": 119,
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808",
+      "destination": "patient-web/c2b/Frontend/tsconfig.json",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/tsconfig.node.json",
+      "bytes": 413,
+      "sha256": "2fba2f25e1859f193b54edef5d2d2cd08cae2a37fab64c08699f6f8672bea2cc",
+      "destination": "patient-web/c2b/Frontend/tsconfig.node.json",
+      "decision": "retained; README and demo config updated for integration"
+    },
+    {
+      "branch": "main",
+      "commit": "fd2bc0382c118aaf98bb9f3e12e44f4d9f75de91",
+      "path": "patient-web/c2b/Frontend/vite.config.ts",
+      "bytes": 285,
+      "sha256": "6edb204ff25259575062c3d3a7b5ce29f23263697e3f2bfa602e6006901ed569",
+      "destination": "patient-web/c2b/Frontend/vite.config.ts",
+      "decision": "retained; README and demo config updated for integration",
+      "lines": 11
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": ".env.example",
+      "bytes": 437,
+      "sha256": "530562acab0ef0a96797d3cc901a853a7715e29f7b9fc8b4e651e8cb8d9935ec",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": ".gitignore",
+      "bytes": 164,
+      "sha256": "d8e1c0229e5684406984ca1be6f2f28e9882d75b0413b3c9beb765edcbbdca5f",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "README.md",
+      "bytes": 4032,
+      "sha256": "334ef409296cd0b2b3e1de31a9e7233ec30099fa143e1e36946a0cd83d7b6b44",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/core/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/api.py",
+      "bytes": 617,
+      "sha256": "cc13fe9408b2f6d6f99bb91ff9fcae268c4dd7d8a3451d57605d6b2b060f957a",
+      "destination": "server/app/core/api.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 21,
+      "functions": [
+        "app_error_handler",
+        "__init__"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/config.py",
+      "bytes": 1029,
+      "sha256": "7435b8276e4f87fd5eb96b718877eb5a89245dbc25686050a7a7f0e323d96122",
+      "destination": "server/app/core/config.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 26,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/database.py",
+      "bytes": 823,
+      "sha256": "c3739d20f0f9e1e5cbfd311207a6825ac43e42fd57aa006e81bfdf97b001c642",
+      "destination": "server/app/core/database.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 27,
+      "functions": [
+        "get_db"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/db.py",
+      "bytes": 1333,
+      "sha256": "138b763072c10aa0cbb1b7cc8015fd0f44fd1a40b9ee1adc5e47933b016a7621",
+      "destination": "server/app/core/db.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 37,
+      "functions": [
+        "get_db",
+        "create_tables"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/dependencies.py",
+      "bytes": 2082,
+      "sha256": "a3bf1dfedbc89b17431a75887ca17753e77a0435977026c3ffa89f924ebc831b",
+      "destination": "server/app/core/dependencies.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 61,
+      "functions": [
+        "current_user",
+        "admin_user",
+        "patient_identity",
+        "ensure_patient_scope"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/core/security.py",
+      "bytes": 1685,
+      "sha256": "44b249fbfadd46d6f6fcac7ce88cab118b20cf8d49897e28738a4e4d0fcc1d67",
+      "destination": "server/app/core/security.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 59,
+      "functions": [
+        "hash_password",
+        "verify_password",
+        "create_token",
+        "decode_token",
+        "new_assignment_token",
+        "token_digest",
+        "new_access_code"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/main.py",
+      "bytes": 2392,
+      "sha256": "205104fe835d6626f2ff9613125b9c8ec49216a6679880bf108a7d12bd8330d0",
+      "destination": "server/app/main.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 71,
+      "functions": [
+        "initialize_database",
+        "lifespan",
+        "request_id",
+        "http_error",
+        "validation_error",
+        "health"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/models.py",
+      "bytes": 10896,
+      "sha256": "5e29ab18b825e880dc73f7154a13c4fbed4e8070949cffb0368601098396ac1e",
+      "destination": "server/app/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 194,
+      "functions": [
+        "utcnow"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assessments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/assessments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assessments/models.py",
+      "bytes": 1510,
+      "sha256": "eb1bd147a4538b0e604ef510ea08500a3efd6e0d23650be89f661ccaa57fc07c",
+      "destination": "server/app/modules/assessments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 27,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assignments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/assignments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assignments/models.py",
+      "bytes": 2994,
+      "sha256": "880c01032556b84839678b774822b41c1b55f0d2d243cd1cc96dea377e3210a0",
+      "destination": "server/app/modules/assignments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 53,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assignments/router.py",
+      "bytes": 11595,
+      "sha256": "bdff449d231211a83d5dd15dd2915c1be712a3b934bf5d8d9cd429275bf74a20",
+      "destination": "server/app/modules/assignments/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 285,
+      "functions": [
+        "assignment_scope",
+        "list_assignments",
+        "create",
+        "get_assignment",
+        "revoke",
+        "regenerate_code",
+        "review",
+        "patient_verify",
+        "patient_package",
+        "patient_tasks",
+        "scoped_item",
+        "patient_task",
+        "save_draft",
+        "submit_task",
+        "submission_result"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assignments/schemas.py",
+      "bytes": 685,
+      "sha256": "dd58d689b273a23716b19ea8b3a1e426f10dd8e175220df95e709fab8e038507",
+      "destination": "server/app/modules/assignments/schemas.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 28,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/assignments/service.py",
+      "bytes": 8376,
+      "sha256": "9b2bc84c8ab31bcae58b776ea241e5863595e16ad53c698976cd1291a0d8aeca",
+      "destination": "server/app/modules/assignments/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 190,
+      "functions": [
+        "utc_now",
+        "aware",
+        "create_assignment",
+        "refresh_package_status",
+        "verify_assignment",
+        "serialize_package",
+        "serialize_task",
+        "is_visible",
+        "validate_answers"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/audit/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/audit/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/audit/models.py",
+      "bytes": 870,
+      "sha256": "f44be3fe4aa0d93d8a4240fffa4e827bbd8c8ca3505d5f156317ee8628328ef3",
+      "destination": "server/app/modules/audit/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 21,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/auth/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/auth/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/auth/dependencies.py",
+      "bytes": 2069,
+      "sha256": "31f27f73205e59a1f3a7be2021bdf6266817d5e8f1e48386a09a05ddb00ad1f5",
+      "destination": "server/app/modules/auth/dependencies.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 65,
+      "functions": [
+        "current_user",
+        "require_admin",
+        "patient_claims"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/auth/router.py",
+      "bytes": 1351,
+      "sha256": "e039863b74348e559eeb6ceb8d16de68ace9eeadd17ec99d2c9c212e9823ac54",
+      "destination": "server/app/modules/auth/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 44,
+      "functions": [
+        "login",
+        "me",
+        "serialize_user"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/departments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/departments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/departments/models.py",
+      "bytes": 427,
+      "sha256": "ab2d8e61a8daeaff8d71a29f6bc05c9e518e8ad1209a02c6be0c694349794caa",
+      "destination": "server/app/modules/departments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 14,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/departments/router.py",
+      "bytes": 1155,
+      "sha256": "04e045b86dff0598a5b98fb8b05f6650a259a90310947481be8a2b0975b776dc",
+      "destination": "server/app/modules/departments/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 33,
+      "functions": [
+        "list_departments",
+        "create_department"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/patients/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/patients/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/patients/models.py",
+      "bytes": 1147,
+      "sha256": "19c64e4877578eb09ecc46e44492224ccf5068f2cb3fc114948ab0fab8477557",
+      "destination": "server/app/modules/patients/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 23,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/patients/router.py",
+      "bytes": 5042,
+      "sha256": "53b11bc4ddb8a9489d12b3199584087ccbaf40ebfcaca50643e071fbc79472a7",
+      "destination": "server/app/modules/patients/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 132,
+      "functions": [
+        "scoped_query",
+        "list_patients",
+        "create_patient",
+        "get_patient",
+        "update_patient",
+        "serialize"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/questionnaires/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/questionnaires/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/questionnaires/models.py",
+      "bytes": 3114,
+      "sha256": "65b3a2577c6455e209adb4095d7f5bb2a1254e7d9e4b3012421907f9ffc96d85",
+      "destination": "server/app/modules/questionnaires/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 59,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/questionnaires/router.py",
+      "bytes": 1966,
+      "sha256": "4b77c8c8a8615197c5e529a4faca98334f4aff0595622b04b210a6f935ae3aa5",
+      "destination": "server/app/modules/questionnaires/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 50,
+      "functions": [
+        "list_questionnaires",
+        "create_questionnaire",
+        "get_questionnaire",
+        "publish_questionnaire",
+        "archive_questionnaire"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/questionnaires/schemas.py",
+      "bytes": 1425,
+      "sha256": "175c86ed814d769e5af07046eecb0df7750b6d8cc3e3bb6baf5fb7652999a763",
+      "destination": "server/app/modules/questionnaires/schemas.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 39,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/questionnaires/service.py",
+      "bytes": 4481,
+      "sha256": "a7d81418de5ebba75344b6180a9b9977a39e98d094cc688a393606c937312fbf",
+      "destination": "server/app/modules/questionnaires/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 118,
+      "functions": [
+        "create_template",
+        "publish_template",
+        "serialize_template",
+        "serialize_question"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/scoring/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/scoring/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/scoring/service.py",
+      "bytes": 2563,
+      "sha256": "6140caf4d1deb2450d4e14bf3882d7ff8632858f56a4d2eed889c96cd2473fce",
+      "destination": "server/app/modules/scoring/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 60,
+      "functions": [
+        "score_response",
+        "option_score"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/users/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/users/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/users/models.py",
+      "bytes": 827,
+      "sha256": "ba4d0fea1ce380fbdbdfe4ff726c2df5471269e9f7901dc926b20040be35a7fb",
+      "destination": "server/app/modules/users/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 20,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/modules/users/router.py",
+      "bytes": 2359,
+      "sha256": "21a8013182856f18d930211fa28c539a67f24ff40054036041cb9063f5f2015f",
+      "destination": "server/app/modules/users/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 71,
+      "functions": [
+        "list_users",
+        "create_user",
+        "update_status",
+        "serialize"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/routers/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/admin.py",
+      "bytes": 6664,
+      "sha256": "b3bb0ea09f84692c22acd353b60ad574184d117efa81e2c1340c19415d7c8da1",
+      "destination": "server/app/routers/admin.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 138,
+      "functions": [
+        "department_view",
+        "user_view",
+        "departments",
+        "create_department",
+        "update_department",
+        "users",
+        "create_user",
+        "update_user",
+        "audit_logs"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/assignments.py",
+      "bytes": 10156,
+      "sha256": "dacb9aacec26cd66fd1191b0faaad5ceca0d27013700905bdba70fdb5ce0a29d",
+      "destination": "server/app/routers/assignments.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 206,
+      "functions": [
+        "assignment_view",
+        "list_assignments",
+        "create_assignment",
+        "update_assignment",
+        "get_assignment",
+        "get_item_result",
+        "revoke"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/auth.py",
+      "bytes": 1585,
+      "sha256": "5fdaddd1cd99f311dd6cc8e51e199e0739cab4b38a89c3ac0d6e650989cf98be",
+      "destination": "server/app/routers/auth.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 46,
+      "functions": [
+        "login",
+        "me",
+        "user_view"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/patient_session.py",
+      "bytes": 8363,
+      "sha256": "952654eaab538de45dc2c825811d19e661b63239206daec4bf31921b3a0ec92a",
+      "destination": "server/app/routers/patient_session.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 190,
+      "functions": [
+        "get_assignment",
+        "item_for_identity",
+        "verify",
+        "assignment_summary",
+        "tasks",
+        "task",
+        "save_draft",
+        "submit",
+        "assessment_view"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/patients.py",
+      "bytes": 13318,
+      "sha256": "d87231cf94b41d0a6ec5bcbda08c0751ae95b8730b7caa1f3a56b1db2e7955f4",
+      "destination": "server/app/routers/patients.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 241,
+      "functions": [
+        "patient_view",
+        "assessment_view",
+        "clinical_record_view",
+        "scoped_patient",
+        "list_patients",
+        "create_patient",
+        "update_patient",
+        "archive_patient",
+        "get_patient",
+        "patient_analysis",
+        "list_clinical_records",
+        "create_clinical_record",
+        "update_clinical_record"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/questionnaires.py",
+      "bytes": 6937,
+      "sha256": "63a3c42266177d58c53a28de25c7a8d9b27c55f868c159173bd8ebaf6d49299a",
+      "destination": "server/app/routers/questionnaires.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 143,
+      "functions": [
+        "template_view",
+        "import_templates",
+        "list_templates",
+        "scale_catalog",
+        "import_package",
+        "import_catalog",
+        "create_template",
+        "publish"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/routers/statistics.py",
+      "bytes": 6338,
+      "sha256": "cc859f14f063df009cc000f281dfb4a679707e97197542b499c6643b20da3025",
+      "destination": "server/app/routers/statistics.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 115,
+      "functions": [
+        "patient_scope",
+        "overview",
+        "funnel",
+        "questionnaire_stats",
+        "risks",
+        "score_summary",
+        "export_assessments"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/seed.py",
+      "bytes": 11845,
+      "sha256": "ba332a651729a5a90119472365930200abe2c25148968931eafd80ff120a40c0",
+      "destination": "server/app/seed.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 199,
+      "functions": [
+        "demo_profile_values",
+        "ensure_demo_patient_profiles",
+        "seed_database"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/services/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/assignment.py",
+      "bytes": 1180,
+      "sha256": "78491b97af19e36c44cb5467f794094d3494a24b26687176cf588b0bd3942cae",
+      "destination": "server/app/services/assignment.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 31,
+      "functions": [
+        "is_expired",
+        "refresh_assignment_status"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/audit.py",
+      "bytes": 373,
+      "sha256": "115221fde3f7508fcb3d340b33cd7e40bb01830eca5acaa1e62589423eaafe35",
+      "destination": "server/app/services/audit.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 14,
+      "functions": [
+        "audit"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/permissions.py",
+      "bytes": 1141,
+      "sha256": "f0e77214a1b602ff59248b2ef59eb3816cbc5ebccf05cea00a6fd4fc602bca4a",
+      "destination": "server/app/services/permissions.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 39,
+      "functions": [
+        "permission_for",
+        "permission_view",
+        "require_permission"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/questionnaire.py",
+      "bytes": 2804,
+      "sha256": "d5528f1879535958db8d7d981c55a23c12a22262e2b22167e0f8373bd9af72e6",
+      "destination": "server/app/services/questionnaire.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 67,
+      "functions": [
+        "all_questions",
+        "visible",
+        "validate_schema",
+        "validate_answers"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/scale_catalog.py",
+      "bytes": 9908,
+      "sha256": "5d8ec85a6335e3e74b00e3cb1fe725cde620d616a69bae98ae2963f767a3aebe",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 131,
+      "functions": [
+        "option",
+        "source",
+        "numeric_question",
+        "catalog_items"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/app/services/scoring.py",
+      "bytes": 1522,
+      "sha256": "b8300b6dfaddc926e744aba7338ed85c2591d3e2fc976a031b30f76c8e9f6d4a",
+      "destination": "server/app/services/scoring.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 36,
+      "functions": [
+        "score_questionnaire"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/requirements.txt",
+      "bytes": 137,
+      "sha256": "5db9a334021a05b009cc6c2304e2134b7d27989fb8a305d0a2836a187dbbc40b",
+      "destination": "server/requirements.txt",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/run.py",
+      "bytes": 120,
+      "sha256": "367d418912bb0e2e6b0e0d3aa6d9c6d554cc8f467b06492662ffcfcaef57eda5",
+      "destination": "server/run.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 6,
+      "functions": []
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "backend/tests/test_flow.py",
+      "bytes": 11213,
+      "sha256": "b7c40d9dbb74d1a4d38422462cdea089f943cc216929bd7bb786a4f58ccc8034",
+      "destination": "server/tests/test_flow.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 202,
+      "functions": [
+        "close_test_database",
+        "auth",
+        "valid_answers",
+        "test_staff_patient_assignment_submission_statistics_flow",
+        "test_doctor_cannot_read_another_doctors_patient",
+        "test_demo_patient_link_is_available",
+        "test_admin_can_manage_doctor_permissions_and_backend_enforces_them",
+        "test_patient_longitudinal_analysis_and_clinical_record_flow",
+        "test_admin_can_modify_and_reassign_pending_assignment",
+        "test_admin_can_import_catalog_scales_and_create_new_versions"
+      ]
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/.github/copilot-instructions.md",
+      "bytes": 301,
+      "sha256": "cbbe3cd8d3322c23189b8786e5e80f6e9156aa3634a715955e6f5aeca945e341",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/1_AD临床前期SCD筛查量表-基线期-加上情景选择题.pdf",
+      "bytes": 1623347,
+      "sha256": "663c18bb5f84cbf6569f7b3c51b805fd318b4a6705dba84851cf5723a526f70c",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/2.量表模板.pdf",
+      "bytes": 6626443,
+      "sha256": "58eb2a6044b1fd860a05a7818aca45bba4f95bef6a65a3b25a0a62b90d03be33",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/3.量表MoCA模板.pdf",
+      "bytes": 102890,
+      "sha256": "9e7799fdc68a88c364777fb53c6a0e50eb46958b6844639c3010190cdd5af125",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/4.最新量表操作说明修订版.pdf",
+      "bytes": 484351,
+      "sha256": "e1975f34e393d88d0942d4d741608ca415930d735a8ef66507b6d6de092c9ed9",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/5.CDR.pdf",
+      "bytes": 346170,
+      "sha256": "77752ede9daebc052b92de094821a53805b451180e37903c74f5ba43e45aba75",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/6.ADAS-cog.pdf",
+      "bytes": 1372842,
+      "sha256": "3aa3de6fa8471bfa68c9eeded26430cb0f4dcd1528ff8c8976b4020974c10b70",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "code/ad-ouc-master/ad-ouc-master/docs/document-readability-audit.md",
+      "bytes": 1714,
+      "sha256": "f07ca4ed24d53e1c99ffcb9a9837c6f567550d6e77ca8449ebef0dd39b986d4e",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/github项目网址.md",
+      "bytes": 595,
+      "sha256": "4da37a851af2502391e4944e5624badd2ae42d4ca8038d8d20c3d266fa3a6e3a",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/plan/第一阶段MVP设计方案_web.md",
+      "bytes": 12728,
+      "sha256": "68d80d8057ae86008f2acd991ab1d958c45e18e08390c38fa4ac200c4be05d7b",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/plan/第一阶段MVP设计方案_小程序.md",
+      "bytes": 10973,
+      "sha256": "85ae5707b2407ecfe135debf7b4177d49d240ec561443ed31b9e57ee30a74d24",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/requirements/软件工程实践.md",
+      "bytes": 7238,
+      "sha256": "d7ab4d72b7a5c3e628b19a3edd3f04d4e163a5b53f819a9e2d233af10c25a4b5",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/签到表.xlsx",
+      "bytes": 9359,
+      "sha256": "1788066b74b45195a33c4e1b5c1519b0317f58b3a023397bc763ded3c18c1081",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "docs/问卷扩展指南.md",
+      "bytes": 1405,
+      "sha256": "5c3a083d5afff2c647842046b775d7cf0adeafb0a970177707efe780b80f6d3e",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/index.html",
+      "bytes": 407,
+      "sha256": "0f39860f0a912b474e3b018fb110a84d076dcb80f9cb6d93516e6a96a89c98b5",
+      "destination": "admin-web/index.html",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/package-lock.json",
+      "bytes": 89301,
+      "sha256": "2893a3d23ca7acd8a70386a2c1f7772eaedf7b77b3051de895dfed50509520b2",
+      "destination": "admin-web/package-lock.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/package.json",
+      "bytes": 606,
+      "sha256": "39648fcaaa99cebca02f89e3fa1ad449e2ea12f9a3b581817eb14e46723a9230",
+      "destination": "admin-web/package.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/App.vue",
+      "bytes": 38,
+      "sha256": "fd41d3f66b192236ec11564fc60935be8e453c1eb0857f888aff3acbb13daba0",
+      "destination": "admin-web/src/App.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 2
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/advanced.css",
+      "bytes": 11829,
+      "sha256": "f185be9de0cf8f478cf94c2a556a6b7ab1863a92d2c5b5f196db47475b2424ed",
+      "destination": "admin-web/src/advanced.css",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/api/client.ts",
+      "bytes": 566,
+      "sha256": "7e608767049b94e1aa6740b96d9c075b0e3fe0fcb7728b06609b5eecfc0664d4",
+      "destination": "admin-web/src/api/client.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 16
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/components/ChartPanel.vue",
+      "bytes": 1551,
+      "sha256": "8995f07ef49428a9e8215b270689e57e00e98c2e67fa1fc81675d6763a7fe78e",
+      "destination": "admin-web/src/components/ChartPanel.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 18
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/components/DynamicQuestion.vue",
+      "bytes": 1528,
+      "sha256": "ad34d595640175e6bfe02845d749470c01ccca8fce8073320c6d8f94d92397a0",
+      "destination": "admin-web/src/components/DynamicQuestion.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 15
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/components/QuestionnaireDetailDialog.vue",
+      "bytes": 13834,
+      "sha256": "81bc846cb142fff2655a700be05a0fefaf28010a1064928aaf19e4ab5661cff7",
+      "destination": "admin-web/src/components/QuestionnaireDetailDialog.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 115
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/components/StatCard.vue",
+      "bytes": 315,
+      "sha256": "825957d377f9c78482c05116da7c014c880f38834b40998909e50bd5062a2e44",
+      "destination": "admin-web/src/components/StatCard.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 4
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/layouts/StaffLayout.vue",
+      "bytes": 2258,
+      "sha256": "dc372bdc81610a2a273f9c5c8f9ae6f13ece825b277dac9d884b76938dd44c22",
+      "destination": "admin-web/src/layouts/StaffLayout.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 38
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/main.ts",
+      "bytes": 397,
+      "sha256": "c1fb0628d6e8a1c620a4e771d607545e12803d81fdfbfaabba358af1de21a0b1",
+      "destination": "admin-web/src/main.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 11
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/router.ts",
+      "bytes": 1667,
+      "sha256": "60923578a05dfcb6dd789592ed3484a328e5cba19b56f9ccc7c5fd3ca3903e97",
+      "destination": "admin-web/src/router.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 36
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/stores/auth.ts",
+      "bytes": 1355,
+      "sha256": "dfed6c376083700cd7f9ee6bd60d14bbf2e77c08130ba99daaa91dcdf85f4568",
+      "destination": "admin-web/src/stores/auth.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 44
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/styles.css",
+      "bytes": 13055,
+      "sha256": "56791cc44b17f966a8b79a8ed80cccbe094d53bf52d590be7243ce5760826640",
+      "destination": "admin-web/src/styles.css",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/utils/idempotency.ts",
+      "bytes": 1109,
+      "sha256": "3d093ad0b88ba74d509757873bd3b3e114f8b8f271ad88890972e530d810da5c",
+      "destination": "admin-web/src/utils/idempotency.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 23
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/utils/patient.ts",
+      "bytes": 430,
+      "sha256": "ed87f5f298cf16639c68ecb8f662293cd243be794d41b116fa2ea500e161c509",
+      "destination": "admin-web/src/utils/patient.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 13
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/AdminCenterView.vue",
+      "bytes": 8783,
+      "sha256": "be7520eb1c9b4580193dd8831d38674e8a81d6bedf22560ccf02104ee6ceb3e1",
+      "destination": "admin-web/src/views/AdminCenterView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 29
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/AssignmentsView.vue",
+      "bytes": 8320,
+      "sha256": "22be8871f4af4f276f1bf638363342812b00e2303e59f9c601023de00577be0c",
+      "destination": "admin-web/src/views/AssignmentsView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 125
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/CreateAssignmentView.vue",
+      "bytes": 4796,
+      "sha256": "fdb32aae2eefb230631ab6ba2fc0282aefe5e0c53d70f01e1a6d5cb6885b24cc",
+      "destination": "admin-web/src/views/CreateAssignmentView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 31
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/DashboardView.vue",
+      "bytes": 4650,
+      "sha256": "98a2614a94542b73cfb3a4524e1c8223d20e994ce6a6d6dedcbabdc423df9111",
+      "destination": "admin-web/src/views/DashboardView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 55
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/LoginView.vue",
+      "bytes": 2013,
+      "sha256": "329e495fc46c1256765b3ec0bf146cdf2e9e400d8a2a15238ee72d3cd35c4d3a",
+      "destination": "admin-web/src/views/LoginView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 38
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/PatientDetailView.vue",
+      "bytes": 16082,
+      "sha256": "bfe7cf069bbd889bd477295a76b903c198d2020ae57dbc96832d78ed2e72d64e",
+      "destination": "admin-web/src/views/PatientDetailView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 43
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/PatientsView.vue",
+      "bytes": 6222,
+      "sha256": "2e67c1b9d940a24364adcd401ba7aac9daa8e2b8bde76b4ea870f91e7d85e475",
+      "destination": "admin-web/src/views/PatientsView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 25
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/QuestionnairesView.vue",
+      "bytes": 11660,
+      "sha256": "01cfc541a656400448f6d426604167494000a55de7239a06939d747b49c8c007",
+      "destination": "admin-web/src/views/QuestionnairesView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 149
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/src/views/patient/PatientPortal.vue",
+      "bytes": 5803,
+      "sha256": "d8d548c258eeb372a63ba00bd4f35aee797ff27fce737a7a5d5137dccc609ad4",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 26
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/tsconfig.app.json",
+      "bytes": 421,
+      "sha256": "8c486170d793d57535e2d96158c328fb6e38cd864349f5795a892d7c668a0b72",
+      "destination": "admin-web/tsconfig.app.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/tsconfig.json",
+      "bytes": 108,
+      "sha256": "69581e1c8b5e42730cca001cc2bb2b7db774021c19ba56ab6be1a251c753590b",
+      "destination": "admin-web/tsconfig.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/tsconfig.node.json",
+      "bytes": 206,
+      "sha256": "4acf27c8a1a76588ac092df2406800cf93354067159060138440cf6c218a5e98",
+      "destination": "admin-web/tsconfig.node.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "frontend/vite.config.ts",
+      "bytes": 245,
+      "sha256": "5246851158cb3c2cabe7c7c5f1885a562d08033ef94ea6967ddc66c419616ce7",
+      "destination": "admin-web/vite.config.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 11
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "samples/questionnaire-template.example.json",
+      "bytes": 1525,
+      "sha256": "9161e9bd432c98eb49c3d91b2abb6fcfc800dd3b756b32147109709940f8605c",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "scripts/setup.ps1",
+      "bytes": 839,
+      "sha256": "4984fc770479b786df386bcb2eda21072635a74dfd3c5a086d15d79400579be7",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git",
+      "lines": 18
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "scripts/start.ps1",
+      "bytes": 3149,
+      "sha256": "4ddc3292a8b315b1323c6598530e1d9ae403dc16856cff65df63af64a509b6ab",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git",
+      "lines": 61
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "scripts/stop.ps1",
+      "bytes": 570,
+      "sha256": "fded62f30ce261ce91ac0032589b79695c26728bc5c1b58d059909e2e0c701a6",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git",
+      "lines": 15
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "scripts/test.ps1",
+      "bytes": 447,
+      "sha256": "90538913a7f77b165d7b6ed25569e74e6d73dac4ec620332f0b0f22e25176fba",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git",
+      "lines": 9
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/1_AD临床前期SCD筛查量表-基线期-加上情景选择题.pdf",
+      "bytes": 1623347,
+      "sha256": "663c18bb5f84cbf6569f7b3c51b805fd318b4a6705dba84851cf5723a526f70c",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/2.量表模板.pdf",
+      "bytes": 850824,
+      "sha256": "7a7aa9f551ba0f617587f1fbcc92762d1797cf3d82c6d6048f0f62a647dbbac7",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/3.量表MoCA模板.pdf",
+      "bytes": 102890,
+      "sha256": "9e7799fdc68a88c364777fb53c6a0e50eb46958b6844639c3010190cdd5af125",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/4.最新量表操作说明修订版.pdf",
+      "bytes": 484351,
+      "sha256": "e1975f34e393d88d0942d4d741608ca415930d735a8ef66507b6d6de092c9ed9",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/5.CDR.pdf",
+      "bytes": 346170,
+      "sha256": "77752ede9daebc052b92de094821a53805b451180e37903c74f5ba43e45aba75",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/6.ADAS-cog.pdf",
+      "bytes": 1372842,
+      "sha256": "3aa3de6fa8471bfa68c9eeded26430cb0f4dcd1528ff8c8976b4020974c10b70",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/cdr.txt",
+      "bytes": 18201,
+      "sha256": "61f95373fd1dc964fb1d8a64de45da0a31b5127c6372e92d20e9d66813428c6e",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "tmp/pdfs/scd.txt",
+      "bytes": 55055,
+      "sha256": "a2d2d0ec30e4cc457e23bb6f25a64ce122773ecc70fec6fb20961ca8f616ba63",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "yjj",
+      "commit": "bbfabb7ec2e182498ce103913cfe5e43ef8bf0ce",
+      "path": "项目规范与Codex执行任务.md",
+      "bytes": 23288,
+      "sha256": "c1019cb4e48099b2bb5cc0679a6602c82f4615674867c8d27a70165c1e6bf68f",
+      "destination": null,
+      "decision": "superseded by main documentation or dl implementation; original kept in Git"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": ".env.example",
+      "bytes": 589,
+      "sha256": "032f0ac45f3dc6c8c0693fc9d11f2de8836592511ef811eae378c71a90cb0e91",
+      "destination": ".env.example",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": ".gitignore",
+      "bytes": 432,
+      "sha256": "5c1bc6a29f47379522dd2526adeb7c11cc39baa7af6bb834f696dd9b68b0949e",
+      "destination": ".gitignore",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "AGENTS.md",
+      "bytes": 1038,
+      "sha256": "83acd66de86f32642ac789d9b63db263927ff6199d43f093637f97870b5cda86",
+      "destination": "AGENTS.md",
+      "decision": "rewritten for explicitly authorized cyb scope"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "README.md",
+      "bytes": 12330,
+      "sha256": "04b014d9d6b04aa9c2c603050cb33838ce753593cdd1b3473cf379e98c9db23c",
+      "destination": "README.md",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "STARTUP.md",
+      "bytes": 3130,
+      "sha256": "b41ed363b5e1c9e6288eb9c325c0f8485162c658965b8bfb1e3a04da110597fc",
+      "destination": "STARTUP.md",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "assets/gds_source_reference.png",
+      "bytes": 303727,
+      "sha256": "b0cc7133a2286107486a0a05a7df7bb9b9a5086d637ad9fde925a3c15d64cd28",
+      "destination": "assets/gds_source_reference.png",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "assets/moca_b_template.png",
+      "bytes": 466098,
+      "sha256": "a5e97582e3e86bb39953d51158fe8dafa58e97572ddda20e5b361d50efc0a853",
+      "destination": "assets/moca_b_template.png",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "assets/stt_form_a_reference.png",
+      "bytes": 257992,
+      "sha256": "27f84e400e8704ae735957073abbc3dbb9fe01bba33d44e5ab09e7b0ec9dbddc",
+      "destination": "assets/stt_form_a_reference.png",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "assets/stt_form_b_practice_reference.png",
+      "bytes": 244437,
+      "sha256": "767cb2fcc19c0a29e495c405d371bf7b424ef5d337a5678cc8107977d149b59c",
+      "destination": "assets/stt_form_b_practice_reference.png",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "assets/stt_form_b_test_reference.png",
+      "bytes": 264073,
+      "sha256": "d7ed0da578fc4e44957d8082834cbbf54319a0b6c817d98a2a556b3b903d26cc",
+      "destination": "assets/stt_form_b_test_reference.png",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/alembic.ini",
+      "bytes": 555,
+      "sha256": "6d5747a3393534774ac2ee79629d94836ca9eb5b895714ec98582b9864272f67",
+      "destination": "server/alembic.ini",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/alembic/env.py",
+      "bytes": 1555,
+      "sha256": "4449f2c8f1a5135bf7424f213a3e98208adcd14ec6d10cf41ba3c38855ea2c12",
+      "destination": "server/alembic/env.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 45,
+      "functions": [
+        "run_migrations_offline",
+        "run_migrations_online"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/alembic/script.py.mako",
+      "bytes": 593,
+      "sha256": "c20f6ab92d4ed36d77fbccb82bc410cd2ced42f2c162eebb43ddd45ae93dd90e",
+      "destination": "server/alembic/script.py.mako",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/alembic/versions/20260910_01_questionnaire_governance.py",
+      "bytes": 3328,
+      "sha256": "20f16c109217a2a8b6d31fd49ff475421472be499dd0275007093bbdb24abc68",
+      "destination": "server/alembic/versions/20260910_01_questionnaire_governance.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 75,
+      "functions": [
+        "upgrade",
+        "downgrade"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/core/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/api.py",
+      "bytes": 617,
+      "sha256": "cc13fe9408b2f6d6f99bb91ff9fcae268c4dd7d8a3451d57605d6b2b060f957a",
+      "destination": "server/app/core/api.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 21,
+      "functions": [
+        "app_error_handler",
+        "__init__"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/config.py",
+      "bytes": 1029,
+      "sha256": "7435b8276e4f87fd5eb96b718877eb5a89245dbc25686050a7a7f0e323d96122",
+      "destination": "server/app/core/config.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 26,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/database.py",
+      "bytes": 823,
+      "sha256": "c3739d20f0f9e1e5cbfd311207a6825ac43e42fd57aa006e81bfdf97b001c642",
+      "destination": "server/app/core/database.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 27,
+      "functions": [
+        "get_db"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/db.py",
+      "bytes": 1333,
+      "sha256": "138b763072c10aa0cbb1b7cc8015fd0f44fd1a40b9ee1adc5e47933b016a7621",
+      "destination": "server/app/core/db.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 37,
+      "functions": [
+        "get_db",
+        "create_tables"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/dependencies.py",
+      "bytes": 2082,
+      "sha256": "a3bf1dfedbc89b17431a75887ca17753e77a0435977026c3ffa89f924ebc831b",
+      "destination": "server/app/core/dependencies.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 61,
+      "functions": [
+        "current_user",
+        "admin_user",
+        "patient_identity",
+        "ensure_patient_scope"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/core/security.py",
+      "bytes": 1685,
+      "sha256": "44b249fbfadd46d6f6fcac7ce88cab118b20cf8d49897e28738a4e4d0fcc1d67",
+      "destination": "server/app/core/security.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 59,
+      "functions": [
+        "hash_password",
+        "verify_password",
+        "create_token",
+        "decode_token",
+        "new_assignment_token",
+        "token_digest",
+        "new_access_code"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/main.py",
+      "bytes": 2831,
+      "sha256": "ae6b10b3ad8d57161f7bba06c361cfa79b444d7eb5ce36088309904e728b092d",
+      "destination": "server/app/main.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 81,
+      "functions": [
+        "initialize_database",
+        "lifespan",
+        "request_id",
+        "http_error",
+        "validation_error",
+        "health"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/models.py",
+      "bytes": 12538,
+      "sha256": "55190cdcd225763d253efe38467ee411a300111641f2cd9682e5e6b494359d47",
+      "destination": "server/app/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 227,
+      "functions": [
+        "utcnow",
+        "load_dialect_impl",
+        "process_bind_param",
+        "process_result_value"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assessments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/assessments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assessments/models.py",
+      "bytes": 1510,
+      "sha256": "eb1bd147a4538b0e604ef510ea08500a3efd6e0d23650be89f661ccaa57fc07c",
+      "destination": "server/app/modules/assessments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 27,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assignments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/assignments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assignments/models.py",
+      "bytes": 2994,
+      "sha256": "880c01032556b84839678b774822b41c1b55f0d2d243cd1cc96dea377e3210a0",
+      "destination": "server/app/modules/assignments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 53,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assignments/router.py",
+      "bytes": 11595,
+      "sha256": "bdff449d231211a83d5dd15dd2915c1be712a3b934bf5d8d9cd429275bf74a20",
+      "destination": "server/app/modules/assignments/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 285,
+      "functions": [
+        "assignment_scope",
+        "list_assignments",
+        "create",
+        "get_assignment",
+        "revoke",
+        "regenerate_code",
+        "review",
+        "patient_verify",
+        "patient_package",
+        "patient_tasks",
+        "scoped_item",
+        "patient_task",
+        "save_draft",
+        "submit_task",
+        "submission_result"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assignments/schemas.py",
+      "bytes": 685,
+      "sha256": "dd58d689b273a23716b19ea8b3a1e426f10dd8e175220df95e709fab8e038507",
+      "destination": "server/app/modules/assignments/schemas.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 28,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/assignments/service.py",
+      "bytes": 8376,
+      "sha256": "9b2bc84c8ab31bcae58b776ea241e5863595e16ad53c698976cd1291a0d8aeca",
+      "destination": "server/app/modules/assignments/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 190,
+      "functions": [
+        "utc_now",
+        "aware",
+        "create_assignment",
+        "refresh_package_status",
+        "verify_assignment",
+        "serialize_package",
+        "serialize_task",
+        "is_visible",
+        "validate_answers"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/audit/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/audit/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/audit/models.py",
+      "bytes": 870,
+      "sha256": "f44be3fe4aa0d93d8a4240fffa4e827bbd8c8ca3505d5f156317ee8628328ef3",
+      "destination": "server/app/modules/audit/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 21,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/auth/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/auth/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/auth/dependencies.py",
+      "bytes": 2069,
+      "sha256": "31f27f73205e59a1f3a7be2021bdf6266817d5e8f1e48386a09a05ddb00ad1f5",
+      "destination": "server/app/modules/auth/dependencies.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 65,
+      "functions": [
+        "current_user",
+        "require_admin",
+        "patient_claims"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/auth/router.py",
+      "bytes": 1351,
+      "sha256": "e039863b74348e559eeb6ceb8d16de68ace9eeadd17ec99d2c9c212e9823ac54",
+      "destination": "server/app/modules/auth/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 44,
+      "functions": [
+        "login",
+        "me",
+        "serialize_user"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/departments/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/departments/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/departments/models.py",
+      "bytes": 427,
+      "sha256": "ab2d8e61a8daeaff8d71a29f6bc05c9e518e8ad1209a02c6be0c694349794caa",
+      "destination": "server/app/modules/departments/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 14,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/departments/router.py",
+      "bytes": 1155,
+      "sha256": "04e045b86dff0598a5b98fb8b05f6650a259a90310947481be8a2b0975b776dc",
+      "destination": "server/app/modules/departments/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 33,
+      "functions": [
+        "list_departments",
+        "create_department"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/patients/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/patients/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/patients/models.py",
+      "bytes": 1147,
+      "sha256": "19c64e4877578eb09ecc46e44492224ccf5068f2cb3fc114948ab0fab8477557",
+      "destination": "server/app/modules/patients/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 23,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/patients/router.py",
+      "bytes": 5042,
+      "sha256": "53b11bc4ddb8a9489d12b3199584087ccbaf40ebfcaca50643e071fbc79472a7",
+      "destination": "server/app/modules/patients/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 132,
+      "functions": [
+        "scoped_query",
+        "list_patients",
+        "create_patient",
+        "get_patient",
+        "update_patient",
+        "serialize"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/questionnaires/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/questionnaires/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/questionnaires/models.py",
+      "bytes": 3114,
+      "sha256": "65b3a2577c6455e209adb4095d7f5bb2a1254e7d9e4b3012421907f9ffc96d85",
+      "destination": "server/app/modules/questionnaires/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 59,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/questionnaires/router.py",
+      "bytes": 1966,
+      "sha256": "4b77c8c8a8615197c5e529a4faca98334f4aff0595622b04b210a6f935ae3aa5",
+      "destination": "server/app/modules/questionnaires/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 50,
+      "functions": [
+        "list_questionnaires",
+        "create_questionnaire",
+        "get_questionnaire",
+        "publish_questionnaire",
+        "archive_questionnaire"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/questionnaires/schemas.py",
+      "bytes": 1425,
+      "sha256": "175c86ed814d769e5af07046eecb0df7750b6d8cc3e3bb6baf5fb7652999a763",
+      "destination": "server/app/modules/questionnaires/schemas.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 39,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/questionnaires/service.py",
+      "bytes": 4481,
+      "sha256": "a7d81418de5ebba75344b6180a9b9977a39e98d094cc688a393606c937312fbf",
+      "destination": "server/app/modules/questionnaires/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 118,
+      "functions": [
+        "create_template",
+        "publish_template",
+        "serialize_template",
+        "serialize_question"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/scoring/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/scoring/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/scoring/service.py",
+      "bytes": 2563,
+      "sha256": "6140caf4d1deb2450d4e14bf3882d7ff8632858f56a4d2eed889c96cd2473fce",
+      "destination": "server/app/modules/scoring/service.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 60,
+      "functions": [
+        "score_response",
+        "option_score"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/users/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/modules/users/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/users/models.py",
+      "bytes": 827,
+      "sha256": "ba4d0fea1ce380fbdbdfe4ff726c2df5471269e9f7901dc926b20040be35a7fb",
+      "destination": "server/app/modules/users/models.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 20,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/modules/users/router.py",
+      "bytes": 2359,
+      "sha256": "21a8013182856f18d930211fa28c539a67f24ff40054036041cb9063f5f2015f",
+      "destination": "server/app/modules/users/router.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 71,
+      "functions": [
+        "list_users",
+        "create_user",
+        "update_status",
+        "serialize"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/routers/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/admin.py",
+      "bytes": 6664,
+      "sha256": "b3bb0ea09f84692c22acd353b60ad574184d117efa81e2c1340c19415d7c8da1",
+      "destination": "server/app/routers/admin.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 138,
+      "functions": [
+        "department_view",
+        "user_view",
+        "departments",
+        "create_department",
+        "update_department",
+        "users",
+        "create_user",
+        "update_user",
+        "audit_logs"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/assignments.py",
+      "bytes": 10217,
+      "sha256": "80fb4765ccc252ecc248ec0e3f07a08cd0577bbba0194e9ef46b43a495f8257e",
+      "destination": "server/app/routers/assignments.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 206,
+      "functions": [
+        "assignment_view",
+        "list_assignments",
+        "create_assignment",
+        "update_assignment",
+        "get_assignment",
+        "get_item_result",
+        "revoke"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/auth.py",
+      "bytes": 1585,
+      "sha256": "5fdaddd1cd99f311dd6cc8e51e199e0739cab4b38a89c3ac0d6e650989cf98be",
+      "destination": "server/app/routers/auth.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 46,
+      "functions": [
+        "login",
+        "me",
+        "user_view"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/patient_session.py",
+      "bytes": 9058,
+      "sha256": "1cfff6c1e834adea08af82825f819ec5db9391f3298a735a90429324012ec529",
+      "destination": "server/app/routers/patient_session.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 199,
+      "functions": [
+        "get_assignment",
+        "item_for_identity",
+        "verify",
+        "assignment_summary",
+        "tasks",
+        "task",
+        "save_draft",
+        "submit",
+        "assessment_view"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/patients.py",
+      "bytes": 13318,
+      "sha256": "d87231cf94b41d0a6ec5bcbda08c0751ae95b8730b7caa1f3a56b1db2e7955f4",
+      "destination": "server/app/routers/patients.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 241,
+      "functions": [
+        "patient_view",
+        "assessment_view",
+        "clinical_record_view",
+        "scoped_patient",
+        "list_patients",
+        "create_patient",
+        "update_patient",
+        "archive_patient",
+        "get_patient",
+        "patient_analysis",
+        "list_clinical_records",
+        "create_clinical_record",
+        "update_clinical_record"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/questionnaires.py",
+      "bytes": 16425,
+      "sha256": "eb50cf3475e402cb98221398bb2f0be8f3a2cb0a83a1d1f6b1fdc5c984b66107",
+      "destination": "server/app/routers/questionnaires.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 319,
+      "functions": [
+        "version_name",
+        "version_description",
+        "version_content_hash",
+        "version_view",
+        "sync_template_status",
+        "template_view",
+        "preview_items",
+        "catalog_templates",
+        "import_templates",
+        "list_templates",
+        "scale_catalog",
+        "import_preview",
+        "import_catalog_preview",
+        "import_package",
+        "import_catalog",
+        "create_template",
+        "list_versions",
+        "compare_version",
+        "publish_version",
+        "retire_version"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/routers/statistics.py",
+      "bytes": 6338,
+      "sha256": "cc859f14f063df009cc000f281dfb4a679707e97197542b499c6643b20da3025",
+      "destination": "server/app/routers/statistics.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 115,
+      "functions": [
+        "patient_scope",
+        "overview",
+        "funnel",
+        "questionnaire_stats",
+        "risks",
+        "score_summary",
+        "export_assessments"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/seed.py",
+      "bytes": 11998,
+      "sha256": "9f1a4065d26dcfb8cfb02ef04d4a9b6a5a1a74d7e5002890a3f8b6e0e091eae7",
+      "destination": "server/app/seed.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 203,
+      "functions": [
+        "demo_profile_values",
+        "ensure_demo_patient_profiles",
+        "seed_database"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/__init__.py",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "destination": "server/app/services/__init__.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 1,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/assignment.py",
+      "bytes": 1180,
+      "sha256": "78491b97af19e36c44cb5467f794094d3494a24b26687176cf588b0bd3942cae",
+      "destination": "server/app/services/assignment.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 31,
+      "functions": [
+        "is_expired",
+        "refresh_assignment_status"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/audit.py",
+      "bytes": 373,
+      "sha256": "115221fde3f7508fcb3d340b33cd7e40bb01830eca5acaa1e62589423eaafe35",
+      "destination": "server/app/services/audit.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 14,
+      "functions": [
+        "audit"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/permissions.py",
+      "bytes": 1141,
+      "sha256": "f0e77214a1b602ff59248b2ef59eb3816cbc5ebccf05cea00a6fd4fc602bca4a",
+      "destination": "server/app/services/permissions.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 39,
+      "functions": [
+        "permission_for",
+        "permission_view",
+        "require_permission"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/questionnaire.py",
+      "bytes": 2804,
+      "sha256": "d5528f1879535958db8d7d981c55a23c12a22262e2b22167e0f8373bd9af72e6",
+      "destination": "server/app/services/questionnaire.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 67,
+      "functions": [
+        "all_questions",
+        "visible",
+        "validate_schema",
+        "validate_answers"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/questionnaire_governance.py",
+      "bytes": 4348,
+      "sha256": "4c8ea5ca0be75b1c8cfc1604a7168fd983e50a29aa21bb1cee6e1b82fcc76e2b",
+      "destination": "server/app/services/questionnaire_governance.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 94,
+      "functions": [
+        "content_hash",
+        "governance_review",
+        "version_diff"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/scale_catalog.py",
+      "bytes": 15259,
+      "sha256": "2987216d826428a448b3d1ac76deb31831e97d8a4a1efff51375041d2ca88840",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 206,
+      "functions": [
+        "option",
+        "source",
+        "numeric_question",
+        "gds_question",
+        "catalog_items"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/app/services/scoring.py",
+      "bytes": 2184,
+      "sha256": "ef0571172edc4438a6bea1ee9d7a3d414e23603c959660143ffbf492c75d57fa",
+      "destination": "server/app/services/scoring.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 53,
+      "functions": [
+        "score_questionnaire"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/requirements.txt",
+      "bytes": 153,
+      "sha256": "73e321eb6765c2172b4dfe5c0c5da03aae3a68e5b99f9e8fdc64783ceb45ea8e",
+      "destination": "server/requirements.txt",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/run.py",
+      "bytes": 120,
+      "sha256": "367d418912bb0e2e6b0e0d3aa6d9c6d554cc8f467b06492662ffcfcaef57eda5",
+      "destination": "server/run.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 6,
+      "functions": []
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "backend/tests/test_flow.py",
+      "bytes": 22238,
+      "sha256": "1421b699dda9002032bfdbc6b0a0da003655c7e1efaa1c7af65313dd723522ee",
+      "destination": "server/tests/test_flow.py",
+      "decision": "dl runtime baseline; modules/ remains unregistered legacy draft",
+      "lines": 390,
+      "functions": [
+        "close_test_database",
+        "auth",
+        "valid_answers",
+        "test_staff_patient_assignment_submission_statistics_flow",
+        "test_doctor_cannot_read_another_doctors_patient",
+        "test_demo_patient_link_is_available",
+        "test_admin_can_manage_doctor_permissions_and_backend_enforces_them",
+        "test_patient_longitudinal_analysis_and_clinical_record_flow",
+        "test_admin_can_modify_and_reassign_pending_assignment",
+        "test_admin_can_import_catalog_scales_and_create_new_versions",
+        "test_questionnaire_preview_publish_diff_and_retire_governance",
+        "test_questionnaire_governance_migration_upgrades_legacy_sqlite",
+        "test_migrated_patient_scales_keep_authoritative_backend_scoring"
+      ]
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "docs/API.md",
+      "bytes": 15234,
+      "sha256": "e1569a4c0de69cd6d1b5037028076934539afdbc7c23760a08697524ab3783d1",
+      "destination": "contracts/API.md",
+      "decision": "relocated and extended"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "docs/BACKEND_INTEGRATION.md",
+      "bytes": 4612,
+      "sha256": "e5e29784af39ae999500d6e2e62ae0be1adad30668f2274544611cc9e4e638db",
+      "destination": "docs/BACKEND_INTEGRATION.md",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "docs/DEVELOPMENT_LOG.md",
+      "bytes": 13870,
+      "sha256": "a0fde9e396f6bf86acf875c35bd462214d40b43ea1cf57f35b8a3b179c6c3281",
+      "destination": "docs/DEVELOPMENT_LOG.md",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/index.html",
+      "bytes": 407,
+      "sha256": "0f39860f0a912b474e3b018fb110a84d076dcb80f9cb6d93516e6a96a89c98b5",
+      "destination": "admin-web/index.html",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/package-lock.json",
+      "bytes": 88873,
+      "sha256": "c161d980bbbd6e3e9f846eef487d484a11ef5173ac672d43fbb027be734940f3",
+      "destination": "admin-web/package-lock.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/package.json",
+      "bytes": 606,
+      "sha256": "39648fcaaa99cebca02f89e3fa1ad449e2ea12f9a3b581817eb14e46723a9230",
+      "destination": "admin-web/package.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/App.vue",
+      "bytes": 183,
+      "sha256": "7a08a7cb627b2eec2a313f0e505834512ea35f1ae21c2952824f9c9db724f184",
+      "destination": "admin-web/src/App.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 6
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/advanced.css",
+      "bytes": 11829,
+      "sha256": "f185be9de0cf8f478cf94c2a556a6b7ab1863a92d2c5b5f196db47475b2424ed",
+      "destination": "admin-web/src/advanced.css",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/api/client.ts",
+      "bytes": 566,
+      "sha256": "7e608767049b94e1aa6740b96d9c075b0e3fe0fcb7728b06609b5eecfc0664d4",
+      "destination": "admin-web/src/api/client.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 16
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/components/ChartPanel.vue",
+      "bytes": 1551,
+      "sha256": "8995f07ef49428a9e8215b270689e57e00e98c2e67fa1fc81675d6763a7fe78e",
+      "destination": "admin-web/src/components/ChartPanel.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 18
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/components/DynamicQuestion.vue",
+      "bytes": 1528,
+      "sha256": "ad34d595640175e6bfe02845d749470c01ccca8fce8073320c6d8f94d92397a0",
+      "destination": "admin-web/src/components/DynamicQuestion.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 15
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/components/QuestionnaireDetailDialog.vue",
+      "bytes": 13834,
+      "sha256": "81bc846cb142fff2655a700be05a0fefaf28010a1064928aaf19e4ab5661cff7",
+      "destination": "admin-web/src/components/QuestionnaireDetailDialog.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 115
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/components/StatCard.vue",
+      "bytes": 315,
+      "sha256": "825957d377f9c78482c05116da7c014c880f38834b40998909e50bd5062a2e44",
+      "destination": "admin-web/src/components/StatCard.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 4
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/layouts/StaffLayout.vue",
+      "bytes": 2258,
+      "sha256": "dc372bdc81610a2a273f9c5c8f9ae6f13ece825b277dac9d884b76938dd44c22",
+      "destination": "admin-web/src/layouts/StaffLayout.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 38
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/main.ts",
+      "bytes": 2363,
+      "sha256": "0c1b7c89a2fcd85345912e124c3d862cc598b08e880f2c1bb2506c4b64b75932",
+      "destination": "admin-web/src/main.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 46
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/router.ts",
+      "bytes": 1667,
+      "sha256": "60923578a05dfcb6dd789592ed3484a328e5cba19b56f9ccc7c5fd3ca3903e97",
+      "destination": "admin-web/src/router.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 36
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/stores/auth.ts",
+      "bytes": 1355,
+      "sha256": "dfed6c376083700cd7f9ee6bd60d14bbf2e77c08130ba99daaa91dcdf85f4568",
+      "destination": "admin-web/src/stores/auth.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 44
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/styles.css",
+      "bytes": 13055,
+      "sha256": "56791cc44b17f966a8b79a8ed80cccbe094d53bf52d590be7243ce5760826640",
+      "destination": "admin-web/src/styles.css",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/utils/date.ts",
+      "bytes": 816,
+      "sha256": "37a6995aa05fd444176660b4d7b2fd6a8f7d9bf4cd568a428fc45f76431b563e",
+      "destination": "admin-web/src/utils/date.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 20
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/utils/idempotency.ts",
+      "bytes": 1109,
+      "sha256": "3d093ad0b88ba74d509757873bd3b3e114f8b8f271ad88890972e530d810da5c",
+      "destination": "admin-web/src/utils/idempotency.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 23
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/utils/patient.ts",
+      "bytes": 430,
+      "sha256": "ed87f5f298cf16639c68ecb8f662293cd243be794d41b116fa2ea500e161c509",
+      "destination": "admin-web/src/utils/patient.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 13
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/AdminCenterView.vue",
+      "bytes": 8819,
+      "sha256": "b17526c10a6414668290a96dda77109efed0ddd283b58ed1a89300daa9fa1968",
+      "destination": "admin-web/src/views/AdminCenterView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 30
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/AssignmentsView.vue",
+      "bytes": 8396,
+      "sha256": "6904753f130f6990c094fa2ec45de99b4a3989be7ec940893383e09258eff041",
+      "destination": "admin-web/src/views/AssignmentsView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 127
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/CreateAssignmentView.vue",
+      "bytes": 4796,
+      "sha256": "fdb32aae2eefb230631ab6ba2fc0282aefe5e0c53d70f01e1a6d5cb6885b24cc",
+      "destination": "admin-web/src/views/CreateAssignmentView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 31
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/DashboardView.vue",
+      "bytes": 4650,
+      "sha256": "98a2614a94542b73cfb3a4524e1c8223d20e994ce6a6d6dedcbabdc423df9111",
+      "destination": "admin-web/src/views/DashboardView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 55
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/LoginView.vue",
+      "bytes": 2013,
+      "sha256": "329e495fc46c1256765b3ec0bf146cdf2e9e400d8a2a15238ee72d3cd35c4d3a",
+      "destination": "admin-web/src/views/LoginView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 38
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/PatientDetailView.vue",
+      "bytes": 16056,
+      "sha256": "7c2804714a08ead52f5a52db7b25561cd546775dacbcc34e5e1ef197b770c44e",
+      "destination": "admin-web/src/views/PatientDetailView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 44
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/PatientsView.vue",
+      "bytes": 6222,
+      "sha256": "2e67c1b9d940a24364adcd401ba7aac9daa8e2b8bde76b4ea870f91e7d85e475",
+      "destination": "admin-web/src/views/PatientsView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 25
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/QuestionnairesView.vue",
+      "bytes": 21775,
+      "sha256": "e7abd2b35f3b7aca8db8b18fbcf9ed85b1864651a0502fc0a822d07fe3cf2321",
+      "destination": "admin-web/src/views/QuestionnairesView.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 266
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/src/views/patient/PatientPortal.vue",
+      "bytes": 5803,
+      "sha256": "d8d548c258eeb372a63ba00bd4f35aee797ff27fce737a7a5d5137dccc609ad4",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 26
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/tsconfig.app.json",
+      "bytes": 421,
+      "sha256": "8c486170d793d57535e2d96158c328fb6e38cd864349f5795a892d7c668a0b72",
+      "destination": "admin-web/tsconfig.app.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/tsconfig.json",
+      "bytes": 108,
+      "sha256": "69581e1c8b5e42730cca001cc2bb2b7db774021c19ba56ab6be1a251c753590b",
+      "destination": "admin-web/tsconfig.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/tsconfig.node.json",
+      "bytes": 206,
+      "sha256": "4acf27c8a1a76588ac092df2406800cf93354067159060138440cf6c218a5e98",
+      "destination": "admin-web/tsconfig.node.json",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "frontend/vite.config.ts",
+      "bytes": 768,
+      "sha256": "a106355e223bb1a44484a729a28cc696b3ffa1e7a5f38343fe74c24d801e7a28",
+      "destination": "admin-web/vite.config.ts",
+      "decision": "dl runtime baseline; patient UI adapted from lfy interactions",
+      "lines": 25
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "samples/questionnaire-template.example.json",
+      "bytes": 1525,
+      "sha256": "9161e9bd432c98eb49c3d91b2abb6fcfc800dd3b756b32147109709940f8605c",
+      "destination": "samples/questionnaire-template.example.json",
+      "decision": "integrated; historical development log retained as history"
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "scripts/setup.ps1",
+      "bytes": 839,
+      "sha256": "4984fc770479b786df386bcb2eda21072635a74dfd3c5a086d15d79400579be7",
+      "destination": "scripts/setup.ps1",
+      "decision": "integrated; historical development log retained as history",
+      "lines": 18
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "scripts/start.ps1",
+      "bytes": 3149,
+      "sha256": "4ddc3292a8b315b1323c6598530e1d9ae403dc16856cff65df63af64a509b6ab",
+      "destination": "scripts/start.ps1",
+      "decision": "integrated; historical development log retained as history",
+      "lines": 61
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "scripts/stop.ps1",
+      "bytes": 570,
+      "sha256": "fded62f30ce261ce91ac0032589b79695c26728bc5c1b58d059909e2e0c701a6",
+      "destination": "scripts/stop.ps1",
+      "decision": "integrated; historical development log retained as history",
+      "lines": 15
+    },
+    {
+      "branch": "dl",
+      "commit": "dee86009a0f9eab373162cfe2897a4aee24acc00",
+      "path": "scripts/test.ps1",
+      "bytes": 447,
+      "sha256": "90538913a7f77b165d7b6ed25569e74e6d73dac4ec620332f0b0f22e25176fba",
+      "destination": "scripts/test.ps1",
+      "decision": "integrated; historical development log retained as history",
+      "lines": 9
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": ".gitignore",
+      "bytes": 213,
+      "sha256": "3057dfe9b9283ba88e36487096c22eef1c7391850bc1ee5b3ab052db587536fe",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "README.md",
+      "bytes": 1935,
+      "sha256": "1a0a8547f32bbdf720ab97ab67c39f89a74dbdb8e913977edc3c2775783358b5",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "STARTUP.md",
+      "bytes": 962,
+      "sha256": "7d953e5778b04d9ac1161bfa4c81c901b850ef7f99c4d0739b1a9055d86116c2",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "assets/gds_source_reference.png",
+      "bytes": 303727,
+      "sha256": "b0cc7133a2286107486a0a05a7df7bb9b9a5086d637ad9fde925a3c15d64cd28",
+      "destination": "docs/references/lfy/assets/gds_source_reference.png",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "assets/moca_b_template.png",
+      "bytes": 466098,
+      "sha256": "a5e97582e3e86bb39953d51158fe8dafa58e97572ddda20e5b361d50efc0a853",
+      "destination": "docs/references/lfy/assets/moca_b_template.png",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "assets/stt_form_a_reference.png",
+      "bytes": 257992,
+      "sha256": "27f84e400e8704ae735957073abbc3dbb9fe01bba33d44e5ab09e7b0ec9dbddc",
+      "destination": "docs/references/lfy/assets/stt_form_a_reference.png",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "assets/stt_form_b_practice_reference.png",
+      "bytes": 244437,
+      "sha256": "767cb2fcc19c0a29e495c405d371bf7b424ef5d337a5678cc8107977d149b59c",
+      "destination": "docs/references/lfy/assets/stt_form_b_practice_reference.png",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "assets/stt_form_b_test_reference.png",
+      "bytes": 264073,
+      "sha256": "d7ed0da578fc4e44957d8082834cbbf54319a0b6c817d98a2a556b3b903d26cc",
+      "destination": "docs/references/lfy/assets/stt_form_b_test_reference.png",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "bootstrap_references.sh",
+      "bytes": 684,
+      "sha256": "76ce3c7b4c8daf141f71b313a0934e66fdcf111b337e0292eb1bce6870a7ce97",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/INTERACTIVE_TASKS.md",
+      "bytes": 4346,
+      "sha256": "b54950d99d91982c96e53355764cf0ef9ebe5a18358332c8b4e296337370d0ba",
+      "destination": "docs/references/lfy/docs/INTERACTIVE_TASKS.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/PATIENT_SCALE_SPEC.md",
+      "bytes": 4063,
+      "sha256": "880784e929ccf5d50012076ca50f193e5b425d09b6db0e0731c6f68d47c0f9e0",
+      "destination": "docs/references/lfy/docs/PATIENT_SCALE_SPEC.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/PROJECT_SPEC.md",
+      "bytes": 2569,
+      "sha256": "41baae776585a303119a2a331bcd5e25fb7ef7586206587366c7531f9b362962",
+      "destination": "docs/references/lfy/docs/PROJECT_SPEC.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/TEMPLATE_REFERENCES.md",
+      "bytes": 2732,
+      "sha256": "0c64a16588a894546995e2a69ad5cfa1c82f7a5bfc52d9c73f49f485c7378110",
+      "destination": "docs/references/lfy/docs/TEMPLATE_REFERENCES.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/plan/前端分析.md",
+      "bytes": 29105,
+      "sha256": "978c92bd90b06cc197956ec18c60237319840301c5f5ae477312f3eb2d400454",
+      "destination": "docs/references/lfy/docs/plan/前端分析.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/plan/前端构思.md",
+      "bytes": 16905,
+      "sha256": "d63b5b8631b696ca30e9d3cb7cda2b2be719c14f20a632bc73e3ff9094dfd23a",
+      "destination": "docs/references/lfy/docs/plan/前端构思.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/01_SCD基线量表_文本版.md",
+      "bytes": 55724,
+      "sha256": "b453e4773286eb1a427e94f0c15539e39e1b623be0936804755262c1c9032775",
+      "destination": "docs/references/lfy/docs/sources/01_SCD基线量表_文本版.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/02_Boston图片材料_状态说明.md",
+      "bytes": 619,
+      "sha256": "892f0bbfd0020bcc16e4bd81a81f07ec45601e1359ae7e435ec772c18bee3637",
+      "destination": "docs/references/lfy/docs/sources/02_Boston图片材料_状态说明.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/03_MoCA模板_说明.md",
+      "bytes": 277,
+      "sha256": "bb89e1228f5520fd2a7482e02aef590f22133127acb1db567908c64ff910fbfc",
+      "destination": "docs/references/lfy/docs/sources/03_MoCA模板_说明.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/04_评分手册_文本版.md",
+      "bytes": 30675,
+      "sha256": "1b696d1b2c635b425b8042e759aaa4fa1b5a61bf325489b4b8550edec2939364",
+      "destination": "docs/references/lfy/docs/sources/04_评分手册_文本版.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/05_CDR_文本版.md",
+      "bytes": 18440,
+      "sha256": "2362850fa9f9a71302ea49f0ecc860c50cd757ca9c70919f2cb7024e99ac6764",
+      "destination": "docs/references/lfy/docs/sources/05_CDR_文本版.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/06_ADAS-Cog_实现参考.md",
+      "bytes": 741,
+      "sha256": "f4e3b69e7282162735e0a5eec4479997e58e898a9c8a67808b1bdc16515511a6",
+      "destination": "docs/references/lfy/docs/sources/06_ADAS-Cog_实现参考.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/sources/README.md",
+      "bytes": 495,
+      "sha256": "1f0fa05f8fd50a1975127bf94efb8cb95340970e6ac0ace057c56f89d9066e51",
+      "destination": "docs/references/lfy/docs/sources/README.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "docs/status/PROJECT_STATUS_2026-09-03.md",
+      "bytes": 3496,
+      "sha256": "889f2d13f40aa73fa11f4da59723b002b79e4e1bb1efb244fbbbdd237a93b8de",
+      "destination": "docs/references/lfy/docs/status/PROJECT_STATUS_2026-09-03.md",
+      "decision": "reference material retained verbatim"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "index.html",
+      "bytes": 323,
+      "sha256": "d0593f371712f81140653b7f13a76b9f2f49d209d153cf3bbc6ac71064d0dc70",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "package-lock.json",
+      "bytes": 82869,
+      "sha256": "338011815f847d0de9e510e3bcaac3d5720993741ad70ae967d3df64da68ff71",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "package.json",
+      "bytes": 553,
+      "sha256": "149ca16ecca429918a5c1ea7d51bd27855772ff1a6cb1fe53d678063f2ad198f",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/App.tsx",
+      "bytes": 1179,
+      "sha256": "7f9c8c4728890face38d8fcb6b62857c281d3a05961d181fcbe89fc4030fb26d",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 29
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/components/AppShell.tsx",
+      "bytes": 3660,
+      "sha256": "7b713b967e91c3d64232fee71be1e0e76bca13a1ddcf6e7438e0b5cedc39b497",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 86
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/components/AssessmentRenderer.tsx",
+      "bytes": 1291,
+      "sha256": "f04bdf4d9a6372cba9e993848e27808cde83bfadfa3c4b95def2beef1ea16115",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 39
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/components/QuestionRenderer.tsx",
+      "bytes": 2808,
+      "sha256": "b34be8146e7a2725d92f1f83874c2c5b9e53cb5363db4760eb0a395510073354",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 96
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/components/ui.tsx",
+      "bytes": 2484,
+      "sha256": "0f1b12ee22e15eec547134c85bed44c673edae7a79a5a481ed8a983409206f00",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 105
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/data/assessments/edinburgh-handedness.ts",
+      "bytes": 2653,
+      "sha256": "4a7ccff628368eaa2ce3961d9f0710bea27f5facbf3ddb4d56d94f9256959dc3",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "semantic comparison; dl server scoring retained",
+      "lines": 84
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/data/assessments/ess.ts",
+      "bytes": 2993,
+      "sha256": "0de6ef4a8c65a5c585b3c4f706a2789bb2afeb271be4877cc29e8fc6b7c42374",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "semantic comparison; dl server scoring retained",
+      "lines": 101
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/data/assessments/gds-15.ts",
+      "bytes": 2329,
+      "sha256": "cbc4954052e87f9744b8763f4c7ffdfa531fa2d69f8682449c02dd3f7954049b",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "semantic comparison; dl server scoring retained",
+      "lines": 61
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/data/assessments/index.ts",
+      "bytes": 962,
+      "sha256": "1c72c35dc3fbb9e4127aa33f8ad5f2eb6d7dd6b527a9d5f9cd5f0b2317766f9f",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "semantic comparison; dl server scoring retained",
+      "lines": 29
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/data/assessments/scd-q9.ts",
+      "bytes": 2520,
+      "sha256": "69f0f8720cad7da7be036bde20a700a73d1f75e0a2c71b4f60ca34045ced4a54",
+      "destination": "server/app/services/scale_catalog.py",
+      "decision": "semantic comparison; dl server scoring retained",
+      "lines": 88
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/lib/cn.ts",
+      "bytes": 117,
+      "sha256": "d170e5bcb8c7eaa794083df8ae7004553b006ceebc0f7716c072eeeef2748560",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 3
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/lib/storage.ts",
+      "bytes": 2692,
+      "sha256": "415806a27b0dfeff9dbf8af6ea94bb51440ffdaab12e418a0770fd941540a3dc",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 101
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/main.tsx",
+      "bytes": 343,
+      "sha256": "62c0f0d035f9286b70477f67d033a394f7f28dc5eecb9fbc3eb57993aa2c160d",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 13
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/AdminPage.tsx",
+      "bytes": 6584,
+      "sha256": "77430a20b6b4bbf315aab5908e2f7c191db92768cd4be89eb2459f4a2d33998e",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 173
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/AssessmentCompletePage.tsx",
+      "bytes": 2543,
+      "sha256": "d01d372dd8a13956fe05d3bd1f16c9a86188ef8778682d9ce8582036c85ec82f",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 62
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/AssessmentIntroPage.tsx",
+      "bytes": 2567,
+      "sha256": "23f74ded051e559404bd26dda81f1623fa12005cd145920c7d5ef79cb3c15b22",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 61
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/AssessmentPage.tsx",
+      "bytes": 6132,
+      "sha256": "e48dae5446864ccda51c42d0e10e140b6c8f48484df1f272dc66b83bfe4fd9fa",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 183
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/HistoryPage.tsx",
+      "bytes": 2721,
+      "sha256": "d7f27995537045fca40e8311119f15ea97341cdfb52f1d7ef6a16b3c4087c645",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 58
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/HomePage.tsx",
+      "bytes": 4385,
+      "sha256": "5cc1bbcbf736790c5dd7414e4fff69ca82a558c7761a6a3dd07d484501ef5dd3",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 99
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/pages/LoginPage.tsx",
+      "bytes": 3203,
+      "sha256": "d9085fa650e7b1d11b22c0266d75e24b95ac809978d72ed2e61f9ca60fe2c087",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 64
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/repositories/mockRepository.ts",
+      "bytes": 6086,
+      "sha256": "bed0c3fface1da2e0d9abb00b35a5ac0684f6a27fdcdcf14b582369ff22ea6f0",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 217
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/styles/globals.css",
+      "bytes": 1130,
+      "sha256": "8f56d25956d454a4a38e803945ba3a22233da484005386f86f8568511625a839",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "src/types/assessment.ts",
+      "bytes": 1741,
+      "sha256": "be01473901548374e1a7671ae0293e14e43207fa166eb5bb3e32a447ff443169",
+      "destination": "admin-web/src/views/patient/PatientPortal.vue",
+      "decision": "step navigation/history adapted; local mock identity and scoring superseded by API",
+      "lines": 87
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "tsconfig.app.json",
+      "bytes": 571,
+      "sha256": "9a69a39165a559a3dc537a34766a6d61e8eed361ae3656a314902a7eb3d3dfb8",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "tsconfig.json",
+      "bytes": 89,
+      "sha256": "57fd7d3b4e628246cd4cf793b3ce3ad6cd707a0e36192e41891005fc7e1fcee2",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git"
+    },
+    {
+      "branch": "lfy",
+      "commit": "5225ab65b9099fabd122f1ebc718de6f4f2c39ef",
+      "path": "vite.config.ts",
+      "bytes": 196,
+      "sha256": "17f7fff409cf4acde70741f4aed8b09d4d937f4189f468e4749a08f14c34d92d",
+      "destination": null,
+      "decision": "React prototype build setup superseded; original kept in Git",
+      "lines": 7
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+node_modules/
+dist/
+.env
+.runtime/
+server/__pycache__/
+server/**/__pycache__/
+server/.pytest_cache/
+server/*.db
+admin-web/node_modules/
+admin-web/dist/
+admin-web/*.tsbuildinfo
+.npm-cache/
+.DS_Store
+*.log
+*.tsbuildinfo
+.vite/
+server/data/store.json
+server/data/store.json.tmp
+
+# Local collaboration / Codex files
+00_CODEX_START.md
+README_FIRST.md
+
+# Optional local references
+.references/
+
+# Editor and OS
+.idea/
+.vscode/
+Thumbs.db
+
+.venv/
+__pycache__/
+.pytest_cache/
+*.db
+.env.local
+playwright-report/
+test-results/

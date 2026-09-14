@@ -37,7 +37,9 @@ export function ScdInterviewPage() {
     }
   }, [messages, progress, setInterview, setStatus, startedAt, status, storedMessages.length]);
 
-  useEffect(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), [messages, sending]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, sending]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
