@@ -62,6 +62,31 @@ def governance_review(schema: dict[str, Any], scoring: dict[str, Any]) -> tuple[
         if previous_max is not None and minimum <= previous_max:
             errors.append("风险阈值存在重叠")
         previous_max = maximum
+    review = scoring.get("review")
+    if review is not None:
+        if not isinstance(review, dict):
+            errors.append("人工复核规则 review 必须是对象")
+        else:
+            score_rule = review.get("score", {})
+            minimum, maximum = score_rule.get("min", 0), score_rule.get("max")
+            if maximum is not None and maximum < minimum:
+                errors.append("人工复核总分最大值不能小于最小值")
+            dimension_keys: list[str] = []
+            for dimension in review.get("dimensions", []):
+                key = str(dimension.get("key", "")).strip()
+                if not key:
+                    errors.append("人工复核维度缺少 key")
+                dimension_keys.append(key)
+                if dimension.get("max") is not None and dimension["max"] < dimension.get("min", 0):
+                    errors.append(f"人工复核维度 {key or '未命名'} 的最大值小于最小值")
+            if len(dimension_keys) != len(set(dimension_keys)):
+                errors.append("人工复核维度 key 重复")
+            allowed_levels = {"low", "medium", "high"}
+            risk_rule = review.get("risk", {})
+            if any(level not in allowed_levels for level in risk_rule.get("levels", [])):
+                errors.append("人工复核风险等级包含不支持的值")
+            if not risk_rule.get("thresholds"):
+                warnings.append("人工复核尚未配置风险阈值，系统不会自动建议风险等级")
     return list(dict.fromkeys(errors)), list(dict.fromkeys(warnings))
 
 

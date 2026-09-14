@@ -1,5 +1,6 @@
 import csv
 import io
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -10,6 +11,7 @@ from ..core.database import get_db
 from ..core.dependencies import current_user
 from ..models import Assessment, AssignmentItem, AssignmentPackage, Patient, QuestionnaireTemplate, QuestionnaireVersion, User
 from ..services.audit import audit
+from ..services.permissions import require_permission
 
 
 router = APIRouter(tags=["统计"])
@@ -37,6 +39,36 @@ def overview(user: User = Depends(current_user), db: Session = Depends(get_db)):
         "high_risk_rate": round(high_risk / assessed_patients * 100, 1) if assessed_patients else 0,
         "pending_review": db.scalar(patient_scope(select(func.count(Assessment.id)).where(Assessment.review_status == "pending"), user, Assessment.doctor_id)) or 0,
     }
+
+
+@router.get("/statistics/pending-reviews")
+def pending_reviews(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    require_permission(db, user, "can_review_results")
+    query = (
+        select(Assessment, AssignmentItem, AssignmentPackage, Patient, QuestionnaireTemplate)
+        .join(AssignmentItem, AssignmentItem.id == Assessment.assignment_item_id)
+        .join(AssignmentPackage, AssignmentPackage.id == AssignmentItem.assignment_id)
+        .join(Patient, Patient.id == Assessment.patient_id)
+        .join(QuestionnaireVersion, QuestionnaireVersion.id == AssignmentItem.questionnaire_version_id)
+        .join(QuestionnaireTemplate, QuestionnaireTemplate.id == QuestionnaireVersion.template_id)
+        .where(Assessment.review_status == "pending")
+        .order_by(Assessment.assessed_at.asc())
+    )
+    query = patient_scope(query, user, Assessment.doctor_id)
+    now = datetime.now(timezone.utc)
+    result = []
+    for assessment, item, assignment, patient, template in db.execute(query).all():
+        assessed_at = assessment.assessed_at if assessment.assessed_at.tzinfo else assessment.assessed_at.replace(tzinfo=timezone.utc)
+        result.append({
+            "assessment_id": assessment.id, "assignment_id": assignment.id, "item_id": item.id,
+            "patient_id": patient.id, "patient_code": patient.patient_code,
+            "patient_name": patient.profile.full_name if patient.profile else None,
+            "questionnaire_code": assessment.questionnaire_code,
+            "questionnaire_name": item.questionnaire_version.name or template.name,
+            "submitted_at": assessment.assessed_at,
+            "waiting_hours": max(0, round((now - assessed_at).total_seconds() / 3600, 1)),
+        })
+    return result
 
 
 @router.get("/statistics/funnel")

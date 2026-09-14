@@ -3,13 +3,18 @@ import { computed, onMounted, ref } from 'vue'
 import { api } from '../api/client'
 import StatCard from '../components/StatCard.vue'
 import ChartPanel from '../components/ChartPanel.vue'
+import { useAuthStore } from '../stores/auth'
+import { formatDateTime } from '../utils/date'
 
+const auth = useAuthStore()
 const loading = ref(true)
 const overview = ref<any>({})
 const funnel = ref<any>({ counts: {} })
 const questionnaires = ref<any[]>([])
 const risks = ref<any[]>([])
 const scoreSummary = ref<any[]>([])
+const pendingReviews = ref<any[]>([])
+const canReview = computed(() => auth.user?.role === 'admin' || auth.user?.permissions?.can_review_results)
 const riskLabels: Record<string, string> = { low: '低风险', medium: '中风险', high: '高风险', unknown: '待复核' }
 const funnelLabels: Record<string, string> = { pending: '未打开', in_progress: '填写中', submitted: '已提交', reviewed: '已复核', expired: '已过期', revoked: '已撤销' }
 const questionnaireOption = computed(() => ({
@@ -31,8 +36,9 @@ const funnelData = computed(() => Object.entries(funnel.value.counts || {}).map(
 async function load() {
   loading.value = true
   try {
-    const [a,b,c,d,e] = await Promise.all([api.get('/statistics/overview'), api.get('/statistics/funnel'), api.get('/statistics/questionnaires'), api.get('/statistics/risks'), api.get('/statistics/score-summary')])
+    const [a,b,c,d,e,f] = await Promise.all([api.get('/statistics/overview'), api.get('/statistics/funnel'), api.get('/statistics/questionnaires'), api.get('/statistics/risks'), api.get('/statistics/score-summary'), canReview.value ? api.get('/statistics/pending-reviews') : Promise.resolve({data:[]})])
     overview.value = a.data; funnel.value = b.data; questionnaires.value = c.data; risks.value = d.data; scoreSummary.value = e.data
+    pendingReviews.value = f.data
   } finally { loading.value = false }
 }
 onMounted(load)
@@ -49,7 +55,10 @@ onMounted(load)
     </div>
     <div class="funnel-strip"><b>派发流程</b><span>{{ funnelData || '暂无派发记录' }}</span><strong>完成率 {{ funnel.completion_rate || 0 }}%</strong></div>
     <div class="chart-grid"><ChartPanel title="各问卷派发与提交" :option="questionnaireOption" /><ChartPanel title="筛查风险分布" :option="riskOption" /></div>
+    <article v-if="canReview" class="panel review-workbench"><div class="panel-head"><div><h3>待复核工作台</h3><p>按提交时间排序，优先处理等待时间较长的结果</p></div><el-tag type="warning">{{pendingReviews.length}} 项待处理</el-tag></div><el-table :data="pendingReviews" empty-text="当前没有待复核结果"><el-table-column label="患者" min-width="145"><template #default="s"><b>{{s.row.patient_name || '姓名待补充'}}</b><small class="table-sub">{{s.row.patient_code}}</small></template></el-table-column><el-table-column prop="questionnaire_name" label="任务" min-width="190"/><el-table-column label="提交时间" min-width="165"><template #default="s">{{formatDateTime(s.row.submitted_at)}}</template></el-table-column><el-table-column label="等待时长" width="105"><template #default="s">{{s.row.waiting_hours < 1 ? '不足 1 小时' : `${s.row.waiting_hours} 小时`}}</template></el-table-column><el-table-column label="操作" width="100"><template #default="s"><router-link :to="`/assignments?assignment=${s.row.assignment_id}&item=${s.row.item_id}`"><el-button link type="primary">立即复核</el-button></router-link></template></el-table-column></el-table></article>
     <article class="panel analysis-panel"><div class="panel-head"><div><h3>量表结果分析</h3><p>已提交问卷的得分范围和风险数量</p></div><router-link to="/assignments"><el-button link type="primary">查看患者原始答案 →</el-button></router-link></div><el-table :data="scoreSummary" empty-text="患者提交问卷后将在此形成分析"><el-table-column prop="questionnaire_name" label="问卷" min-width="180"/><el-table-column prop="assessment_count" label="样本数" width="90"/><el-table-column prop="average_score" label="平均分" width="100"/><el-table-column label="分数范围" width="120"><template #default="scope">{{ scope.row.minimum_score ?? '—' }} ～ {{ scope.row.maximum_score ?? '—' }}</template></el-table-column><el-table-column prop="medium_risk_count" label="中风险" width="90"/><el-table-column prop="high_risk_count" label="高风险" width="90"/></el-table></article>
     <div class="notice-card"><b>医学使用提示</b><p>本系统展示的是问卷筛查和风险提示，不能替代医生面诊、完整认知评估或医学诊断。</p></div>
   </div>
 </template>
+
+<style scoped>.review-workbench{margin-top:18px}.review-workbench .panel-head p{margin:5px 0 0;color:#718299;font-size:11px}</style>

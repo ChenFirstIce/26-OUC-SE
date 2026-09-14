@@ -13,7 +13,7 @@ import pytest
 
 from app.main import app
 from app.core.database import SessionLocal, engine
-from app.models import Assessment, LlmMessage, Response
+from app.models import Assessment, AssessmentReviewEvent, LlmMessage, Response
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -159,13 +159,79 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
                 "revision": boston_detail["revision"], "metrics": {"durationMs": 900},
             })
         assert boston.status_code == 200 and "score" not in boston.text
+        trail_id = by_code["DEMO_TRAIL"]["id"]
+        trail_detail = client.get(f"/api/v1/patient-session/tasks/{trail_id}", headers=headers).json()
+        trail_nodes = {"1": (12, 18), "A": (72, 12), "2": (42, 38), "B": (86, 56), "3": (22, 78), "C": (68, 86)}
+        clicks = ["B", "1", "A", "2", "B", "3", "C"]
+        trail_events = [{"nodeId": node, "timestampMs": (index + 1) * 100,
+                         "x": trail_nodes[node][0], "y": trail_nodes[node][1]}
+                        for index, node in enumerate(clicks)]
+        trail = client.post(f"/api/v1/patient-session/tasks/{trail_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "cb-trail-submit"}, json={
+                "answers": {"events": trail_events, "sequence": ["1", "A", "2", "B", "3", "C"],
+                            "errorCount": 1, "elapsedMs": 700},
+                "revision": trail_detail["revision"], "metrics": {"durationMs": 800},
+            })
+        assert trail.status_code == 200, trail.text
         with SessionLocal() as db:
             scd_assessment = db.query(Assessment).filter_by(assignment_item_id=scd_id).one()
             boston_assessment = db.query(Assessment).filter_by(assignment_item_id=boston_id).one()
+            trail_assessment = db.query(Assessment).filter_by(assignment_item_id=trail_id).one()
             assert scd_assessment.candidate_result_json["requires_clinician_review"] is True
             assert not scd_assessment.final_result_json
             assert boston_assessment.auto_result_json["provisional_total"] == 1
+            assert trail_assessment.auto_result_json["error_count"] == 1
+            assert trail_assessment.auto_result_json["correction_count"] == 1
+            assert trail_assessment.auto_result_json["events"][0]["expected_node"] == "1"
             assert db.query(LlmMessage).count() >= 2
+
+        doctor = auth(client, "doctor1", "Doctor123!")
+        assignment_id = verified["assignment"]["id"]
+        pending = client.get("/api/v1/statistics/pending-reviews", headers=doctor)
+        assert pending.status_code == 200
+        assert {row["item_id"] for row in pending.json()} >= {scd_id, boston_id}
+        invalid = client.patch(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/review", headers=doctor, json={
+            "action": "confirm", "candidate_result": {}, "total_score": 4,
+            "dimension_scores": {}, "risk_level": "unknown", "note": "",
+        })
+        assert invalid.status_code == 422
+        invalid_max = client.patch(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/review", headers=doctor, json={
+            "action": "confirm", "candidate_result": {}, "total_score": 4,
+            "dimension_scores": {"命名": 3}, "risk_level": "low", "note": "已核对",
+        })
+        assert invalid_max.status_code == 422 and "3" in invalid_max.text
+        invalid_dimension = client.patch(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/review", headers=doctor, json={
+            "action": "confirm", "candidate_result": {}, "total_score": 1,
+            "dimension_scores": {"自定义维度": 1}, "risk_level": "low", "note": "已核对",
+        })
+        assert invalid_dimension.status_code == 422 and "不在当前问卷版本" in invalid_dimension.text
+        saved = client.patch(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/review", headers=doctor, json={
+            "action": "save", "candidate_result": {"accepted_items": 1}, "total_score": 1,
+            "dimension_scores": {"命名": 1}, "risk_level": "unknown", "note": "候选结果待确认",
+        })
+        assert saved.status_code == 200 and saved.json()["status"] == "pending"
+        confirmed = client.patch(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/review", headers=doctor, json={
+            "action": "confirm", "candidate_result": {"accepted_items": 1}, "total_score": 1,
+            "dimension_scores": {"命名": 1}, "risk_level": "low", "note": "已核对原始回答",
+        })
+        assert confirmed.status_code == 200 and confirmed.json()["status"] == "reviewed"
+        result = client.get(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/result", headers=doctor).json()
+        assert result["review_config"]["score"] == {"required": True, "min": 0, "max": 3}
+        assert result["assessment"]["final_result"]["total_score"] == 1
+        assert result["assessment"]["reviewed_by_name"] == "演示医生1"
+        assert [event["action"] for event in result["review_history"]][:2] == ["confirm", "save"]
+
+        reopened = client.post(f"/api/v1/assignments/{assignment_id}/items/{boston_id}/reopen", headers=doctor,
+                               json={"reason": "请患者重新确认答案"})
+        assert reopened.status_code == 200 and reopened.json()["item_status"] == "in_progress"
+        reopened_detail = client.get(f"/api/v1/patient-session/tasks/{boston_id}", headers=headers).json()
+        assert reopened_detail["status"] == "in_progress" and reopened_detail["revision"] == reopened.json()["revision"]
+        assert reopened_detail["answers"] == {}
+        with SessionLocal() as db:
+            assert db.query(Assessment).filter_by(assignment_item_id=boston_id).count() == 0
+            history = db.query(AssessmentReviewEvent).filter_by(assignment_item_id=boston_id).all()
+            assert [event.action for event in history] == ["save", "confirm", "reopen"]
+            assert history[-1].snapshot_json["response"]["answers"]["items"][0]["answer"] == "雨伞"
 
 
 def test_admin_can_manage_doctor_permissions_and_backend_enforces_them():

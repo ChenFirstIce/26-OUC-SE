@@ -196,7 +196,24 @@ class Assessment(Base):
     auto_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     candidate_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     final_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    review_note: Mapped[str] = mapped_column(Text, default="")
+    reviewed_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     assessed_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
+
+
+class AssessmentReviewEvent(Base):
+    """Append-only review history, including snapshots retained before reopening."""
+
+    __tablename__ = "assessment_review_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assessment_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    assignment_item_id: Mapped[int] = mapped_column(ForeignKey("assignment_items.id"), index=True)
+    reviewer_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    action: Mapped[str] = mapped_column(String(20), index=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    snapshot_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
 
 
 class LlmSession(Base):

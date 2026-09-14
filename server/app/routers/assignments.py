@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -9,11 +10,12 @@ from ..core.config import settings
 from ..core.database import get_db
 from ..core.dependencies import current_user, ensure_patient_scope
 from ..core.security import hash_password, new_access_code, new_assignment_token, token_digest
-from ..models import Assessment, AssignmentItem, AssignmentPackage, Patient, QuestionnaireVersion, User
+from ..models import Assessment, AssessmentReviewEvent, AssignmentItem, AssignmentPackage, Patient, QuestionnaireVersion, User, utcnow
 from ..services.questionnaire import all_questions
 from ..services.assignment import refresh_assignment_status
 from ..services.audit import audit
 from ..services.permissions import require_permission
+from ..services.review_rules import review_config, suggested_risk, validate_review_result
 
 
 router = APIRouter(prefix="/assignments", tags=["问卷派发"])
@@ -33,6 +35,38 @@ class AssignmentUpdateInput(BaseModel):
     note: str | None = None
     deadline: datetime | None = None
     doctor_id: int | None = None
+
+
+class ReviewInput(BaseModel):
+    action: Literal["save", "confirm"]
+    candidate_result: dict[str, Any] = Field(default_factory=dict)
+    total_score: float | None = None
+    dimension_scores: dict[str, float] = Field(default_factory=dict)
+    risk_level: Literal["low", "medium", "high", "unknown"] = "unknown"
+    note: str = Field(default="", max_length=2000)
+
+
+class ReopenInput(BaseModel):
+    reason: str = Field(min_length=2, max_length=500)
+
+
+def review_snapshot(assessment: Assessment, response=None) -> dict:
+    result = {
+        "review_status": assessment.review_status, "total_score": assessment.total_score,
+        "dimension_scores": assessment.dimension_scores or {}, "risk_level": assessment.risk_level,
+        "auto_result": assessment.auto_result_json or {}, "candidate_result": assessment.candidate_result_json or {},
+        "final_result": assessment.final_result_json or {}, "review_note": assessment.review_note,
+    }
+    if response:
+        result["response"] = {"answers": response.answers_json or {}, "submitted_at": response.submitted_at.isoformat() if response.submitted_at else None}
+    return result
+
+
+def validate_final_review(payload: ReviewInput, item: AssignmentItem) -> None:
+    if payload.action != "confirm":
+        return
+    validate_review_result(payload.total_score, payload.dimension_scores, payload.risk_level,
+                           payload.note, item.questionnaire_version.scoring_json)
 
 
 def assignment_view(assignment: AssignmentPackage, include_secret: dict | None = None) -> dict:
@@ -173,6 +207,15 @@ def get_item_result(
             "type": question.get("type"), "raw_value": raw_value, "display_value": display_value,
             "dimension": question.get("dimension"),
         })
+    events = db.scalars(select(AssessmentReviewEvent).where(
+        AssessmentReviewEvent.assignment_item_id == item.id
+    ).order_by(AssessmentReviewEvent.created_at.desc())).all()
+    reviewer_ids = {event.reviewer_id for event in events}
+    if assessment.reviewed_by_id:
+        reviewer_ids.add(assessment.reviewed_by_id)
+    reviewers = {row.id: row.display_name for row in db.scalars(
+        select(User).where(User.id.in_(reviewer_ids))
+    ).all()} if reviewer_ids else {}
     audit(db, "user", user.id, "response.view", "assignment_item", item.id)
     db.commit()
     return {
@@ -182,6 +225,8 @@ def get_item_result(
         "questionnaire_code": item.questionnaire_version.template.code,
         "questionnaire_name": item.questionnaire_version.name or item.questionnaire_version.template.name,
         "questionnaire_version": item.questionnaire_version.version,
+        "review_config": review_config(item.questionnaire_version.scoring_json),
+        "suggested_risk": suggested_risk(assessment.total_score, review_config(item.questionnaire_version.scoring_json)),
         "submitted_at": item.response.submitted_at,
         "duration_seconds": item.response.duration_seconds,
         "assessment": {
@@ -189,9 +234,92 @@ def get_item_result(
             "risk_level": assessment.risk_level, "review_status": assessment.review_status,
             "assessed_at": assessment.assessed_at, "auto_result": assessment.auto_result_json,
             "candidate_result": assessment.candidate_result_json, "final_result": assessment.final_result_json,
+            "review_note": assessment.review_note, "reviewed_by_id": assessment.reviewed_by_id,
+            "reviewed_by_name": reviewers.get(assessment.reviewed_by_id), "reviewed_at": assessment.reviewed_at,
         },
         "answers": answer_items, "raw_answers": answers if not answer_items else None,
+        "review_history": [{"id": event.id, "action": event.action, "note": event.note,
+            "reviewer_id": event.reviewer_id, "reviewer_name": reviewers.get(event.reviewer_id),
+            "snapshot": event.snapshot_json, "created_at": event.created_at} for event in events],
     }
+
+
+@router.patch("/{assignment_id}/items/{item_id}/review")
+def review_item(assignment_id: int, item_id: int, payload: ReviewInput,
+                user: User = Depends(current_user), db: Session = Depends(get_db)):
+    assignment = db.get(AssignmentPackage, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="派发任务不存在")
+    ensure_patient_scope(user, assignment.doctor_id)
+    require_permission(db, user, "can_review_results")
+    item = db.get(AssignmentItem, item_id)
+    if not item or item.assignment_id != assignment.id:
+        raise HTTPException(status_code=404, detail="问卷任务不存在")
+    assessment = db.scalar(select(Assessment).where(Assessment.assignment_item_id == item.id))
+    if not assessment or not item.response or item.response.status != "submitted":
+        raise HTTPException(status_code=409, detail="患者尚未提交该问卷")
+    if assessment.review_status == "reviewed":
+        raise HTTPException(status_code=409, detail="最终结果已经确认，请先退回后重新评估")
+    if assessment.review_status != "pending":
+        raise HTTPException(status_code=409, detail="该问卷为自动计分结果，无需人工复核")
+    validate_final_review(payload, item)
+    assessment.candidate_result_json = payload.candidate_result
+    assessment.review_note = payload.note
+    action = "save"
+    if payload.action == "confirm":
+        assessment.total_score = payload.total_score
+        assessment.dimension_scores = payload.dimension_scores
+        assessment.risk_level = payload.risk_level
+        assessment.final_result_json = {
+            "total_score": payload.total_score, "dimension_scores": payload.dimension_scores,
+            "risk_level": payload.risk_level, "note": payload.note,
+        }
+        assessment.review_status = "reviewed"
+        assessment.reviewed_by_id = user.id
+        assessment.reviewed_at = utcnow()
+        item.status = "reviewed"
+        action = "confirm"
+        refresh_assignment_status(db, assignment)
+    db.add(AssessmentReviewEvent(assessment_id=assessment.id, assignment_item_id=item.id,
+        reviewer_id=user.id, action=action, note=payload.note, snapshot_json=review_snapshot(assessment)))
+    audit(db, "user", user.id, f"assessment.review.{action}", "assessment", assessment.id)
+    db.commit()
+    return {"status": assessment.review_status, "item_status": item.status, "reviewed_at": assessment.reviewed_at}
+
+
+@router.post("/{assignment_id}/items/{item_id}/reopen")
+def reopen_item(assignment_id: int, item_id: int, payload: ReopenInput,
+                user: User = Depends(current_user), db: Session = Depends(get_db)):
+    assignment = db.get(AssignmentPackage, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="派发任务不存在")
+    ensure_patient_scope(user, assignment.doctor_id)
+    require_permission(db, user, "can_review_results")
+    item = db.get(AssignmentItem, item_id)
+    if not item or item.assignment_id != assignment.id:
+        raise HTTPException(status_code=404, detail="问卷任务不存在")
+    assessment = db.scalar(select(Assessment).where(Assessment.assignment_item_id == item.id))
+    if not assessment or not item.response or item.response.status != "submitted":
+        raise HTTPException(status_code=409, detail="只有已提交结果可以退回重做")
+    if assessment.review_status not in {"pending", "reviewed"}:
+        raise HTTPException(status_code=409, detail="自动计分结果不能通过复核流程退回")
+    db.add(AssessmentReviewEvent(assessment_id=assessment.id, assignment_item_id=item.id,
+        reviewer_id=user.id, action="reopen", note=payload.reason,
+        snapshot_json=review_snapshot(assessment, item.response)))
+    assessment_id = assessment.id
+    db.delete(assessment)
+    item.response.status = "draft"
+    item.response.answers_json = {}
+    item.response.idempotency_key = None
+    item.response.submitted_at = None
+    item.response.duration_seconds = None
+    item.response.revision += 1
+    item.response.started_at = utcnow()
+    item.status = "in_progress"
+    assignment.status = "in_progress"
+    audit(db, "user", user.id, "assessment.review.reopen", "assessment", assessment_id)
+    db.commit()
+    return {"status": "reopened", "item_status": item.status, "revision": item.response.revision}
 
 
 @router.post("/{assignment_id}/revoke")

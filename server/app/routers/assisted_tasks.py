@@ -98,19 +98,42 @@ def assisted_submit(payload: AssistedSubmitInput, item_id: int,
         auto_result = {"item_scores": scores, "provisional_total": sum(row["score"] for row in scores)}
     elif code == "DEMO_TRAIL":
         events = payload.answers.get("events")
-        if not isinstance(events, list):
+        if not isinstance(events, list) or not events:
             raise HTTPException(422, "连线任务事件格式不正确")
         expected = item.questionnaire_version.scoring_json.get("sequence", [])
-        progress = errors = 0
+        progress = errors = corrections = 0
+        previous_timestamp = -1
+        error_since_progress = False
+        normalized_events = []
         for event in events:
             node = event.get("nodeId") if isinstance(event, dict) else None
-            if progress < len(expected) and node == expected[progress]:
+            timestamp = event.get("timestampMs") if isinstance(event, dict) else None
+            if not isinstance(timestamp, (int, float)) or timestamp < previous_timestamp or timestamp < 0:
+                raise HTTPException(422, "连线任务点击时间必须按顺序记录")
+            x, y = event.get("x"), event.get("y")
+            if (x is not None or y is not None) and (not isinstance(x, (int, float)) or not isinstance(y, (int, float)) or not 0 <= x <= 100 or not 0 <= y <= 100):
+                raise HTTPException(422, "连线任务节点坐标不正确")
+            expected_node = expected[progress] if progress < len(expected) else None
+            correct = node == expected_node
+            if correct:
+                if error_since_progress:
+                    corrections += 1
+                    error_since_progress = False
                 progress += 1
             else:
                 errors += 1
+                error_since_progress = True
+            normalized_events.append({"node_id": node, "timestamp_ms": timestamp, "correct": correct,
+                                      "expected_node": expected_node, "x": x, "y": y})
+            previous_timestamp = timestamp
         if progress != len(expected):
             raise HTTPException(422, "连线任务尚未完成")
-        auto_result = {"completed": True, "error_count": errors, "sequence": expected, "duration_ms": payload.metrics.get("durationMs")}
+        duration = payload.metrics.get("durationMs")
+        if not isinstance(duration, (int, float)) or duration < previous_timestamp:
+            raise HTTPException(422, "连线任务总用时不正确")
+        auto_result = {"completed": True, "error_count": errors, "correction_count": corrections,
+                       "sequence": expected, "first_click_ms": events[0]["timestampMs"],
+                       "duration_ms": duration, "events": normalized_events}
     else:
         candidate_result = {"status": "candidate_generated", "requires_clinician_review": True}
     return acknowledgement(submit_record(db, item, payload, idempotency_key, auto_result, candidate_result))

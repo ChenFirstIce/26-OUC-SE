@@ -342,11 +342,42 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 
 B 类过程数据保存在原始答卷中，程序核验结果写入 `auto_result_json`；C 类访谈消息单独留痕，候选状态写入 `candidate_result_json`。两类任务的 `final_result_json` 初始均为空，`review_status` 为 `pending`。患者响应不返回程序分或 AI 候选结果。
 
+STT 的 `answers.events` 逐次记录 `nodeId`、`timestampMs`、`x`、`y`、`expectedNode` 和前端即时 `correct`，同时保存当前正确 `sequence`、`errorCount` 与 `elapsedMs` 以支持草稿恢复。服务端不会信任前端正确性标记，而是按锁定版本的目标顺序重新计算错误数、纠正次数、首次点击时间和标准化轨迹，并校验时间单调递增、坐标位于 0–100 百分比画布内、总用时不短于最后点击时间。
+
+### 7.6 医生复核与退回
+
+医生或具备 `can_review_results` 权限的负责医生可调用：
+
+```http
+PATCH /api/v1/assignments/{assignment_id}/items/{item_id}/review
+```
+
+`action` 为 `save` 时保存候选结果和意见但仍保持待复核；为 `confirm` 时写入最终分数、维度分、风险等级和意见，并将任务项标记为 `reviewed`：
+
+```json
+{
+  "action": "confirm",
+  "candidate_result": { "accepted_items": 3 },
+  "total_score": 3,
+  "dimension_scores": { "命名": 3 },
+  "risk_level": "low",
+  "note": "已核对原始回答和过程记录"
+}
+```
+
+退回重做使用 `POST /assignments/{assignment_id}/items/{item_id}/reopen`，请求为 `{ "reason": "请重新确认答案" }`。系统会把原答卷、程序结果、候选结果及最终结果写入只追加的复核历史，清空当前答卷后重新开放原任务并递增 revision。`GET .../result` 返回 `reviewed_by_name`、`reviewed_at`、`review_note` 和 `review_history`。所有保存、确认和退回操作均写入审计日志。
+
+`confirm` 操作要求总分为非负数、风险等级不能为 `unknown`、复核意见至少 2 个字符，维度名称及分数合法；Boston 演示任务的总分还不能超过锁定版本中的题目数。这些规则由后端强制执行，前端仅提供提前提示。
+
+人工复核规则来自锁定问卷版本的 `scoring_json.review`，支持 `score.required/min/max`、`dimensions[{key,label,min,max}]`、`risk.required/levels/thresholds` 和 `note_required`。结果详情会返回规范化后的 `review_config`；只有版本明确配置 `risk.thresholds` 时界面才给出风险建议，未配置时必须由医生综合判断，不会使用系统臆造的医学阈值。
+
 `duration_seconds` 使用 UTC 的 `submitted_at - started_at` 向上取整，正常的新答卷最少记录 1 秒。修复前已经保存为 0 的历史结果无法还原真实起点，前端显示为“历史记录未计时”。
 
 ## 8. 统计与权限
 
 统计接口均自动按医生数据范围过滤；管理员查看全局。`score-summary` 返回量表的次数、平均/最小/最大分和中高风险数。CSV 导出字段为 `patient_code, questionnaire_code, total_score, risk_level, review_status, assessed_at`。
+
+`GET /statistics/pending-reviews` 返回当前用户数据范围内 `review_status=pending` 的评估，按提交时间升序排列，并包含患者、量表、任务项、提交时间和等待小时数。接口要求 `can_review_results` 权限，用于医生首页待复核工作台。
 
 管理员权限对象字段：
 
@@ -384,5 +415,6 @@ B 类过程数据保存在原始答卷中，程序核验结果写入 `auto_resul
 | `e09911f` | `GET /patient-session/tasks/{item_id}` 首次打开即创建答卷并记录 UTC 起点；提交时计算真实 `duration_seconds`。 | 所有后端时间按 UTC 解析后转浏览器本地时间；历史 0 秒显示“历史记录未计时”。 |
 | `7b931ca` | 增加导入预览、版本差异、版本级发布/停用和预览并发校验；导入不再允许直接发布。 | 管理页面必须先预览再导入，发布和停用均需输入问卷编号确认。 |
 | `e4fcf05` | 内置目录导入与外部 JSON 导入统一要求 `preview_hashes`、`preview_versions`。 | 任一来源在未预览、内容变化或基础版本变化时均返回 `409`。 |
+| 当前工作区 | 增加医生保存候选、确认最终结果、退回重做和复核历史接口。 | 任务结果弹窗新增医生复核操作区与历史时间线。 |
 
 完整操作背景、验证和故障记录见 [来源开发记录](../docs/DEVELOPMENT_LOG.md)。

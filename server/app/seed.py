@@ -110,23 +110,32 @@ WELLBEING_SCHEMA = {
 }
 
 
+def review_rules(maximum: float | None = None, dimensions: list[dict] | None = None) -> dict:
+    return {"score": {"required": True, "min": 0, "max": maximum},
+            "dimensions": dimensions or [],
+            "risk": {"required": True, "levels": ["low", "medium", "high"], "thresholds": []},
+            "note_required": True}
+
+
 CB_DEMOS = [
     ("DEMO_SCD_INTERVIEW", "SCD 结构化访谈（DEMO）", "通过对话记录主观认知变化，回答由医生复核。",
      {"title": "SCD 结构化访谈", "administration_mode": "interview_assisted", "task_type": "scd_interview",
       "notice": "访谈内容仅用于课程演示，将由专业人员复核。", "sections": [{"key": "interview", "title": "访谈", "questions": []}]},
-     {"strategy": "manual_review"}),
+     {"strategy": "manual_review", "review": review_rules(dimensions=[{"key": "访谈结论", "label": "访谈结论", "min": 0}])}),
     ("DEMO_MOCA_OPEN", "MoCA-B 开放回答（DEMO）", "记录自然语言回答并生成待医生复核的候选分析。",
      {"title": "MoCA-B 开放回答", "administration_mode": "interview_assisted", "task_type": "moca_open_answer",
       "notice": "题目和分析均为演示内容，不构成医学诊断。", "sections": [{"key": "open", "title": "开放回答", "questions": []}]},
-     {"strategy": "manual_review"}),
+     {"strategy": "manual_review", "review": review_rules(maximum=1, dimensions=[{"key": "抽象概括", "label": "抽象概括", "min": 0, "max": 1}])}),
     ("DEMO_BOSTON", "Boston 图片命名（DEMO）", "记录逐题回答、提示使用和用时，由医生确认结果。",
      {"title": "Boston 图片命名", "administration_mode": "assisted_task", "task_type": "boston_naming",
       "notice": "图片和答案均为课程演示占位内容。", "sections": [{"key": "naming", "title": "图片命名", "questions": []}]},
-     {"strategy": "manual_review", "expected_answers": {"demo_boston_01": "雨伞", "demo_boston_02": "自行车", "demo_boston_03": "苹果"}}),
+     {"strategy": "manual_review", "expected_answers": {"demo_boston_01": "雨伞", "demo_boston_02": "自行车", "demo_boston_03": "苹果"},
+      "review": review_rules(maximum=3, dimensions=[{"key": "命名", "label": "命名", "min": 0, "max": 3}])}),
     ("DEMO_TRAIL", "STT 形状连线（DEMO）", "记录点击顺序、时间戳、错误次数和完成用时。",
      {"title": "STT 形状连线", "administration_mode": "assisted_task", "task_type": "trail_making",
       "notice": "连线任务为课程演示，不替代正式施测。", "sections": [{"key": "trail", "title": "形状连线", "questions": []}]},
-     {"strategy": "manual_review", "sequence": ["1", "A", "2", "B", "3", "C"]}),
+     {"strategy": "manual_review", "sequence": ["1", "A", "2", "B", "3", "C"],
+      "review": review_rules(dimensions=[{"key": "执行控制", "label": "执行控制", "min": 0}])}),
 ]
 
 
@@ -145,6 +154,15 @@ def ensure_cb_demos(db: Session, admin: User, assignment: AssignmentPackage | No
             db.flush()
         else:
             version = next((row for row in template.versions if row.status == "published"), template.versions[-1])
+            if "review" not in (version.scoring_json or {}):
+                version.scoring_json = {**(version.scoring_json or {}), "review": scoring["review"]}
+            if code == "DEMO_BOSTON" and "items" in (version.schema_json or {}):
+                restored_schema = dict(version.schema_json)
+                restored_schema.pop("items", None)
+                restored_scoring = dict(version.scoring_json or {})
+                restored_scoring.pop("accepted_answers", None)
+                restored_scoring["expected_answers"] = scoring["expected_answers"]
+                version.schema_json, version.scoring_json = restored_schema, restored_scoring
         versions.append(version)
     if assignment:
         existing = {item.questionnaire_version_id for item in assignment.items}
