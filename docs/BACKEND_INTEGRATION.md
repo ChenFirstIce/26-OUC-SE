@@ -2,7 +2,9 @@
 
 本分支从 main 建立，正式代码取自固定版本 dl，来源及取舍见 [功能覆盖报告](integration/coverage.md)。下文的 yjj/dl 整合记录描述来源历史。
 
-正式后端位于 `server/`，Vue 工程位于 `admin-web/`（包含医生与患者路由）。患者逐题导航、进度和当前任务包已完成记录从 lfy 原型交互适配；所有正式身份、草稿和计分由同一 FastAPI 管理。`patient-web/c2b/Frontend/` 保留 main 的四项 Mock 演示，5174 独立运行。API 文档位于 `contracts/API.md`，启动与目录以根 README 和 STARTUP 为准。
+正式后端位于 `server/`，Vue 工程位于 `admin-web/`（包含医生与患者路由）。患者逐题导航、进度和当前任务包已完成记录从 lfy 原型交互适配；所有正式身份、草稿和计分由同一 FastAPI 管理。main 的四项 C/B 原型已改写为 Vue 专用任务并接入正式派发、患者会话、过程数据和医生结果页；`patient-web/c2b/Frontend/` 仅保留来源参考。API 文档位于 `contracts/API.md`，启动与目录以根 README 和 STARTUP 为准。
+
+本次 C/B 接入的更新前后对比、数据结构、验证结果与剩余限制见 [2026-09-14 C/B 辅助任务患者系统整合记录](integration/2026-09-14-cb-patient-integration.md)。
 
 ---
 

@@ -12,8 +12,4 @@ Write-Host '[2/2] 前端类型检查与生产构建' -ForegroundColor Cyan
 $ErrorActionPreference = 'Continue'
 npm run build --prefix (Join-Path $ProjectRoot 'admin-web')
 if ($LASTEXITCODE -ne 0) { throw 'Admin build failed' }
-foreach ($Check in @('typecheck', 'test', 'build')) {
-    npm run $Check --prefix (Join-Path $ProjectRoot 'patient-web\c2b\Frontend')
-    if ($LASTEXITCODE -ne 0) { throw "Demo $Check failed" }
-}
 Write-Host '全部检查通过。' -ForegroundColor Green

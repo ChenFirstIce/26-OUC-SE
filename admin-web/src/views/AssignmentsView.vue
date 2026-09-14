@@ -109,6 +109,12 @@ onMounted(load)
           <div v-if="Object.keys(result.assessment.dimension_scores || {}).length" class="dimension-row"><b>维度得分</b><el-tag v-for="(score,name) in result.assessment.dimension_scores" :key="name">{{name}}：{{score}}</el-tag></div>
           <h3 class="answer-heading">逐题答案</h3>
           <div class="answer-list"><div v-for="(answer,index) in result.answers" :key="answer.question_key" class="answer-row"><span class="answer-index">{{index + 1}}</span><div><b>{{answer.label}}</b><p>{{answer.display_value}}</p></div></div></div>
+          <template v-if="result.raw_answers">
+            <h3 class="answer-heading">C/B 原始过程数据</h3>
+            <pre class="raw-result">{{ JSON.stringify(result.raw_answers, null, 2) }}</pre>
+            <div v-if="Object.keys(result.assessment.auto_result || {}).length" class="dimension-row"><b>程序核验结果</b><span>{{ JSON.stringify(result.assessment.auto_result) }}</span></div>
+            <div v-if="Object.keys(result.assessment.candidate_result || {}).length" class="dimension-row"><b>AI 候选状态</b><span>已生成候选结果，等待医生复核；不会自动写入最终评分。</span></div>
+          </template>
           <div class="notice-card"><b>结果说明</b><p>问卷筛查结果不等同于医学诊断，需由医生结合临床资料综合判断。</p></div>
         </template>
       </div>
@@ -125,3 +131,5 @@ onMounted(load)
     </el-dialog>
   </div>
 </template>
+
+<style scoped>.raw-result{max-height:300px;padding:14px;overflow:auto;color:#29453d;background:#f3f6f4;border-radius:10px;font-size:12px;white-space:pre-wrap}</style>

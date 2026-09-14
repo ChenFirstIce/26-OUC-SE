@@ -3,9 +3,8 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $RuntimeDir = Join-Path $ProjectRoot '.runtime'
 $BackendDir = Join-Path $ProjectRoot 'server'
 $FrontendDir = Join-Path $ProjectRoot 'admin-web'
-$DemoDir = Join-Path $ProjectRoot 'patient-web\c2b\Frontend'
 $Python = Join-Path $ProjectRoot '.venv\Scripts\python.exe'
-foreach ($Required in @($Python, (Join-Path $FrontendDir 'node_modules\vite\bin\vite.js'), (Join-Path $DemoDir 'node_modules\vite\bin\vite.js'))) {
+foreach ($Required in @($Python, (Join-Path $FrontendDir 'node_modules\vite\bin\vite.js'))) {
     if (-not (Test-Path -LiteralPath $Required)) { throw 'Run scripts/setup.ps1 first.' }
 }
 New-Item -ItemType Directory -Force -Path $RuntimeDir | Out-Null
@@ -17,7 +16,6 @@ function Assert-PortFree([int]$Port) {
 
 Assert-PortFree 8000
 Assert-PortFree 5173
-Assert-PortFree 5174
 
 $LanAddress = [System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |
     Where-Object {
@@ -37,11 +35,7 @@ $ViteScript = Join-Path $FrontendDir 'node_modules\vite\bin\vite.js'
 $Frontend = Start-Process -FilePath node -ArgumentList ('"' + $ViteScript + '"'),'--host','0.0.0.0','--port','5173' -WorkingDirectory $FrontendDir -WindowStyle Hidden `
     -RedirectStandardOutput (Join-Path $RuntimeDir 'frontend.log') -RedirectStandardError (Join-Path $RuntimeDir 'frontend-error.log') -PassThru
 
-$DemoScript = Join-Path $DemoDir 'node_modules\vite\bin\vite.js'
-$Demo = Start-Process -FilePath node -ArgumentList ('"' + $DemoScript + '"'),'--host','0.0.0.0','--port','5174' -WorkingDirectory $DemoDir -WindowStyle Hidden `
-    -RedirectStandardOutput (Join-Path $RuntimeDir 'demo.log') -RedirectStandardError (Join-Path $RuntimeDir 'demo-error.log') -PassThru
 $env:FRONTEND_ORIGIN = $PreviousOrigin
-Set-Content -LiteralPath (Join-Path $RuntimeDir 'demo.pid') -Value $Demo.Id
 Set-Content -LiteralPath (Join-Path $RuntimeDir 'backend.pid') -Value $Backend.Id
 Set-Content -LiteralPath (Join-Path $RuntimeDir 'frontend.pid') -Value $Frontend.Id
 
@@ -51,8 +45,7 @@ for ($Attempt = 1; $Attempt -le 20; $Attempt++) {
     try {
         $Health = Invoke-RestMethod 'http://127.0.0.1:8000/health' -TimeoutSec 2
         $Front = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:5173/' -TimeoutSec 2
-        $DemoFront = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:5174/' -TimeoutSec 2
-        if ($Health.status -eq 'ok' -and $Front.StatusCode -eq 200 -and $DemoFront.StatusCode -eq 200) { $Ready = $true; break }
+        if ($Health.status -eq 'ok' -and $Front.StatusCode -eq 200) { $Ready = $true; break }
     } catch { }
 }
 if (-not $Ready) {
@@ -65,7 +58,7 @@ Write-Host '系统启动成功：' -ForegroundColor Green
 Write-Host '医生/管理端: http://127.0.0.1:5173/login'
 Write-Host "患者手机端: http://${LanAddress}:5173/p/fill/demo-patient-token"
 Write-Host 'Swagger:     http://127.0.0.1:8000/docs'
-Write-Host 'C/B Demo:    http://127.0.0.1:5174/'
+Write-Host 'C/B 任务已整合到上述患者手机端。'
 Write-Host '医生账号: doctor1 / Doctor123!'
 Write-Host '管理员:   admin / Admin123!'
 Write-Host '患者访问码: 123456'

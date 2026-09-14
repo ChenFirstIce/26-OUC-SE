@@ -5,14 +5,12 @@
 | 检查 | 结果 | 证据/入口 |
 | --- | --- | --- |
 | 全分支文件清点 | 329 个来源文件，固定 SHA 与内容哈希 | `scripts/audit_branches.py`、`inventory.json` |
-| 后端回归与新增边界 | **21 passed** | `server/tests/test_flow.py`、`test_integration.py` |
+| 后端回归与新增边界 | **22 passed** | `server/tests/test_flow.py`、`test_integration.py`，含 C/B 正式会话与结果分层 |
 | Vue 类型检查与生产构建 | **通过** | `npm run build --prefix admin-web` |
-| C/B 类型检查 | **通过** | `npm run typecheck --prefix patient-web/c2b/Frontend` |
-| C/B 单元测试 | **3 passed**，2 个测试文件 | `npm run test --prefix patient-web/c2b/Frontend` |
-| C/B 生产构建 | **通过** | `npm run build --prefix patient-web/c2b/Frontend` |
+| C/B 正式患者端构建 | **通过** | 四项任务已迁入 `admin-web`，随统一 Vue 生产构建验证 |
 | 完整检查脚本 | **退出码 0** | `scripts/test.ps1`，输出“全部检查通过” |
 | Chromium 浏览器检查 | **5 passed** | `admin-web/tests/integration.spec.ts` |
-| 启动与停止 | **通过** | 三端健康检查成功；停止后 8000/5173/5174 无监听，PID 文件清理完成 |
+| 启动与停止 | **待本轮浏览器复验** | 启动脚本已收敛为 8000/5173；不再依赖 5174 独立演示服务 |
 | 原工作区保护 | **未改变** | main 的 README/签到表修改和临时签到文件删除状态与整合前一致 |
 
 ## 后端覆盖场景
@@ -27,7 +25,7 @@
 2. 同一浏览器切换另一条评估链接：清除旧患者会话并要求新访问码。
 3. 回答后立即返回列表：保存完成后再离开，再打开可恢复最后一次回答。
 4. 1440px 桌面视口：医生登录以及患者、派发、问卷、统计页面无页面运行异常。
-5. 四个 C/B 演示路由均可打开、无页面运行异常，并检查移动视口横向溢出。
+5. 浏览器用例已改为从正式患者任务包打开四项 C/B 任务并检查移动视口横向溢出；本轮尚未启动服务执行该用例。
 
 已人工查看自动化生成的 [手机答题截图](screenshots/patient-mobile.png) 与 [医生桌面截图](screenshots/doctor-desktop.png)。
 
@@ -41,6 +39,6 @@
 
 ## 验证限制
 
-有一条 Starlette/AnyIO 弃用提示，以及 C/B 构建中的 Zod 注释标记提示，未影响测试或构建。没有进行压力测试、真实手机跨网络测试、生产部署或医学有效性认证。正式量表与演示模块的剩余功能缺口详见 [coverage.md](coverage.md)。
+有一条 Starlette/AnyIO 弃用提示，未影响测试。没有进行压力测试、真实手机跨网络测试、生产部署、真实 LLM 接入或医学有效性认证。正式量表与演示模块的剩余功能缺口详见 [coverage.md](coverage.md)。
 
 浏览器测试添加的是本工作区隔离数据库内的虚拟测试患者和任务；没有操作其他分支数据库。验证完成后已停止三项服务，用户可按根目录 STARTUP.md 重新启动。

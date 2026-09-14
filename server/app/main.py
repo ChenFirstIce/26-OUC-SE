@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from . import models
 from .core.config import settings
 from .core.database import Base, SessionLocal, engine
-from .routers import admin, assignments, auth, patient_session, patients, questionnaires, statistics
+from .routers import admin, assignments, assisted_tasks, auth, patient_session, patients, questionnaires, statistics
 from .seed import seed_database
 
 
@@ -77,5 +77,5 @@ def health():
     return {"status": "ok", "service": settings.app_name}
 
 
-for router in [auth.router, patients.router, questionnaires.router, assignments.router, patient_session.router, statistics.router, admin.router]:
+for router in [auth.router, patients.router, questionnaires.router, assignments.router, patient_session.router, assisted_tasks.router, statistics.router, admin.router]:
     app.include_router(router, prefix=settings.api_prefix)

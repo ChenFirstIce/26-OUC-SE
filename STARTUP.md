@@ -8,7 +8,7 @@
 .\scripts\setup.ps1
 ```
 
-脚本创建项目专用 `.venv`，安装 `server/requirements.txt`，并在 Vue 与 C/B 演示目录运行 `npm ci`。不会安装到全局 Python。若 PowerShell 执行策略阻止脚本，可对单次调用使用 `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`。
+脚本创建项目专用 `.venv`，安装 `server/requirements.txt`，并在统一 Vue 工程 `admin-web` 运行 `npm ci`。不会安装到全局 Python。若 PowerShell 执行策略阻止脚本，可对单次调用使用 `powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`。
 
 ## 启动/停止
 
@@ -17,13 +17,13 @@
 .\scripts\stop.ps1
 ```
 
-启动前检查 8000、5173、5174 三个端口；后台窗口隐藏，日志和 PID 写入 `.runtime/`。三项服务健康检查通过后报告启动成功，失败时清理本次服务。
+启动前检查 8000、5173 两个端口；后台窗口隐藏，日志和 PID 写入 `.runtime/`。两项服务健康检查通过后报告启动成功，失败时清理本次服务。
 
 | 服务 | 地址 | 代码目录 |
 | --- | --- | --- |
 | 医生与管理员 | http://127.0.0.1:5173/login | admin-web |
 | 正式患者入口 | http://127.0.0.1:5173/p/fill/demo-patient-token | admin-web |
-| 独立 C/B Mock 演示 | http://127.0.0.1:5174/ | patient-web/c2b/Frontend |
+| C/B 辅助任务 | 正式患者入口内 | admin-web + server |
 | API / Swagger | http://127.0.0.1:8000/docs | server |
 
 演示医生 `doctor1 / Doctor123!`，管理员 `admin / Admin123!`，演示患者访问码 `123456`。真实新派发任务使用返回的链接及对应 6 位码。
@@ -66,6 +66,6 @@ npm run test:e2e
 Pop-Location
 ```
 
-后端测试、Vue 构建、C/B 类型检查/测试/构建通过才算脚本成功。浏览器测试覆盖手机填写/草稿恢复/历史、切换链接验证、离开保存、医生主要页面和四项 C/B 入口。截图保存在 `admin-web/test-results/`，不提交运行数据或构建产物。
+后端测试和统一 Vue 工程构建通过才算脚本成功。浏览器测试覆盖手机填写/草稿恢复/历史、切换链接验证、离开保存、医生主要页面和正式患者入口内的四项 C/B 任务。截图保存在 `admin-web/test-results/`，不提交运行数据或构建产物。
 
 出现问题先查看 `.runtime/backend-error.log`、`frontend-error.log` 和 `demo-error.log`。端口被其他程序占用时不会强制结束其他程序。

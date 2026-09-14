@@ -19,7 +19,7 @@ async function enter(page: Page, task: any) {
   await page.goto(`/p/fill/${task.token}`)
   await page.getByPlaceholder('6 位访问码').fill(task.access_code)
   await page.getByRole('button', { name: '验证并进入' }).click()
-  await expect(page.getByRole('button', { name: '开始填写', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: '开始填写', exact: true }).first()).toBeVisible()
 }
 
 test('手机逐题填写、草稿恢复、历史记录与医生报告', async ({ page, request }, info) => {
@@ -85,13 +85,24 @@ test('医生桌面端主要页面可访问', async ({ page }, info) => {
   expect(errors).toEqual([])
 })
 
-test('四项 C/B 演示入口无页面运行错误', async ({ page }) => {
+test('四项 C/B 任务从正式患者入口打开', async ({ page, request }) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
-  for (const name of ['scd-interview', 'moca-open-answer', 'boston-naming', 'trail-making']) {
-    await page.goto(`http://127.0.0.1:5174/demo/${name}`)
-    await expect(page.locator('h1')).toBeVisible()
+  const login = await request.post('/api/v1/auth/login', { data: { username:'doctor1', password:'Doctor123!' } })
+  const headers = { Authorization:`Bearer ${(await login.json()).access_token}` }
+  const patient = await request.post('/api/v1/patients', { headers, data:{ patient_code:`CB${Date.now()}`, full_name:'C/B 浏览器测试患者' } })
+  const templates = await (await request.get('/api/v1/questionnaires', { headers })).json()
+  const codes = ['DEMO_SCD_INTERVIEW','DEMO_MOCA_OPEN','DEMO_BOSTON','DEMO_TRAIL']
+  const assigned = await request.post('/api/v1/assignments', { headers, data:{ patient_id:(await patient.json()).id,
+    questionnaire_version_ids:codes.map(code => templates.find((item:any) => item.code === code).latest_version_id), title:'C/B 正式入口测试' } })
+  const task = await assigned.json()
+  await enter(page, task)
+  for (const name of ['SCD 结构化访谈（DEMO）','MoCA-B 开放回答（DEMO）','Boston 图片命名（DEMO）','STT 形状连线（DEMO）']) {
+    const card = page.locator('.patient-task').filter({ hasText:name })
+    await card.getByRole('button', { name:'开始填写' }).click()
+    await expect(page.getByRole('heading', { name })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
+    await page.getByRole('button', { name:'返回任务列表', exact:false }).click()
   }
   expect(errors).toEqual([])
 })

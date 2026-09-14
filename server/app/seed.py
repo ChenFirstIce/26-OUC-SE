@@ -110,6 +110,49 @@ WELLBEING_SCHEMA = {
 }
 
 
+CB_DEMOS = [
+    ("DEMO_SCD_INTERVIEW", "SCD 结构化访谈（DEMO）", "通过对话记录主观认知变化，回答由医生复核。",
+     {"title": "SCD 结构化访谈", "administration_mode": "interview_assisted", "task_type": "scd_interview",
+      "notice": "访谈内容仅用于课程演示，将由专业人员复核。", "sections": [{"key": "interview", "title": "访谈", "questions": []}]},
+     {"strategy": "manual_review"}),
+    ("DEMO_MOCA_OPEN", "MoCA-B 开放回答（DEMO）", "记录自然语言回答并生成待医生复核的候选分析。",
+     {"title": "MoCA-B 开放回答", "administration_mode": "interview_assisted", "task_type": "moca_open_answer",
+      "notice": "题目和分析均为演示内容，不构成医学诊断。", "sections": [{"key": "open", "title": "开放回答", "questions": []}]},
+     {"strategy": "manual_review"}),
+    ("DEMO_BOSTON", "Boston 图片命名（DEMO）", "记录逐题回答、提示使用和用时，由医生确认结果。",
+     {"title": "Boston 图片命名", "administration_mode": "assisted_task", "task_type": "boston_naming",
+      "notice": "图片和答案均为课程演示占位内容。", "sections": [{"key": "naming", "title": "图片命名", "questions": []}]},
+     {"strategy": "manual_review", "expected_answers": {"demo_boston_01": "雨伞", "demo_boston_02": "自行车", "demo_boston_03": "苹果"}}),
+    ("DEMO_TRAIL", "STT 形状连线（DEMO）", "记录点击顺序、时间戳、错误次数和完成用时。",
+     {"title": "STT 形状连线", "administration_mode": "assisted_task", "task_type": "trail_making",
+      "notice": "连线任务为课程演示，不替代正式施测。", "sections": [{"key": "trail", "title": "形状连线", "questions": []}]},
+     {"strategy": "manual_review", "sequence": ["1", "A", "2", "B", "3", "C"]}),
+]
+
+
+def ensure_cb_demos(db: Session, admin: User, assignment: AssignmentPackage | None = None) -> None:
+    versions = []
+    for code, name, description, schema, scoring in CB_DEMOS:
+        template = db.scalar(select(QuestionnaireTemplate).where(QuestionnaireTemplate.code == code))
+        if template is None:
+            template = QuestionnaireTemplate(code=code, name=name, description=description, status="published", created_by_id=admin.id)
+            db.add(template)
+            db.flush()
+            version = QuestionnaireVersion(template_id=template.id, version=1, name=name, description=description,
+                schema_json=schema, scoring_json=scoring, status="published", created_by_id=admin.id,
+                published_at=datetime.now(timezone.utc), published_by_id=admin.id)
+            db.add(version)
+            db.flush()
+        else:
+            version = next((row for row in template.versions if row.status == "published"), template.versions[-1])
+        versions.append(version)
+    if assignment:
+        existing = {item.questionnaire_version_id for item in assignment.items}
+        for version in versions:
+            if version.id not in existing:
+                db.add(AssignmentItem(assignment_id=assignment.id, questionnaire_version_id=version.id))
+
+
 def seed_database(db: Session) -> None:
     if db.scalar(select(User.id).limit(1)):
         for user in db.scalars(select(User)).all():
@@ -117,6 +160,10 @@ def seed_database(db: Session) -> None:
                 db.add(UserPermission(user_id=user.id, can_manage_templates=user.role == "admin"))
         ensure_demo_patient_profiles(db)
         demo_patient = db.scalar(select(Patient).where(Patient.patient_code == "P0001"))
+        admin = db.scalar(select(User).where(User.role == "admin"))
+        demo_assignment = db.scalar(select(AssignmentPackage).where(AssignmentPackage.token_hash == token_digest(DEMO_TOKEN)))
+        if admin:
+            ensure_cb_demos(db, admin, demo_assignment)
         if demo_patient and not db.scalar(select(ClinicalRecord.id).where(ClinicalRecord.patient_id == demo_patient.id).limit(1)):
             now = datetime.now(timezone.utc)
             db.add_all([
@@ -189,6 +236,7 @@ def seed_database(db: Session) -> None:
     )
     db.add(demo_assignment)
     db.flush()
+    ensure_cb_demos(db, admin, demo_assignment)
     for _, version in templates:
         db.add(AssignmentItem(assignment_id=demo_assignment.id, questionnaire_version_id=version.id))
     db.add_all([

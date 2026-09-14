@@ -193,7 +193,30 @@ class Assessment(Base):
     dimension_scores: Mapped[dict[str, float]] = mapped_column(JSON, default=dict)
     risk_level: Mapped[str] = mapped_column(String(20), default="unknown", index=True)
     review_status: Mapped[str] = mapped_column(String(20), default="auto", index=True)
+    auto_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    candidate_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    final_result_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     assessed_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, index=True)
+
+
+class LlmSession(Base):
+    __tablename__ = "llm_sessions"
+    __table_args__ = (UniqueConstraint("assignment_item_id", "external_session_id", name="uq_llm_item_session"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assignment_item_id: Mapped[int] = mapped_column(ForeignKey("assignment_items.id"), index=True)
+    external_session_id: Mapped[str] = mapped_column(String(100))
+    progress: Mapped[int] = mapped_column(Integer, default=15)
+    completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class LlmMessage(Base):
+    __tablename__ = "llm_messages"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    session_id: Mapped[int] = mapped_column(ForeignKey("llm_sessions.id"), index=True)
+    role: Mapped[str] = mapped_column(String(16))
+    content: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
 
 
 class ClinicalRecord(Base):

@@ -1,6 +1,6 @@
 # cyb 接入补充
 
-本文件对应 `server/app/routers/`，API 前缀保持 `/api/v1`。Vue 医生端和患者端均在 `admin-web`，C/B 演示位于 `patient-web/c2b/Frontend`，不调用本正式契约中的计分接口。
+本文件对应 `server/app/routers/`，API 前缀保持 `/api/v1`。Vue 医生端和患者端均在 `admin-web`；四项 C/B 任务已接入正式患者会话、数据库和医生结果查看流程，原 React 工程仅保留为来源参考。
 
 `GET /api/v1/patient-session/tasks` 的 `items[]` 新增可空字段：
 
@@ -74,6 +74,8 @@
 | 患者 | GET | `/api/v1/patient-session/tasks/{item_id}` | 问卷 schema、草稿和 revision |
 | 患者 | PUT | `/api/v1/patient-session/tasks/{item_id}/draft` | 全量保存草稿 |
 | 患者 | POST | `/api/v1/patient-session/tasks/{item_id}/submit` | 幂等正式提交并计分 |
+| 患者 | POST | `/api/v1/patient-session/tasks/{item_id}/assisted-submit` | 幂等提交 C/B 过程数据并进入医生复核 |
+| 患者 | POST | `/api/v1/patient-session/tasks/{item_id}/llm/sessions/{session_id}/messages` | 保存 C 类访谈消息并获取 Mock 追问 |
 | 职员 | GET | `/api/v1/statistics/overview` | 总览指标 |
 | 职员 | GET | `/api/v1/statistics/funnel` | 任务状态漏斗 |
 | 职员 | GET | `/api/v1/statistics/questionnaires` | 各问卷完成率 |
@@ -333,6 +335,12 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 ```
 
 相同 `Idempotency-Key` 重试返回首次结果，不创建重复评估；不同键重复提交返回 `409`。前端不得上传或覆盖分数，正式结果只由后端根据任务锁定版本生成。
+
+### 7.5 C/B 辅助任务
+
+四项已发布 DEMO 编码为 `DEMO_SCD_INTERVIEW`、`DEMO_MOCA_OPEN`、`DEMO_BOSTON`、`DEMO_TRAIL`，分别使用 `interview_assisted` 或 `assisted_task` 管理模式。患者仍通过同一任务详情与草稿接口恢复状态，最终调用 `assisted-submit`，请求包含 `answers`、`revision` 和 `metrics`。
+
+B 类过程数据保存在原始答卷中，程序核验结果写入 `auto_result_json`；C 类访谈消息单独留痕，候选状态写入 `candidate_result_json`。两类任务的 `final_result_json` 初始均为空，`review_status` 为 `pending`。患者响应不返回程序分或 AI 候选结果。
 
 `duration_seconds` 使用 UTC 的 `submitted_at - started_at` 向上取整，正常的新答卷最少记录 1 秒。修复前已经保存为 0 的历史结果无法还原真实起点，前端显示为“历史记录未计时”。
 

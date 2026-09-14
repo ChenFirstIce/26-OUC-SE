@@ -44,7 +44,7 @@ def governance_review(schema: dict[str, Any], scoring: dict[str, Any]) -> tuple[
             errors.append(f"题目 {key} 的显示条件引用了不存在的题目")
 
     mode = schema.get("administration_mode")
-    if mode not in {"patient_self", "informant", "clinician"}:
+    if mode not in {"patient_self", "informant", "clinician", "assisted_task", "interview_assisted"}:
         warnings.append("未明确填写/施测方式")
     if not schema.get("source"):
         warnings.append("未记录量表来源与授权审核说明")

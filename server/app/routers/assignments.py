@@ -80,6 +80,8 @@ def create_assignment(payload: AssignmentInput, user: User = Depends(current_use
         raise HTTPException(status_code=422, detail="包含无效问卷版本")
     if any(v.status != "published" or not v.published_at for v in versions):
         raise HTTPException(status_code=422, detail="只能派发已发布问卷")
+    if any(v.schema_json.get("administration_mode") == "clinician" for v in versions):
+        raise HTTPException(status_code=422, detail="纯医生录入量表不能派发到患者端")
     raw_token = new_assignment_token()
     access_code = new_access_code()
     doctor_id = payload.doctor_id if user.role == "admin" and payload.doctor_id else patient.assigned_doctor_id
@@ -185,9 +187,10 @@ def get_item_result(
         "assessment": {
             "total_score": assessment.total_score, "dimension_scores": assessment.dimension_scores,
             "risk_level": assessment.risk_level, "review_status": assessment.review_status,
-            "assessed_at": assessment.assessed_at,
+            "assessed_at": assessment.assessed_at, "auto_result": assessment.auto_result_json,
+            "candidate_result": assessment.candidate_result_json, "final_result": assessment.final_result_json,
         },
-        "answers": answer_items,
+        "answers": answer_items, "raw_answers": answers if not answer_items else None,
     }
 
 

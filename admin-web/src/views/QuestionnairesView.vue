@@ -30,7 +30,7 @@ const publishForm = ref({ confirmation_code:'', change_summary:'', acknowledge_w
 const retireDialog = ref(false)
 const retireTarget = ref<any>()
 const retireForm = ref({ confirmation_code:'', reason:'' })
-const modeLabels: any = { patient_self:'患者自评', informant:'知情者填写', clinician:'医生施测' }
+const modeLabels: any = { patient_self:'患者自评', informant:'知情者填写', clinician:'医生施测', assisted_task:'程序辅助任务', interview_assisted:'AI 辅助访谈' }
 const statusLabels: any = { draft:'草稿待审核', published:'当前可派发', retired:'已停用' }
 const statusTypes: any = { draft:'warning', published:'success', retired:'info' }
 

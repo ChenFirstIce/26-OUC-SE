@@ -8,7 +8,7 @@ const schema = computed(() => props.questionnaire?.schema_json || {})
 const sections = computed(() => schema.value.sections || [])
 const scoring = computed(() => props.questionnaire?.scoring_json || {})
 const questionCount = computed(() => sections.value.reduce((total: number, section: any) => total + (section.questions?.length || 0), 0))
-const modeLabels: Record<string, string> = { patient_self:'患者自评', informant:'知情者填写', clinician:'医生施测' }
+const modeLabels: Record<string, string> = { patient_self:'患者自评', informant:'知情者填写', clinician:'医生施测', assisted_task:'程序辅助任务', interview_assisted:'AI 辅助访谈' }
 const typeLabels: Record<string, string> = {
   single_choice:'单选题', multi_choice:'多选题', yes_no:'是非题', scale:'量表选择',
   number:'数字录入', integer:'整数录入', duration:'时长录入', short_text:'短文本',

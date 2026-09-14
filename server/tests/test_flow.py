@@ -13,7 +13,7 @@ import pytest
 
 from app.main import app
 from app.core.database import SessionLocal, engine
-from app.models import Response
+from app.models import Assessment, LlmMessage, Response
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -125,7 +125,47 @@ def test_demo_patient_link_is_available():
         headers = {"Authorization": f"Bearer {verified.json()['access_token']}"}
         tasks = client.get("/api/v1/patient-session/tasks", headers=headers)
         assert tasks.status_code == 200
-        assert len(tasks.json()["items"]) == 2
+        assert len(tasks.json()["items"]) == 6
+
+
+def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
+    with TestClient(app) as client:
+        verified = client.post("/api/v1/patient-session/verify", json={
+            "token": "demo-patient-token", "access_code": "123456",
+        }).json()
+        headers = {"Authorization": f"Bearer {verified['access_token']}"}
+        tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
+        by_code = {item["code"]: item for item in tasks}
+        assert {"DEMO_SCD_INTERVIEW", "DEMO_MOCA_OPEN", "DEMO_BOSTON", "DEMO_TRAIL"} <= set(by_code)
+
+        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
+        detail = client.get(f"/api/v1/patient-session/tasks/{scd_id}", headers=headers).json()
+        message = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/test-session/messages",
+                              headers=headers, json={"message": "最近半年开始有变化。"})
+        assert message.status_code == 200 and message.json()["progress"] == .4
+        draft = client.put(f"/api/v1/patient-session/tasks/{scd_id}/draft", headers=headers,
+                           json={"answers": {"messages": [{"role": "user", "content": "最近半年"}]}, "revision": detail["revision"]})
+        submitted = client.post(f"/api/v1/patient-session/tasks/{scd_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "cb-scd-submit"},
+            json={"answers": {"messages": []}, "revision": draft.json()["revision"], "metrics": {"durationMs": 1000}})
+        assert submitted.status_code == 200
+        assert "candidate" not in submitted.text and "score" not in submitted.text
+
+        boston_id = by_code["DEMO_BOSTON"]["id"]
+        boston_detail = client.get(f"/api/v1/patient-session/tasks/{boston_id}", headers=headers).json()
+        boston = client.post(f"/api/v1/patient-session/tasks/{boston_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "cb-boston-submit"}, json={
+                "answers": {"items": [{"questionId": "demo_boston_01", "answer": "雨伞"}]},
+                "revision": boston_detail["revision"], "metrics": {"durationMs": 900},
+            })
+        assert boston.status_code == 200 and "score" not in boston.text
+        with SessionLocal() as db:
+            scd_assessment = db.query(Assessment).filter_by(assignment_item_id=scd_id).one()
+            boston_assessment = db.query(Assessment).filter_by(assignment_item_id=boston_id).one()
+            assert scd_assessment.candidate_result_json["requires_clinician_review"] is True
+            assert not scd_assessment.final_result_json
+            assert boston_assessment.auto_result_json["provisional_total"] == 1
+            assert db.query(LlmMessage).count() >= 2
 
 
 def test_admin_can_manage_doctor_permissions_and_backend_enforces_them():

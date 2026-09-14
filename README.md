@@ -1,6 +1,6 @@
 # 认知评估与量表管理系统 · cyb 集成版
 
-本分支按功能整合 `main`、`yjj`、`dl`、`lfy`。正式系统采用 Vue + FastAPI + SQLAlchemy，以 dl 已整合的医生/患者流程为基础；患者端加入 lfy 的逐题交互和完成记录，另保留 main 的四项 C/B 演示。
+本分支按功能整合 `main`、`yjj`、`dl`、`lfy`。正式系统采用 Vue + FastAPI + SQLAlchemy，以 dl 已整合的医生/患者流程为基础；患者端加入 lfy 的逐题交互和完成记录，并将 main 的四项 C/B 任务接入同一正式患者流程。
 
 ## 功能与目录
 
@@ -8,7 +8,7 @@
 | --- | --- |
 | `admin-web/` | Vue 医生管理、患者移动填写、问卷治理；正式患者入口 `/p/fill/:token` |
 | `server/` | FastAPI、数据库模型、认证、草稿、计分、统计、迁移与后端测试 |
-| `patient-web/c2b/Frontend/` | SCD 访谈、MoCA-B 开放题、Boston 命名、STT 连线 Mock 演示 |
+| `patient-web/c2b/Frontend/` | main 原始 React C/B 原型，仅作来源参考；正式入口已迁入 `admin-web` |
 | `contracts/` | 正式 API 契约 |
 | `scripts/` | 安装、启动、停止、测试及来源审计 |
 | `docs/integration/` | 固定来源版本、逐文件去向、覆盖报告与验证记录 |
@@ -18,7 +18,7 @@
 
 正式闭环：医生登录 → 建档 → 派发 → 患者通过链接和访问码进入 → 草稿/提交 → 服务端计分 → 医生查看报告和统计。
 
-量表目录包含 SCD-Q9、GDS-15、ESS、利手量表及其他录入/复核模板。首次启动只有两张 DEMO 问卷已发布；正式目录项须经管理员预览、导入、核对和发布。C/B 演示使用占位内容与本地存储，不调用真实 AI、不写入正式评估库。
+量表目录包含 SCD-Q9、GDS-15、ESS、利手量表及其他录入/复核模板。首次启动会发布两张结构化 DEMO 和四张 C/B DEMO；正式目录项须经管理员预览、导入、核对和发布。C/B 使用占位内容和 Mock AI，但过程数据、访谈证据及候选结果会写入正式评估库并等待医生复核。
 
 ## 运行
 
@@ -31,7 +31,7 @@
 
 - 医生/管理员：<http://127.0.0.1:5173/login>
 - 正式患者演示：<http://127.0.0.1:5173/p/fill/demo-patient-token>，访问码 `123456`
-- C/B 演示：<http://127.0.0.1:5174/>
+- C/B 任务：通过正式患者演示入口进入
 - 后端接口：<http://127.0.0.1:8000/docs>
 - 演示医生 `doctor1 / Doctor123!`；管理员 `admin / Admin123!`。
 
@@ -47,6 +47,7 @@ npm run test:e2e --prefix admin-web
 ```
 
 - [功能覆盖、分支取舍与剩余缺口](docs/integration/coverage.md)
+- [2026-09-14 C/B 辅助任务患者系统整合记录](docs/integration/2026-09-14-cb-patient-integration.md)
 - [实际验证结果](docs/integration/validation.md)
 - [固定来源版本](docs/integration/sources.json) / [逐文件去向](docs/integration/inventory.json)
 - [API 契约](contracts/API.md)

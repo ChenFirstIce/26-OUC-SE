@@ -4,6 +4,7 @@ import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../../api/client'
 import DynamicQuestion from '../../components/DynamicQuestion.vue'
+import AssistedTask from '../../components/patient/AssistedTask.vue'
 import { createIdempotencyKey } from '../../utils/idempotency'
 import { formatDateTime } from '../../utils/date'
 
@@ -25,6 +26,7 @@ let dirty = false
 let saving: Promise<void> | undefined
 let submissionKey = ''
 const completed = (item: any) => ['submitted', 'reviewed'].includes(item.status)
+const assisted = computed(() => ['assisted_task', 'interview_assisted'].includes(current.value?.schema?.administration_mode))
 const visibleQuestions = computed<any[]>(() => current.value?.schema.sections.flatMap((section: any) =>
   section.questions.map((question: any) => ({ ...question, sectionTitle: section.title })))
   .filter((question: any) => !question.show_if || answers.value[question.show_if.question_key] === question.show_if.equals) ?? [])
@@ -106,6 +108,7 @@ async function back() {
   busy.value = true
   try { await save(); current.value = null; await loadTasks() } catch (error) { message(error) } finally { busy.value = false }
 }
+async function assistedComplete() { current.value = null; await loadTasks() }
 function beforeUnload(event: BeforeUnloadEvent) {
   if (dirty || saving) { event.preventDefault(); event.returnValue = '' }
 }
@@ -145,6 +148,8 @@ onBeforeUnmount(() => { clearTimeout(timer); window.removeEventListener('beforeu
         <div class="privacy-note">本系统用于信息收集和筛查，不提供医学诊断。</div>
       </section>
       <section v-else-if="current" class="questionnaire-page">
+        <AssistedTask v-if="assisted" :task="current" @back="back" @complete="assistedComplete" />
+        <template v-else>
         <button class="text-back" :disabled="busy" @click="back">← 返回任务列表</button>
         <h1>{{ current.name }}</h1><p class="notice-inline">{{ current.schema.notice }}</p>
         <p aria-live="polite">已回答 {{ answeredCount }} / {{ visibleQuestions.length }} 题</p>
@@ -163,6 +168,7 @@ onBeforeUnmount(() => { clearTimeout(timer); window.removeEventListener('beforeu
             </div>
           </fieldset>
         </form>
+        </template>
       </section>
       <section v-else-if="packageData" class="task-home">
         <h1>{{ packageData.assignment.title }}</h1><p>{{ packageData.assignment.note }}</p>
