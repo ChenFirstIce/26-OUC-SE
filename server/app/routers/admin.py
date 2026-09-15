@@ -7,6 +7,8 @@ from ..core.database import get_db
 from ..core.dependencies import admin_user, current_user
 from ..core.security import hash_password
 from ..models import AuditLog, Department, User
+from ..services.deepseek import DeepSeekUnavailable, test_deepseek_connection
+from ..services.llm_config import LlmConfigError, config_view, get_provider_config, upsert_deepseek_config
 from ..services.audit import audit
 from ..services.permissions import PERMISSION_FIELDS, permission_for, permission_view
 
@@ -36,6 +38,13 @@ class UserUpdateInput(BaseModel):
     active: bool | None = None
     new_password: str | None = Field(default=None, min_length=8, max_length=100)
     permissions: dict[str, bool] | None = None
+
+
+class LlmConfigInput(BaseModel):
+    api_key: str | None = Field(default=None, min_length=1, max_length=400)
+    enabled: bool = True
+    model: str | None = Field(default=None, min_length=1, max_length=80)
+    base_url: str | None = Field(default=None, min_length=8, max_length=255)
 
 
 def department_view(department: Department) -> dict:
@@ -136,3 +145,30 @@ def audit_logs(page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=1
     return [{"id": row.id, "actor_type": row.actor_type, "actor_id": row.actor_id, "action": row.action,
              "target_type": row.target_type, "target_id": row.target_id, "result": row.result,
              "created_at": row.created_at} for row in rows]
+
+
+@router.get("/llm-config")
+def llm_config(_: User = Depends(admin_user), db: Session = Depends(get_db)):
+    return config_view(get_provider_config(db))
+
+
+@router.put("/llm-config")
+def update_llm_config(payload: LlmConfigInput, actor: User = Depends(admin_user), db: Session = Depends(get_db)):
+    try:
+        row = upsert_deepseek_config(db, actor, api_key=payload.api_key, enabled=payload.enabled,
+                                     model=payload.model, base_url=payload.base_url)
+    except LlmConfigError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    audit(db, "user", actor.id, "llm_config.update", "llm_provider_config", row.id)
+    db.commit()
+    db.refresh(row)
+    return config_view(row)
+
+
+@router.post("/llm-config/test")
+def test_llm_config(_: User = Depends(admin_user), db: Session = Depends(get_db)):
+    try:
+        result = test_deepseek_connection(db)
+        return {"ok": bool(result["ok"]), "message": result["message"] or "DeepSeek 连接成功"}
+    except DeepSeekUnavailable as exc:
+        return {"ok": False, "message": str(exc)}

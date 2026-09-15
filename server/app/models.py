@@ -236,6 +236,20 @@ class LlmMessage(Base):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
 
 
+class LlmProviderConfig(Base):
+    __tablename__ = "llm_provider_configs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    encrypted_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    key_hint: Mapped[str] = mapped_column(String(40), default="")
+    model: Mapped[str] = mapped_column(String(80), default="deepseek-flash")
+    base_url: Mapped[str] = mapped_column(String(255), default="https://api.deepseek.com")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    updated_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, onupdate=utcnow)
+
+
 class ClinicalRecord(Base):
     """医生人工记录的诊断、随访和处置意见；与自动问卷评分明确分离。"""
 

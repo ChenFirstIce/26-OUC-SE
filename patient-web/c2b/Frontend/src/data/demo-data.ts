@@ -1,4 +1,5 @@
 import type { TrailNode } from "../types";
+import { sttTasks } from "./stt-scale";
 
 export interface BostonQuestion {
   id: string;
@@ -18,16 +19,8 @@ export const bostonQuestions: BostonQuestion[] = [
   { id: "demo_boston_03", title: "这是什么水果？", image: makeDemoImage("🍎", "DEMO IMAGE"), imageAlt: "演示用苹果图标", expectedAnswer: "苹果", hint: "一种常见的红色水果" },
 ];
 
-export const trailNodes: TrailNode[] = [
-  { id: "1", label: "1", x: 14, y: 20 },
-  { id: "A", label: "A", x: 77, y: 17 },
-  { id: "2", label: "2", x: 32, y: 43 },
-  { id: "B", label: "B", x: 82, y: 54 },
-  { id: "3", label: "3", x: 18, y: 75 },
-  { id: "C", label: "C", x: 68, y: 83 },
-];
+export const trailNodes: TrailNode[] = sttTasks.A.test.nodes;
 
-export const trailSequence = ["1", "A", "2", "B", "3", "C"];
+export const trailSequence = sttTasks.A.test.sequence;
 
 export const scdInitialMessage = "这是一个演示访谈。最近您是否感觉自己的记忆或思考能力与以前相比发生了变化？";
-export const mocaDemoQuestion = "DEMO 开放题：请用一句话说明“火车”和“自行车”有什么共同之处。";

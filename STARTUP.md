@@ -37,14 +37,18 @@
 ```powershell
 $env:DATABASE_URL = 'sqlite:///D:/data/cyb-demo.db'
 $env:JWT_SECRET = 'local-demo-change-this-secret'
+$env:LLM_SECRET_KEY = 'local-demo-long-random-llm-master-secret'
 ```
 
 未设置 `DATABASE_URL` 时使用 `%TEMP%/ad_questionnaire_cyb_<工作区路径哈希>/ad_questionnaire.db`，避免不同分支共享数据库，也规避当前 Windows SQLite 中文路径问题。数据库在服务启动时初始化并执行 Alembic 兼容迁移，重启保留数据。指定已有数据库前自行保留备份；自动测试使用独立临时数据库。
+
+DeepSeek API key 不写入 `.env.example` 或前端环境变量。管理员通过 `/api/v1/admin/llm-config` 写入后，后端用 `LLM_SECRET_KEY` 加密保存到数据库；未配置 key、缺少 `LLM_SECRET_KEY`、解密失败或 DeepSeek 调用失败时，SCD/MoCA-B 会自动使用本地 Mock/规则降级。可选环境变量：`DEEPSEEK_BASE_URL`、`DEEPSEEK_MODEL`、`DEEPSEEK_TIMEOUT_SECONDS`、`DEEPSEEK_MAX_TOKENS`。
 
 启动脚本为本次后端设置 LAN `FRONTEND_ORIGIN`，启动后恢复父进程原值。要手动控制：
 
 ```powershell
 $env:FRONTEND_ORIGIN = 'http://127.0.0.1:5173'
+$env:LLM_SECRET_KEY = 'local-demo-long-random-llm-master-secret'
 # 终端一
 Push-Location server
 ..\.venv\Scripts\python.exe run.py

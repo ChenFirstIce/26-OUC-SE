@@ -27,6 +27,8 @@
 - 医生/管理员接口：`Authorization: Bearer {staff_access_token}`。
 - 患者任务接口：`Authorization: Bearer {patient_access_token}`。
 - 每个响应含 `X-Request-ID`；请求也可主动传入该头便于追踪。
+- `LLM_SECRET_KEY` 必须由部署环境以进程环境变量提供，不写入文档、前端环境变量或版本库。
+
 
 统一错误：
 
@@ -86,6 +88,7 @@
 | 管理员 | POST/PATCH | `/api/v1/admin/departments[/{id}]` | 新建/修改科室 |
 | 管理员 | GET/POST | `/api/v1/admin/users` | 账号列表/创建 |
 | 管理员 | PATCH | `/api/v1/admin/users/{user_id}` | 账号、密码和权限修改 |
+| 管理员 | GET/PUT/POST | `/api/v1/admin/llm-config[/test]` | DeepSeek 配置、加密入库和连通性测试 |
 | 管理员 | GET | `/api/v1/admin/audit` | 审计分页列表 |
 
 ## 3. 登录
@@ -342,6 +345,40 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 
 B 类过程数据保存在原始答卷中，程序核验结果写入 `auto_result_json`；C 类访谈消息单独留痕，候选状态写入 `candidate_result_json`。两类任务的 `final_result_json` 初始均为空，`review_status` 为 `pending`。患者响应不返回程序分或 AI 候选结果。
 
+MoCA-B 开放回答提交为两个结构化子任务，不在患者端展示候选分：
+
+```json
+{
+  "answers": {
+    "answers": {
+      "moca_payment_13": "10元+2元+1元；5元+5元+2元+1元；13张1元",
+      "moca_abstraction": "火车和轮船是交通工具；锣鼓和笛子是乐器；南方和北方是方位"
+    },
+    "completedAt": "2026-09-14T00:00:00+00:00"
+  },
+  "revision": 0,
+  "metrics": { "durationMs": 1200 }
+}
+```
+
+后端在 DeepSeek 未配置或不可用时使用本地规则生成 `candidate_result_json.items[]`、`candidate_total`、`max_score=6` 和解释文本，仍要求医生复核确认最终分数。
+
+DeepSeek 已接入后端配置链路：管理员可通过 `/admin/llm-config` 写入 API key，数据库仅保存密文和 `key_hint`，解密主密钥来自进程环境变量 `LLM_SECRET_KEY`。SCD 追问与 MoCA-B 候选分析会优先使用 DeepSeek；未配置、解密失败、超时、HTTP 错误、非 JSON 或字段不合规时自动降级到本地 Mock/规则。患者响应不返回候选分、外部错误或密钥信息。
+
+配置接口：
+
+```json
+PUT /api/v1/admin/llm-config
+{
+  "api_key": "sk-...",
+  "enabled": true,
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com"
+}
+```
+
+响应只返回 `provider`、`enabled`、`model`、`base_url`、`key_hint`、`configured`、更新时间和更新人；不会返回明文 key。`POST /api/v1/admin/llm-config/test` 使用当前密文配置发起最小连通性测试，返回 `{ "ok": true|false, "message": "..." }`。
+
 STT 的 `answers.events` 逐次记录 `nodeId`、`timestampMs`、`x`、`y`、`expectedNode` 和前端即时 `correct`，同时保存当前正确 `sequence`、`errorCount` 与 `elapsedMs` 以支持草稿恢复。服务端不会信任前端正确性标记，而是按锁定版本的目标顺序重新计算错误数、纠正次数、首次点击时间和标准化轨迹，并校验时间单调递增、坐标位于 0–100 百分比画布内、总用时不短于最后点击时间。
 
 ### 7.6 医生复核与退回
@@ -416,5 +453,7 @@ PATCH /api/v1/assignments/{assignment_id}/items/{item_id}/review
 | `7b931ca` | 增加导入预览、版本差异、版本级发布/停用和预览并发校验；导入不再允许直接发布。 | 管理页面必须先预览再导入，发布和停用均需输入问卷编号确认。 |
 | `e4fcf05` | 内置目录导入与外部 JSON 导入统一要求 `preview_hashes`、`preview_versions`。 | 任一来源在未预览、内容变化或基础版本变化时均返回 `409`。 |
 | 当前工作区 | 增加医生保存候选、确认最终结果、退回重做和复核历史接口。 | 任务结果弹窗新增医生复核操作区与历史时间线。 |
+| 当前工作区 | MoCA-B 开放回答拆为付款方式、抽象分类两个结构化子任务，后端生成 0-6 分候选结果。 | 患者端只显示回答记录，医生端查看原始回答并复核候选结果。 |
+| 当前工作区 | DeepSeek API key 支持管理员接口加密入库，SCD/MoCA-B 优先使用真实 LLM 并自动降级。 | 前端不持有 key；管理员接口只显示掩码。 |
 
 完整操作背景、验证和故障记录见 [来源开发记录](../docs/DEVELOPMENT_LOG.md)。

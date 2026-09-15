@@ -29,8 +29,19 @@ export interface InterviewReply {
   completed: boolean;
 }
 
-export interface OpenAnswerAnalysis {
+export interface OpenAnswerItemAnalysis {
+  questionId: string;
+  taskType: "payment" | "abstraction";
+  prompt: string;
+  answer: string;
   candidateScore: number;
+  explanation: string;
+}
+
+export interface OpenAnswerAnalysis {
+  items: OpenAnswerItemAnalysis[];
+  candidateTotal: number;
+  maxScore: number;
   explanation: string;
 }
 
@@ -44,25 +55,52 @@ export interface BostonAnswer {
   provisionalScore: 0 | 1;
 }
 
+export type SttForm = "A" | "B";
+export type SttPhase = "practice" | "test";
+export type SttShape = "square" | "circle";
+export type SttAgeBand = "50-59" | "60-69" | "70-79";
+
+export interface SttCoordinateSystem {
+  width: number;
+  height: number;
+  origin: "top-left";
+  point: "shape-center";
+  unit: "px";
+}
+
 export interface TrailNode {
   id: string;
   label: string;
+  shape: SttShape;
   x: number;
   y: number;
+  sourceX: number;
+  sourceY: number;
+  isTarget: boolean;
+  order?: number;
 }
 
 export interface TrailEvent {
   nodeId: string;
+  label: string;
+  shape: SttShape;
+  expectedNodeId: string;
   timestampMs: number;
   correct: boolean;
 }
 
 export interface TrailResult {
+  form: SttForm;
+  phase: SttPhase;
+  ageBand: SttAgeBand;
+  thresholdSeconds: number;
   clickedSequence: string[];
   events: TrailEvent[];
   durationMs: number;
   errorCount: number;
   completed: boolean;
+  abnormal?: boolean;
+  interpretation?: string;
 }
 
 export type ApiErrorCode =

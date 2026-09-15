@@ -125,7 +125,7 @@ CB_DEMOS = [
     ("DEMO_MOCA_OPEN", "MoCA-B 开放回答（DEMO）", "记录自然语言回答并生成待医生复核的候选分析。",
      {"title": "MoCA-B 开放回答", "administration_mode": "interview_assisted", "task_type": "moca_open_answer",
       "notice": "题目和分析均为演示内容，不构成医学诊断。", "sections": [{"key": "open", "title": "开放回答", "questions": []}]},
-     {"strategy": "manual_review", "review": review_rules(maximum=1, dimensions=[{"key": "抽象概括", "label": "抽象概括", "min": 0, "max": 1}])}),
+     {"strategy": "manual_review", "review": review_rules(maximum=6, dimensions=[{"key": "付款方式", "label": "付款方式", "min": 0, "max": 3}, {"key": "抽象分类", "label": "抽象分类", "min": 0, "max": 3}])}),
     ("DEMO_BOSTON", "Boston 图片命名（DEMO）", "记录逐题回答、提示使用和用时，由医生确认结果。",
      {"title": "Boston 图片命名", "administration_mode": "assisted_task", "task_type": "boston_naming",
       "notice": "图片和答案均为课程演示占位内容。", "sections": [{"key": "naming", "title": "图片命名", "questions": []}]},
@@ -155,6 +155,8 @@ def ensure_cb_demos(db: Session, admin: User, assignment: AssignmentPackage | No
         else:
             version = next((row for row in template.versions if row.status == "published"), template.versions[-1])
             if "review" not in (version.scoring_json or {}):
+                version.scoring_json = {**(version.scoring_json or {}), "review": scoring["review"]}
+            if code == "DEMO_MOCA_OPEN":
                 version.scoring_json = {**(version.scoring_json or {}), "review": scoring["review"]}
             if code == "DEMO_BOSTON" and "items" in (version.schema_json or {}):
                 restored_schema = dict(version.schema_json)

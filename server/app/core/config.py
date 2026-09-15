@@ -22,6 +22,11 @@ class Settings:
     jwt_expire_minutes: int = int(os.getenv("JWT_EXPIRE_MINUTES", "120"))
     patient_session_minutes: int = int(os.getenv("PATIENT_SESSION_MINUTES", "120"))
     frontend_origin: str = os.getenv("FRONTEND_ORIGIN", "http://127.0.0.1:5173")
+    llm_secret_key: str = os.getenv("LLM_SECRET_KEY", "")
+    deepseek_base_url: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    deepseek_model: str = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
+    deepseek_timeout_seconds: float = float(os.getenv("DEEPSEEK_TIMEOUT_SECONDS", "12"))
+    deepseek_max_tokens: int = int(os.getenv("DEEPSEEK_MAX_TOKENS", "800"))
 
 
 settings = Settings()

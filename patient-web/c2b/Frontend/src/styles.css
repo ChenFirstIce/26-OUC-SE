@@ -10,13 +10,13 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 10% 0%, #e0f5ef 0, transparent 32rem), #f4f8f6; }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
 h1, h2, p { margin-top: 0; }
-textarea, input { width: 100%; border: 1.5px solid #cbdad6; border-radius: 12px; background: #fff; color: #17332f; padding: 14px 16px; font-size: 17px; outline: none; transition: border-color .2s, box-shadow .2s; }
+textarea, input, select { width: 100%; border: 1.5px solid #cbdad6; border-radius: 12px; background: #fff; color: #17332f; padding: 14px 16px; font-size: 17px; outline: none; transition: border-color .2s, box-shadow .2s; }
 textarea { resize: vertical; line-height: 1.65; }
-textarea:focus, input:focus { border-color: #0f766e; box-shadow: 0 0 0 4px #ccfbf1; }
+textarea:focus, input:focus, select:focus { border-color: #0f766e; box-shadow: 0 0 0 4px #ccfbf1; }
 label { display: block; margin-bottom: 8px; font-weight: 700; }
 
 .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
@@ -101,6 +101,9 @@ footer { color: #71827e; text-align: center; font-size: 14px; padding: 20px; }
 .question-card h2 { font-size: clamp(22px,4vw,29px); line-height: 1.55; margin: 18px 0 9px; }
 .question-badge { display: inline-flex; align-items: center; gap: 7px; color: #0f766e; font-weight: 750; }
 .question-help { color: #667a74; line-height: 1.6; margin-bottom: 27px; }
+.open-task-field { padding: 18px 0; border-top: 1px solid #e2ebe8; }
+.open-task-field:first-of-type { border-top: 0; padding-top: 0; }
+.open-task-field p { color: #49615b; line-height: 1.7; margin-bottom: 12px; }
 .field-meta { display: flex; justify-content: flex-end; color: #7a8c87; font-size: 13px; margin-top: 7px; }
 .success-card { text-align: center; }
 .success-icon { display: grid; place-items: center; width: 70px; height: 70px; margin: 0 auto 18px; border-radius: 50%; color: #198754; background: #dcfce7; }
@@ -125,6 +128,9 @@ footer { color: #71827e; text-align: center; font-size: 14px; padding: 20px; }
 .trail-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
 .trail-instructions { padding: 23px; }
 .trail-instructions h2 { margin: 17px 0 9px; }
+.segmented-control { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; margin: 14px 0; border-radius: 12px; background: #edf4f1; }
+.segmented-control button { min-height: 42px; border: 0; border-radius: 9px; color: #526964; background: transparent; cursor: pointer; font-weight: 800; }
+.segmented-control button.active { color: white; background: #0f766e; box-shadow: 0 6px 14px rgba(15,118,110,.18); }
 .sequence-preview { color: #174a43; font-size: 19px; font-weight: 800; letter-spacing: .04em; margin-bottom: 25px; }
 .sequence-preview span { color: #82a29a; }
 .metric { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid #e3ece9; }
@@ -133,15 +139,21 @@ footer { color: #71827e; text-align: center; font-size: 14px; padding: 20px; }
 .metric strong { margin-top: 3px; font-size: 18px; }
 .error-dot { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: white !important; background: #c66b52; font-weight: 800; }
 .trail-instructions > p { padding: 12px; border-radius: 10px; background: #e7f7f2; }
-.trail-board-card { position: relative; overflow: hidden; min-height: 530px; padding: 18px; }
-.trail-board { display: block; width: 100%; height: 490px; border-radius: 14px; background: linear-gradient(135deg,#f7fbfa,#edf7f4); touch-action: manipulation; }
-.trail-line { stroke: #0f766e; stroke-width: 1.6; stroke-linecap: round; }
+.threshold-warning { color: #8a3d15; background: #fff1df !important; }
+.threshold-normal { color: #176f48; background: #eafaf1 !important; }
+.trail-board-card { position: relative; overflow: hidden; min-height: 680px; padding: 18px; }
+.trail-board { display: block; width: 100%; height: auto; aspect-ratio: 1489 / 2105; max-height: 74vh; border-radius: 14px; background: #f8fbfa; touch-action: manipulation; }
+.trail-paper { fill: #fbfdfc; stroke: #d9e9e4; stroke-width: .25; }
+.trail-guide-line { stroke: #b8ccc6; stroke-width: .28; stroke-linecap: round; stroke-dasharray: 1.1 1.4; }
+.trail-line { stroke: #0f766e; stroke-width: .55; stroke-linecap: round; }
 .trail-node { cursor: pointer; }
-.trail-node circle { fill: white; stroke: #557d75; stroke-width: .7; transition: fill .15s, stroke .15s; }
-.trail-node text { text-anchor: middle; dominant-baseline: middle; fill: #244740; font-size: 5px; font-weight: 800; pointer-events: none; }
-.trail-node:hover circle, .trail-node:focus circle { fill: #d8f6ed; stroke: #0f766e; stroke-width: 1; }
-.trail-node.done circle { fill: #0f766e; stroke: #0f766e; }
+.trail-node circle, .trail-node rect { fill: white; stroke: #557d75; stroke-width: .32; transition: fill .15s, stroke .15s, opacity .15s; }
+.trail-node.distractor circle, .trail-node.distractor rect { fill: #f2f6f4; stroke: #a1b5af; }
+.trail-node text { text-anchor: middle; dominant-baseline: middle; fill: #244740; font-size: 1.9px; font-weight: 800; pointer-events: none; }
+.trail-node:hover circle, .trail-node:focus circle, .trail-node:hover rect, .trail-node:focus rect { fill: #d8f6ed; stroke: #0f766e; stroke-width: .42; }
+.trail-node.done circle, .trail-node.done rect { fill: #0f766e; stroke: #0f766e; }
 .trail-node.done text { fill: white; }
+.trail-source-note { color: #71837e; font-size: 13px; margin-top: 10px; text-align: center; }
 .trail-complete { position: absolute; left: 32px; right: 32px; bottom: 32px; border-radius: 14px; box-shadow: 0 8px 25px rgba(23,111,72,.14); }
 .empty-state { max-width: 600px; margin: 50px auto; padding: 45px; text-align: center; }
 .empty-icon { color: #0f766e; margin-bottom: 15px; }
@@ -163,7 +175,8 @@ footer { color: #71827e; text-align: center; font-size: 14px; padding: 20px; }
   .trail-instructions { display: grid; grid-template-columns: 1fr 1fr; gap: 0 15px; }
   .trail-instructions .question-badge, .trail-instructions h2, .trail-instructions .sequence-preview, .trail-instructions > p { grid-column: 1 / -1; }
   .trail-board-card { min-height: auto; padding: 8px; }
-  .trail-board { height: auto; aspect-ratio: 1 / 1; }
+  .trail-board { max-height: none; }
+  .trail-complete { position: static; margin-top: 12px; }
 }
 
 @media (max-width: 430px) {

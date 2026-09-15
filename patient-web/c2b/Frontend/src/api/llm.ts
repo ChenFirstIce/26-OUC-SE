@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { analyzeMocaOpenAnswers } from "../data/moca-open";
 import { ApiError, type InterviewReply, type OpenAnswerAnalysis } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
@@ -13,7 +14,16 @@ const interviewReplySchema = z.object({
 const openAnswerSchema = z.object({
   recorded: z.literal(true),
   analysis: z.object({
-    candidateScore: z.number(),
+    items: z.array(z.object({
+      questionId: z.string(),
+      taskType: z.enum(["payment", "abstraction"]),
+      prompt: z.string(),
+      answer: z.string(),
+      candidateScore: z.number(),
+      explanation: z.string(),
+    })),
+    candidateTotal: z.number(),
+    maxScore: z.number(),
     explanation: z.string(),
   }),
 });
@@ -66,14 +76,13 @@ export async function sendInterviewMessage(sessionId: string, message: string, m
 
 export async function analyzeOpenAnswer(payload: {
   assignmentId: string;
-  questionId: string;
-  answer: string;
+  answers: Record<string, string>;
 }): Promise<{ recorded: true; analysis: OpenAnswerAnalysis }> {
   if (useMock) {
     await delay(900);
     return {
       recorded: true,
-      analysis: { candidateScore: 1, explanation: "DEMO 内部分析：回答表达了两个对象的共同类别。" },
+      analysis: analyzeMocaOpenAnswers(payload.answers),
     };
   }
 

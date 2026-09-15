@@ -12,6 +12,8 @@ from ..core.dependencies import PatientIdentity, patient_identity
 from ..models import Assessment, LlmMessage, LlmSession, Response
 from ..services.assignment import refresh_assignment_status
 from ..services.audit import audit
+from ..services.deepseek import DeepSeekUnavailable, analyze_moca_with_deepseek, generate_scd_reply, summarize_scd_interview
+from ..services.moca_open import MOCA_OPEN_TASKS, analyze_moca_open_answers
 from .patient_session import item_for_identity
 
 router = APIRouter(prefix="/patient-session/tasks", tags=["C/B 辅助任务"])
@@ -134,8 +136,31 @@ def assisted_submit(payload: AssistedSubmitInput, item_id: int,
         auto_result = {"completed": True, "error_count": errors, "correction_count": corrections,
                        "sequence": expected, "first_click_ms": events[0]["timestampMs"],
                        "duration_ms": duration, "events": normalized_events}
+    elif code == "DEMO_MOCA_OPEN":
+        answers = payload.answers.get("answers")
+        if not isinstance(answers, dict):
+            raise HTTPException(422, "MoCA-B 开放题答案格式不正确")
+        missing = [task["id"] for task in MOCA_OPEN_TASKS if not str(answers.get(task["id"], "")).strip()]
+        if missing:
+            raise HTTPException(422, "MoCA-B 开放题答案不能为空")
+        try:
+            candidate_result = analyze_moca_with_deepseek(db, answers)
+        except DeepSeekUnavailable as exc:
+            candidate_result = {**analyze_moca_open_answers(answers), "fallback_reason": str(exc)}
+    elif code == "DEMO_SCD_INTERVIEW":
+        messages = payload.answers.get("messages", [])
+        if isinstance(messages, list) and messages:
+            try:
+                candidate_result = summarize_scd_interview(db, messages)
+            except DeepSeekUnavailable as exc:
+                candidate_result = {"status": "candidate_generated", "requires_clinician_review": True,
+                                    "source": "local_fallback", "fallback_reason": str(exc)}
+        else:
+            candidate_result = {"status": "candidate_generated", "requires_clinician_review": True,
+                                "source": "local_fallback"}
     else:
-        candidate_result = {"status": "candidate_generated", "requires_clinician_review": True}
+        candidate_result = {"status": "candidate_generated", "requires_clinician_review": True,
+                            "source": "local_fallback"}
     return acknowledgement(submit_record(db, item, payload, idempotency_key, auto_result, candidate_result))
 
 
@@ -153,7 +178,12 @@ def interview_message(item_id: int, session_id: str, payload: MessageInput,
         db.flush()
     turns = db.scalar(select(func.count()).select_from(LlmMessage).where(
         LlmMessage.session_id == session.id, LlmMessage.role == "user")) or 0
-    reply, progress, completed = MOCK_REPLIES[min(turns, len(MOCK_REPLIES) - 1)]
+    previous_messages = db.scalars(select(LlmMessage).where(LlmMessage.session_id == session.id).order_by(LlmMessage.id)).all()
+    try:
+        generated = generate_scd_reply(db, previous_messages, payload.message.strip())
+        reply, progress, completed = generated["reply"], generated["progress"], generated["completed"]
+    except DeepSeekUnavailable:
+        reply, progress, completed = MOCK_REPLIES[min(turns, len(MOCK_REPLIES) - 1)]
     db.add_all([LlmMessage(session_id=session.id, role="user", content=payload.message.strip()),
                 LlmMessage(session_id=session.id, role="assistant", content=reply)])
     session.progress, session.completed = round(progress * 100), completed

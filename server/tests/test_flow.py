@@ -13,7 +13,7 @@ import pytest
 
 from app.main import app
 from app.core.database import SessionLocal, engine
-from app.models import Assessment, AssessmentReviewEvent, LlmMessage, Response
+from app.models import Assessment, AssessmentReviewEvent, LlmMessage, LlmProviderConfig, Response
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -151,6 +151,24 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
         assert submitted.status_code == 200
         assert "candidate" not in submitted.text and "score" not in submitted.text
 
+        moca_id = by_code["DEMO_MOCA_OPEN"]["id"]
+        moca_detail = client.get(f"/api/v1/patient-session/tasks/{moca_id}", headers=headers).json()
+        empty_moca = client.post(f"/api/v1/patient-session/tasks/{moca_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "cb-moca-empty"}, json={
+                "answers": {"answers": {"moca_payment_13": "", "moca_abstraction": ""}},
+                "revision": moca_detail["revision"], "metrics": {"durationMs": 1000},
+            })
+        assert empty_moca.status_code == 422
+        moca = client.post(f"/api/v1/patient-session/tasks/{moca_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "cb-moca-submit"}, json={
+                "answers": {"answers": {
+                    "moca_payment_13": "10元+2元+1元；5元+5元+2元+1元；13张1元",
+                    "moca_abstraction": "火车和轮船都是交通工具；锣鼓和笛子都是乐器；南方和北方都是方位。",
+                }, "completedAt": "2026-09-14T00:00:00+00:00"},
+                "revision": moca_detail["revision"], "metrics": {"durationMs": 1200},
+            })
+        assert moca.status_code == 200 and "score" not in moca.text
+
         boston_id = by_code["DEMO_BOSTON"]["id"]
         boston_detail = client.get(f"/api/v1/patient-session/tasks/{boston_id}", headers=headers).json()
         boston = client.post(f"/api/v1/patient-session/tasks/{boston_id}/assisted-submit",
@@ -175,10 +193,14 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
         assert trail.status_code == 200, trail.text
         with SessionLocal() as db:
             scd_assessment = db.query(Assessment).filter_by(assignment_item_id=scd_id).one()
+            moca_assessment = db.query(Assessment).filter_by(assignment_item_id=moca_id).one()
             boston_assessment = db.query(Assessment).filter_by(assignment_item_id=boston_id).one()
             trail_assessment = db.query(Assessment).filter_by(assignment_item_id=trail_id).one()
             assert scd_assessment.candidate_result_json["requires_clinician_review"] is True
             assert not scd_assessment.final_result_json
+            assert moca_assessment.candidate_result_json["candidate_total"] == 6
+            assert moca_assessment.candidate_result_json["max_score"] == 6
+            assert {item["question_id"] for item in moca_assessment.candidate_result_json["items"]} == {"moca_payment_13", "moca_abstraction"}
             assert boston_assessment.auto_result_json["provisional_total"] == 1
             assert trail_assessment.auto_result_json["error_count"] == 1
             assert trail_assessment.auto_result_json["correction_count"] == 1
@@ -232,6 +254,125 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
             history = db.query(AssessmentReviewEvent).filter_by(assignment_item_id=boston_id).all()
             assert [event.action for event in history] == ["save", "confirm", "reopen"]
             assert history[-1].snapshot_json["response"]["answers"]["items"][0]["answer"] == "雨伞"
+
+
+def test_admin_stores_deepseek_key_encrypted_and_hides_plaintext(monkeypatch):
+    from app.core.config import settings
+
+    with TestClient(app) as client:
+        admin = auth(client, "admin", "Admin123!")
+        doctor = auth(client, "doctor1", "Doctor123!")
+        forbidden = client.get("/api/v1/admin/llm-config", headers=doctor)
+        assert forbidden.status_code == 403
+        object.__setattr__(settings, "llm_secret_key", "")
+        missing_secret = client.put("/api/v1/admin/llm-config", headers=admin, json={
+            "api_key": "sk-test-secret-1234", "enabled": True,
+        })
+        assert missing_secret.status_code == 422
+
+        object.__setattr__(settings, "llm_secret_key", "unit-test-master-key")
+        saved = client.put("/api/v1/admin/llm-config", headers=admin, json={
+            "api_key": "sk-test-secret-1234", "enabled": True,
+            "model": "deepseek-flash", "base_url": "https://api.deepseek.com",
+        })
+        assert saved.status_code == 200, saved.text
+        body = saved.json()
+        assert body["configured"] is True and body["enabled"] is True
+        assert body["key_hint"].endswith("1234")
+        assert "sk-test-secret-1234" not in saved.text
+        loaded = client.get("/api/v1/admin/llm-config", headers=admin)
+        assert loaded.status_code == 200 and "sk-test-secret-1234" not in loaded.text
+        with SessionLocal() as db:
+            row = db.query(LlmProviderConfig).filter_by(provider="deepseek").one()
+            assert row.encrypted_api_key and "sk-test-secret-1234" not in row.encrypted_api_key
+
+
+def test_deepseek_success_and_failure_paths(monkeypatch):
+    from app.core.config import settings
+    import app.services.deepseek as deepseek
+
+    object.__setattr__(settings, "llm_secret_key", "unit-test-master-key")
+
+    def fake_chat_json(_db, messages, *, max_tokens=None):
+        system = messages[0]["content"]
+        if "结构化访谈助手" in system:
+            return {"reply": "这种变化是否影响日常安排？", "progress": 0.66, "completed": False}
+        if "MoCA-B 开放题候选计分助手" in system:
+            return {"items": [
+                {"question_id": "moca_payment_13", "task_type": "payment", "candidate_score": 2, "explanation": "识别到两种付款方式。"},
+                {"question_id": "moca_abstraction", "task_type": "abstraction", "candidate_score": 3, "explanation": "三组抽象分类均正确。"},
+            ], "candidate_total": 5, "max_score": 6, "explanation": "候选总分 5/6。"}
+        return {"ok": True, "message": "connected"}
+
+    monkeypatch.setattr(deepseek, "_chat_json", fake_chat_json)
+
+    def create_cb_assignment(client, doctor_headers):
+        patient = client.post("/api/v1/patients", headers=doctor_headers, json={
+            "patient_code": f"DS{uuid4().hex[:8].upper()}", "full_name": "DeepSeek 测试患者",
+        })
+        assert patient.status_code == 201, patient.text
+        templates = client.get("/api/v1/questionnaires", headers=doctor_headers).json()
+        versions = [next(item["latest_version_id"] for item in templates if item["code"] == code)
+                    for code in ("DEMO_SCD_INTERVIEW", "DEMO_MOCA_OPEN")]
+        assignment = client.post("/api/v1/assignments", headers=doctor_headers, json={
+            "patient_id": patient.json()["id"], "questionnaire_version_ids": versions, "title": "DeepSeek C 类测试",
+        })
+        assert assignment.status_code == 201, assignment.text
+        verified = client.post("/api/v1/patient-session/verify", json={
+            "token": assignment.json()["token"], "access_code": assignment.json()["access_code"],
+        })
+        assert verified.status_code == 200, verified.text
+        return {"Authorization": f"Bearer {verified.json()['access_token']}"}
+
+    with TestClient(app) as client:
+        admin = auth(client, "admin", "Admin123!")
+        doctor = auth(client, "doctor1", "Doctor123!")
+        assert client.put("/api/v1/admin/llm-config", headers=admin, json={
+            "api_key": "sk-deepseek-unit-5678", "enabled": True,
+        }).status_code == 200
+        assert client.post("/api/v1/admin/llm-config/test", headers=admin).json()["ok"] is True
+
+        headers = create_cb_assignment(client, doctor)
+        tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
+        by_code = {item["code"]: item for item in tasks}
+        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
+        moca_id = by_code["DEMO_MOCA_OPEN"]["id"]
+
+        scd_reply = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/deepseek-test/messages",
+            headers=headers, json={"message": "最近半年开始有变化。"})
+        assert scd_reply.status_code == 200, scd_reply.text
+        assert scd_reply.json()["reply"] == "这种变化是否影响日常安排？"
+        assert scd_reply.json()["progress"] == 0.66
+
+        moca_detail = client.get(f"/api/v1/patient-session/tasks/{moca_id}", headers=headers).json()
+        moca = client.post(f"/api/v1/patient-session/tasks/{moca_id}/assisted-submit",
+            headers={**headers, "Idempotency-Key": "deepseek-moca-submit"}, json={
+                "answers": {"answers": {
+                    "moca_payment_13": "10元+2元+1元；5元+5元+2元+1元",
+                    "moca_abstraction": "交通工具、乐器、方位",
+                }},
+                "revision": moca_detail["revision"], "metrics": {"durationMs": 1200},
+            })
+        assert moca.status_code == 200 and "score" not in moca.text
+        with SessionLocal() as db:
+            assessment = db.query(Assessment).filter_by(assignment_item_id=moca_id).one()
+            assert assessment.candidate_result_json["source"] == "deepseek"
+            assert assessment.candidate_result_json["candidate_total"] == 5
+
+    def failing_chat_json(*_args, **_kwargs):
+        raise deepseek.DeepSeekUnavailable("unit_failure")
+
+    monkeypatch.setattr(deepseek, "_chat_json", failing_chat_json)
+    with TestClient(app) as client:
+        doctor = auth(client, "doctor1", "Doctor123!")
+        headers = create_cb_assignment(client, doctor)
+        tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
+        by_code = {item["code"]: item for item in tasks}
+        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
+        reply = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/fallback-test/messages",
+            headers=headers, json={"message": "最近半年开始有变化。"})
+        assert reply.status_code == 200
+        assert reply.json()["reply"] == "这种变化大约从什么时候开始？请按实际感受回答。"
 
 
 def test_admin_can_manage_doctor_permissions_and_backend_enforces_them():

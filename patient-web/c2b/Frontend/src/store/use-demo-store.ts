@@ -7,13 +7,13 @@ interface DemoState {
   interviewMessages: InterviewMessage[];
   interviewProgress: number;
   interviewStartedAt?: string;
-  openAnswer: string;
+  openAnswers: Record<string, string>;
   bostonAnswers: BostonAnswer[];
   trailDraft?: TrailResult;
   submissions: Partial<Record<TaskType, DemoSubmission>>;
   setStatus: (task: TaskType, status: TaskStatus) => void;
   setInterview: (messages: InterviewMessage[], progress: number, startedAt?: string) => void;
-  setOpenAnswer: (answer: string) => void;
+  setOpenAnswer: (questionId: string, answer: string) => void;
   setBostonAnswers: (answers: BostonAnswer[]) => void;
   setTrailDraft: (result?: TrailResult) => void;
   saveSubmission: (task: TaskType, submission: DemoSubmission) => void;
@@ -33,12 +33,12 @@ export const useDemoStore = create<DemoState>()(
       statuses: initialStatuses,
       interviewMessages: [],
       interviewProgress: 0,
-      openAnswer: "",
+      openAnswers: {},
       bostonAnswers: [],
       submissions: {},
       setStatus: (task, status) => set((state) => ({ statuses: { ...state.statuses, [task]: status } })),
       setInterview: (messages, progress, startedAt) => set({ interviewMessages: messages, interviewProgress: progress, interviewStartedAt: startedAt }),
-      setOpenAnswer: (openAnswer) => set({ openAnswer }),
+      setOpenAnswer: (questionId, answer) => set((state) => ({ openAnswers: { ...(state.openAnswers ?? {}), [questionId]: answer } })),
       setBostonAnswers: (bostonAnswers) => set({ bostonAnswers }),
       setTrailDraft: (trailDraft) => set({ trailDraft }),
       saveSubmission: (task, submission) => set((state) => ({
@@ -49,7 +49,7 @@ export const useDemoStore = create<DemoState>()(
         statuses: { ...state.statuses, [task]: "not_started" },
         submissions: { ...state.submissions, [task]: undefined },
         ...(task === "scd_interview" ? { interviewMessages: [], interviewProgress: 0, interviewStartedAt: undefined } : {}),
-        ...(task === "moca_open_answer" ? { openAnswer: "" } : {}),
+        ...(task === "moca_open_answer" ? { openAnswers: {} } : {}),
         ...(task === "boston_naming" ? { bostonAnswers: [] } : {}),
         ...(task === "trail_making" ? { trailDraft: undefined } : {}),
       })),

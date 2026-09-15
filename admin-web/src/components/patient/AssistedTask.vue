@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../../api/client'
 import { createIdempotencyKey } from '../../utils/idempotency'
+import { mocaOpenTasks } from '../../utils/mocaOpen'
 
 const props = defineProps<{ task: any }>()
 const emit = defineEmits<{ complete: []; back: [] }>()
@@ -13,7 +14,7 @@ const startedAt = ref(Date.now() - Number(props.task.answers?.elapsedMs || 0))
 const sessionId = `scd-${props.task.id}-${Date.now()}`
 const submissionKey = createIdempotencyKey()
 const input = ref('')
-const openAnswer = ref(props.task.answers?.answer || '')
+const openAnswers = ref<Record<string, string>>({ ...(props.task.answers?.answers || {}) })
 const messages = ref<any[]>(props.task.answers?.messages || [{ role: 'assistant', content: '最近您是否感觉自己的记忆或思考能力与以前相比发生了变化？' }])
 const progress = ref(props.task.answers?.progress || .15)
 const boston = [
@@ -71,9 +72,10 @@ async function sendInterview() {
   finally { busy.value = false }
 }
 async function submitOpen() {
-  if (!openAnswer.value.trim()) return
-  await saveDraft({ questionId:'demo-open-01', answer:openAnswer.value.trim() })
-  await finish({ questionId:'demo-open-01', answer:openAnswer.value.trim() })
+  const answers = Object.fromEntries(mocaOpenTasks.map(task => [task.id, (openAnswers.value[task.id] || '').trim()]))
+  if (mocaOpenTasks.some(task => !answers[task.id])) return
+  await saveDraft({ answers })
+  await finish({ answers, completedAt:new Date().toISOString() })
 }
 async function submitNaming() {
   if (!namingAnswer.value.trim()) return
@@ -129,10 +131,14 @@ async function clickTrail(nodeId:string) {
     </section>
 
     <section v-else-if="kind === 'moca_open_answer'" class="cb-card">
-      <h2>请用一句话说明“火车”和“自行车”有什么共同之处。</h2>
-      <p>没有唯一表达方式，请使用自然语言回答。</p>
-      <el-input v-model="openAnswer" type="textarea" :rows="6" maxlength="500" show-word-limit />
-      <el-button type="primary" size="large" class="full" :loading="busy" :disabled="!openAnswer.trim()" @click="submitOpen">确认提交</el-button>
+      <h2>请完成以下 2 个 MoCA-B 开放题子任务。</h2>
+      <p>没有唯一表达方式，请使用自然语言回答；内部候选分仅供专业人员复核。</p>
+      <div v-for="task in mocaOpenTasks" :key="task.id" class="open-question">
+        <b>{{ task.title }}</b>
+        <p>{{ task.prompt }}</p>
+        <el-input v-model="openAnswers[task.id]" type="textarea" :rows="4" maxlength="500" show-word-limit :placeholder="task.hint" />
+      </div>
+      <el-button type="primary" size="large" class="full" :loading="busy" :disabled="mocaOpenTasks.some(task => !openAnswers[task.id]?.trim())" @click="submitOpen">确认提交</el-button>
     </section>
 
     <section v-else-if="kind === 'boston_naming'" class="cb-card naming-card">
@@ -157,5 +163,5 @@ async function clickTrail(nodeId:string) {
 </template>
 
 <style scoped>
-.task-badge{display:inline-block;padding:6px 10px;color:#246b5b;background:#e2f0ea;border-radius:999px;font-size:12px;font-weight:700}.cb-card{display:flex;flex-direction:column;gap:16px;margin-top:20px;padding:22px;background:#fff;border:1px solid var(--line);border-radius:16px}.cb-card h2{margin:0;line-height:1.5}.cb-card>p{margin:0;color:var(--muted)}.cb-progress{height:8px;overflow:hidden;background:#e3e8e4;border-radius:9px}.cb-progress i{display:block;height:100%;background:var(--green);transition:width .25s}.chat-list{display:flex;flex-direction:column;gap:10px;max-height:360px;overflow:auto}.chat-message{max-width:86%;padding:12px 14px;border-radius:13px;line-height:1.65}.chat-message.assistant{background:#edf2ef}.chat-message.user{align-self:flex-end;color:#fff;background:var(--green)}.demo-object{display:grid;place-items:center;height:230px;font-size:100px;background:#edf7f2;border-radius:14px}.hint{padding:11px;color:#795b2c!important;background:#fff6e8;border-radius:8px}.attempt-list{display:grid;gap:7px}.attempt-list span{display:flex;justify-content:space-between;padding:9px 11px;background:#f2f6f4;border-radius:8px}.attempt-list small{color:var(--muted)}.naming-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}.trail-board{position:relative;height:420px;overflow:hidden;background:linear-gradient(145deg,#f4f8f6,#e8f1ed);border:1px solid #d8e5df;border-radius:14px}.trail-board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.trail-board line{stroke:#2f7b66;stroke-width:1.1;stroke-linecap:round;vector-effect:non-scaling-stroke}.trail-board button{position:absolute;display:grid;place-items:center;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #8ca99e;border-radius:50%;color:var(--deep);background:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 14px #183d3020;cursor:pointer;transition:.2s}.trail-board button.done{color:#fff;background:var(--green);border-color:var(--green)}.trail-board button.wrong{color:#fff;background:#c85d5d;border-color:#c85d5d;animation:wrong-pulse .45s}.trail-legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:12px}.trail-legend span{display:flex;align-items:center;gap:5px}.trail-legend i{width:9px;height:9px;background:#2f7b66;border-radius:50%}.trail-legend i.wrong{background:#c85d5d}@keyframes wrong-pulse{50%{transform:translate(-50%,-50%) scale(1.15)}}@media(max-width:600px){.trail-board{height:340px}.trail-board button{width:50px;height:50px}.naming-actions{align-items:stretch;flex-direction:column}}
+.task-badge{display:inline-block;padding:6px 10px;color:#246b5b;background:#e2f0ea;border-radius:999px;font-size:12px;font-weight:700}.cb-card{display:flex;flex-direction:column;gap:16px;margin-top:20px;padding:22px;background:#fff;border:1px solid var(--line);border-radius:16px}.cb-card h2{margin:0;line-height:1.5}.cb-card>p{margin:0;color:var(--muted)}.open-question{display:grid;gap:8px;padding-top:15px;border-top:1px solid var(--line)}.open-question b{color:var(--deep)}.open-question p{margin:0;color:#4b625b;line-height:1.65}.cb-progress{height:8px;overflow:hidden;background:#e3e8e4;border-radius:9px}.cb-progress i{display:block;height:100%;background:var(--green);transition:width .25s}.chat-list{display:flex;flex-direction:column;gap:10px;max-height:360px;overflow:auto}.chat-message{max-width:86%;padding:12px 14px;border-radius:13px;line-height:1.65}.chat-message.assistant{background:#edf2ef}.chat-message.user{align-self:flex-end;color:#fff;background:var(--green)}.demo-object{display:grid;place-items:center;height:230px;font-size:100px;background:#edf7f2;border-radius:14px}.hint{padding:11px;color:#795b2c!important;background:#fff6e8;border-radius:8px}.attempt-list{display:grid;gap:7px}.attempt-list span{display:flex;justify-content:space-between;padding:9px 11px;background:#f2f6f4;border-radius:8px}.attempt-list small{color:var(--muted)}.naming-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}.trail-board{position:relative;height:420px;overflow:hidden;background:linear-gradient(145deg,#f4f8f6,#e8f1ed);border:1px solid #d8e5df;border-radius:14px}.trail-board svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.trail-board line{stroke:#2f7b66;stroke-width:1.1;stroke-linecap:round;vector-effect:non-scaling-stroke}.trail-board button{position:absolute;display:grid;place-items:center;width:58px;height:58px;transform:translate(-50%,-50%);border:2px solid #8ca99e;border-radius:50%;color:var(--deep);background:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 14px #183d3020;cursor:pointer;transition:.2s}.trail-board button.done{color:#fff;background:var(--green);border-color:var(--green)}.trail-board button.wrong{color:#fff;background:#c85d5d;border-color:#c85d5d;animation:wrong-pulse .45s}.trail-legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:12px}.trail-legend span{display:flex;align-items:center;gap:5px}.trail-legend i{width:9px;height:9px;background:#2f7b66;border-radius:50%}.trail-legend i.wrong{background:#c85d5d}@keyframes wrong-pulse{50%{transform:translate(-50%,-50%) scale(1.15)}}@media(max-width:600px){.trail-board{height:340px}.trail-board button{width:50px;height:50px}.naming-actions{align-items:stretch;flex-direction:column}}
 </style>
