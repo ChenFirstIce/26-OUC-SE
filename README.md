@@ -49,6 +49,7 @@ npm run test:e2e --prefix admin-web
 - [实际验证结果](docs/integration/validation.md)
 - [固定来源版本](docs/integration/sources.json) / [逐文件去向](docs/integration/inventory.json)
 - [API 契约](contracts/API.md)
-- [系统整合说明](docs/BACKEND_INTEGRATION.md)
+- [系统架构说明](docs/ARCHITECTURE.md)
+- [文档索引（按贡献者和时间线）](docs/README.md)
 
 本项目为课程原型，不提供医学诊断。演示/测试使用虚拟数据，量表来源与授权说明随模板保留。原计划的 8 位备用码与独立凭码进入尚未实现，当前保持链接加 6 位码的协议。
