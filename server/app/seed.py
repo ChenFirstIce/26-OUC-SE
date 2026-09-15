@@ -117,31 +117,58 @@ def review_rules(maximum: float | None = None, dimensions: list[dict] | None = N
             "note_required": True}
 
 
-CB_DEMOS = [
-    ("DEMO_SCD_INTERVIEW", "SCD 结构化访谈（DEMO）", "通过对话记录主观认知变化，回答由医生复核。",
+PATIENT_QUESTIONNAIRE_TEMPLATES = [
+    ("SCD_QUESTIONNAIRE", "认知状态问卷", "主观认知变化收集。", SCD_SCHEMA,
+     {"strategy": "metadata_sum", "risk_thresholds": [{"min": 0, "level": "low"}, {"min": 2, "level": "medium"}, {"min": 4, "level": "high"}]}),
+    ("WELLBEING_QUESTIONNAIRE", "生活与情绪问卷", "生活和情绪信息收集。", WELLBEING_SCHEMA,
+     {"strategy": "metadata_sum", "risk_thresholds": [{"min": 0, "level": "low"}, {"min": 1, "level": "medium"}, {"min": 2, "level": "high"}]}),
+]
+
+
+ASSISTED_TASK_TEMPLATES = [
+    ("SCD_INTERVIEW", "SCD 结构化访谈", "通过对话记录主观认知变化，回答由医生复核。",
      {"title": "SCD 结构化访谈", "administration_mode": "interview_assisted", "task_type": "scd_interview",
-      "notice": "访谈内容仅用于课程演示，将由专业人员复核。", "sections": [{"key": "interview", "title": "访谈", "questions": []}]},
+      "notice": "访谈内容将由专业人员复核。", "sections": [{"key": "interview", "title": "访谈", "questions": []}]},
      {"strategy": "manual_review", "review": review_rules(dimensions=[{"key": "访谈结论", "label": "访谈结论", "min": 0}])}),
-    ("DEMO_MOCA_OPEN", "MoCA-B 开放回答（DEMO）", "记录自然语言回答并生成待医生复核的候选分析。",
+    ("SCD_STRUCTURED_INTERVIEW", "SCD 主观认知下降结构性问卷", "完整的 SCD 结构性访谈问卷，包含认知域筛查、主要问题、追加问题和知情者问卷。",
+     {"title": "SCD 主观认知下降结构性问卷", "administration_mode": "assisted_task", "task_type": "scd_structured_interview",
+      "notice": "本问卷为 E 部分主观认知下降结构性问卷。",
+      "sections": [{"key": "scd_structured", "title": "结构性问卷", "questions": []}],
+      "cognitive_domains": ["memory", "language", "planning", "attention", "other_cognition"]},
+     {"strategy": "manual_review", "review": review_rules(dimensions=[
+         {"key": "记忆力", "label": "记忆力", "min": 0},
+         {"key": "语言/找词", "label": "语言/找词", "min": 0},
+         {"key": "组织/计划", "label": "组织/计划", "min": 0},
+         {"key": "注意力", "label": "注意力", "min": 0},
+         {"key": "其他认知", "label": "其他认知", "min": 0}
+     ])}),
+    ("MOCA_OPEN_ANSWER", "MoCA-B 开放回答", "记录自然语言回答并生成待医生复核的候选分析。",
      {"title": "MoCA-B 开放回答", "administration_mode": "interview_assisted", "task_type": "moca_open_answer",
-      "notice": "题目和分析均为演示内容，不构成医学诊断。", "sections": [{"key": "open", "title": "开放回答", "questions": []}]},
+      "notice": "回答将由医生进行专业评估。", "sections": [{"key": "open", "title": "开放回答", "questions": []}]},
      {"strategy": "manual_review", "review": review_rules(maximum=6, dimensions=[{"key": "付款方式", "label": "付款方式", "min": 0, "max": 3}, {"key": "抽象分类", "label": "抽象分类", "min": 0, "max": 3}])}),
-    ("DEMO_BOSTON", "Boston 图片命名（DEMO）", "记录逐题回答、提示使用和用时，由医生确认结果。",
+    ("BOSTON_NAMING", "Boston 图片命名", "记录逐题回答、提示使用和用时，由医生确认结果。",
      {"title": "Boston 图片命名", "administration_mode": "assisted_task", "task_type": "boston_naming",
-      "notice": "图片和答案均为课程演示占位内容。", "sections": [{"key": "naming", "title": "图片命名", "questions": []}]},
+      "notice": "请根据图片回答相应问题。", "sections": [{"key": "naming", "title": "图片命名", "questions": []}]},
      {"strategy": "manual_review", "expected_answers": {"demo_boston_01": "雨伞", "demo_boston_02": "自行车", "demo_boston_03": "苹果"},
       "review": review_rules(maximum=3, dimensions=[{"key": "命名", "label": "命名", "min": 0, "max": 3}])}),
-    ("DEMO_TRAIL", "STT 形状连线（DEMO）", "记录点击顺序、时间戳、错误次数和完成用时。",
+    ("STT_SHAPE_TRAIL_MAKING", "STT 形状连线", "按 A/B 卷完成练习和正式连线，记录点击顺序、时间戳、错误次数和完成用时。",
      {"title": "STT 形状连线", "administration_mode": "assisted_task", "task_type": "trail_making",
-      "notice": "连线任务为课程演示，不替代正式施测。", "sections": [{"key": "trail", "title": "形状连线", "questions": []}]},
-     {"strategy": "manual_review", "sequence": ["1", "A", "2", "B", "3", "C"],
+      "notice": "请按照说明完成连线任务。", "sections": [{"key": "trail", "title": "形状连线", "questions": []}],
+      "stt_forms": [
+        {"form": "A", "label": "A 卷（数字）", "practice_nodes": 8, "test_nodes": 25},
+        {"form": "B", "label": "B 卷（数字 + 字母）", "practice_nodes": 15, "test_nodes": 49},
+      ]},
+     {"strategy": "manual_review",
+      "age_thresholds": {"A": {"50-59": 70, "60-69": 80, "70-79": 100},
+                         "B": {"50-59": 180, "60-69": 200, "70-79": 240}},
+      "threshold_interpretation": "达到或超过对应年龄阈值为异常",
       "review": review_rules(dimensions=[{"key": "执行控制", "label": "执行控制", "min": 0}])}),
 ]
 
 
-def ensure_cb_demos(db: Session, admin: User, assignment: AssignmentPackage | None = None) -> None:
+def ensure_assisted_task_templates(db: Session, admin: User, assignment: AssignmentPackage | None = None) -> None:
     versions = []
-    for code, name, description, schema, scoring in CB_DEMOS:
+    for code, name, description, schema, scoring in ASSISTED_TASK_TEMPLATES:
         template = db.scalar(select(QuestionnaireTemplate).where(QuestionnaireTemplate.code == code))
         if template is None:
             template = QuestionnaireTemplate(code=code, name=name, description=description, status="published", created_by_id=admin.id)
@@ -156,15 +183,24 @@ def ensure_cb_demos(db: Session, admin: User, assignment: AssignmentPackage | No
             version = next((row for row in template.versions if row.status == "published"), template.versions[-1])
             if "review" not in (version.scoring_json or {}):
                 version.scoring_json = {**(version.scoring_json or {}), "review": scoring["review"]}
-            if code == "DEMO_MOCA_OPEN":
+            if code == "MOCA_OPEN_ANSWER":
                 version.scoring_json = {**(version.scoring_json or {}), "review": scoring["review"]}
-            if code == "DEMO_BOSTON" and "items" in (version.schema_json or {}):
+            if code == "BOSTON_NAMING" and "items" in (version.schema_json or {}):
                 restored_schema = dict(version.schema_json)
                 restored_schema.pop("items", None)
                 restored_scoring = dict(version.scoring_json or {})
                 restored_scoring.pop("accepted_answers", None)
                 restored_scoring["expected_answers"] = scoring["expected_answers"]
                 version.schema_json, version.scoring_json = restored_schema, restored_scoring
+            if code == "STT_SHAPE_TRAIL_MAKING":
+                upgraded_schema = dict(version.schema_json or {})
+                upgraded_schema["description"] = description
+                upgraded_schema["stt_forms"] = schema["stt_forms"]
+                upgraded_scoring = dict(version.scoring_json or {})
+                upgraded_scoring.pop("sequence", None)
+                upgraded_scoring["age_thresholds"] = scoring["age_thresholds"]
+                upgraded_scoring["threshold_interpretation"] = scoring["threshold_interpretation"]
+                version.schema_json, version.scoring_json = upgraded_schema, upgraded_scoring
         versions.append(version)
     if assignment:
         existing = {item.questionnaire_version_id for item in assignment.items}
@@ -183,7 +219,7 @@ def seed_database(db: Session) -> None:
         admin = db.scalar(select(User).where(User.role == "admin"))
         demo_assignment = db.scalar(select(AssignmentPackage).where(AssignmentPackage.token_hash == token_digest(DEMO_TOKEN)))
         if admin:
-            ensure_cb_demos(db, admin, demo_assignment)
+            ensure_assisted_task_templates(db, admin, demo_assignment)
         if demo_patient and not db.scalar(select(ClinicalRecord.id).where(ClinicalRecord.patient_id == demo_patient.id).limit(1)):
             now = datetime.now(timezone.utc)
             db.add_all([
@@ -215,12 +251,7 @@ def seed_database(db: Session) -> None:
     db.add(UserPermission(user_id=admin.id, can_manage_templates=True))
     db.add_all([UserPermission(user_id=doctor.id) for doctor in doctors])
     templates = []
-    for code, name, description, schema, scoring in [
-        ("DEMO_SCD", "认知状态演示问卷", "模拟主观认知变化收集，仅用于系统演示。", SCD_SCHEMA,
-         {"strategy": "metadata_sum", "risk_thresholds": [{"min": 0, "level": "low"}, {"min": 2, "level": "medium"}, {"min": 4, "level": "high"}]}),
-        ("DEMO_WELLBEING", "生活与情绪演示问卷", "模拟生活和情绪信息收集，仅用于系统演示。", WELLBEING_SCHEMA,
-         {"strategy": "metadata_sum", "risk_thresholds": [{"min": 0, "level": "low"}, {"min": 1, "level": "medium"}, {"min": 2, "level": "high"}]}),
-    ]:
+    for code, name, description, schema, scoring in PATIENT_QUESTIONNAIRE_TEMPLATES:
         template = QuestionnaireTemplate(code=code, name=name, description=description, status="published", created_by_id=admin.id)
         db.add(template)
         db.flush()
@@ -256,7 +287,7 @@ def seed_database(db: Session) -> None:
     )
     db.add(demo_assignment)
     db.flush()
-    ensure_cb_demos(db, admin, demo_assignment)
+    ensure_assisted_task_templates(db, admin, demo_assignment)
     for _, version in templates:
         db.add(AssignmentItem(assignment_id=demo_assignment.id, questionnaire_version_id=version.id))
     db.add_all([

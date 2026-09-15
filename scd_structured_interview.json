@@ -1,0 +1,432 @@
+{
+  "sourceSection": "E 主观认知下降结构性问卷",
+  "screeningPrompt": "你觉得以下哪方面有问题？（受访者需要即刻回答）",
+  "branchRule": "主要的问题（1-5）中若受访者回答是，应提问额外的 A-E。",
+  "cognitiveDomains": [
+    {
+      "id": "memory",
+      "label": "记忆力",
+      "initialQuestion": "你觉得记忆力有问题吗？",
+      "mainQuestions": [
+        "你是否觉得你的记性变差了?"
+      ],
+      "followUpQuestions": {
+        "A": {
+          "question": "如果是，你是否会担心",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "B": {
+          "question": "如果是，你觉得什么时候情况变差的?",
+          "options": [
+            "近6个月内",
+            "近6个月-2年",
+            "2-5年",
+            "超过5年",
+            "不清楚"
+          ],
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "C": {
+          "question": "如果是：你是否觉得你这方面表现的比同龄人差？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "D": {
+          "question": "如果是：你是否因为这些问题去看过医生？或者你是否同你的医生谈过这个问题（在你来记忆门诊之前）？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "E": {
+          "question": "如果是：你第一次跟你的医生谈这些问题是什么时候？",
+          "type": "text",
+          "responseFormat": "□□月前 / NA"
+        }
+      }
+    },
+    {
+      "id": "language",
+      "label": "语言 / 找词困难",
+      "initialQuestion": "你觉得语言 / 找词困难有问题吗？",
+      "mainQuestions": [
+        "你是否比以前更频繁得寻找合适的词?"
+      ],
+      "followUpQuestions": {
+        "A": {
+          "question": "如果是，你是否会担心",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "B": {
+          "question": "如果是，你觉得什么时候情况变差的?",
+          "options": [
+            "近6个月内",
+            "近6个月-2年",
+            "2-5年",
+            "超过5年",
+            "不清楚"
+          ],
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "C": {
+          "question": "如果是：你是否觉得你这方面表现的比同龄人差？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "D": {
+          "question": "如果是：你是否因为这些问题去看过医生？或者你是否同你的医生谈过这个问题（在你来记忆门诊之前）？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "E": {
+          "question": "如果是：你第一次跟你的医生谈这些问题是什么时候？",
+          "type": "text",
+          "responseFormat": "□□月前 / NA"
+        }
+      }
+    },
+    {
+      "id": "planning",
+      "label": "组织能力 / 计划能力",
+      "initialQuestion": "你觉得组织能力 / 计划能力有问题吗？",
+      "mainQuestions": [
+        "你是否感觉在做计划或有序地安排事情时越来越困难？"
+      ],
+      "followUpQuestions": {
+        "A": {
+          "question": "如果是，你是否会担心",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "B": {
+          "question": "如果是，你觉得什么时候情况变差的?",
+          "options": [
+            "近6个月内",
+            "近6个月-2年",
+            "2-5年",
+            "超过5年",
+            "不清楚"
+          ],
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "C": {
+          "question": "如果是：你是否觉得你这方面表现的比同龄人差？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "D": {
+          "question": "如果是：你是否因为这些问题去看过医生？或者你是否同你的医生谈过这个问题（在你来记忆门诊之前）？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "E": {
+          "question": "如果是：你第一次跟你的医生谈这些问题是什么时候？",
+          "type": "text",
+          "responseFormat": "□□月前 / NA"
+        }
+      }
+    },
+    {
+      "id": "attention",
+      "label": "注意力 / 专心",
+      "initialQuestion": "你觉得注意力 / 专心有问题吗？",
+      "mainQuestions": [
+        "如果你不专心做一件事情是否比以前更容易犯错?"
+      ],
+      "followUpQuestions": {
+        "A": {
+          "question": "如果是，你是否会担心",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "B": {
+          "question": "如果是，你觉得什么时候情况变差的?",
+          "options": [
+            "近6个月内",
+            "近6个月-2年",
+            "2-5年",
+            "超过5年",
+            "不清楚"
+          ],
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "C": {
+          "question": "如果是：你是否觉得你这方面表现的比同龄人差？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "D": {
+          "question": "如果是：你是否因为这些问题去看过医生？或者你是否同你的医生谈过这个问题（在你来记忆门诊之前）？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "E": {
+          "question": "如果是：你第一次跟你的医生谈这些问题是什么时候？",
+          "type": "text",
+          "responseFormat": "□□月前 / NA"
+        }
+      }
+    },
+    {
+      "id": "other_cognition",
+      "label": "其他认知功能方面",
+      "initialQuestion": "你觉得其他认知功能方面有问题吗？",
+      "mainQuestions": [
+        "你是否意识到其他认知方面的问题?",
+        "它们是什么?"
+      ],
+      "followUpQuestions": {
+        "A": {
+          "question": "如果是，你是否会担心",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "B": {
+          "question": "如果是，你觉得什么时候情况变差的?",
+          "options": [
+            "近6个月内",
+            "近6个月-2年",
+            "2-5年",
+            "超过5年",
+            "不清楚"
+          ],
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "C": {
+          "question": "如果是：你是否觉得你这方面表现的比同龄人差？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "D": {
+          "question": "如果是：你是否因为这些问题去看过医生？或者你是否同你的医生谈过这个问题（在你来记忆门诊之前）？",
+          "options": [
+            "否",
+            "是"
+          ],
+          "values": [
+            0,
+            1
+          ]
+        },
+        "E": {
+          "question": "如果是：你第一次跟你的医生谈这些问题是什么时候？",
+          "type": "text",
+          "responseFormat": "□□月前 / NA"
+        }
+      }
+    }
+  ],
+  "informantQuestionnaire": [
+    {
+      "id": "inform_1",
+      "question": "你是否觉得受访者的记性变差了?",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    },
+    {
+      "id": "inform_2",
+      "question": "受访者是否比以前要找词困难？",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    },
+    {
+      "id": "inform_3",
+      "question": "受访者是否越来越难做计划、有序安排事情？",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    },
+    {
+      "id": "inform_4",
+      "question": "如果受访者不专心做一件事情时是否比以前更容易犯错?",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    },
+    {
+      "id": "inform_5",
+      "question": "受访者在其他认知方面是否变差? 是哪些方面？",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    },
+    {
+      "id": "inform_6",
+      "question": "受访者行为或性格是否有变化？",
+      "followUpIfYes": "减退是从什么时候开始的?"
+    }
+  ],
+  "informantOnsetOptions": {
+    "question": "减退是从什么时候开始的?",
+    "options": [
+      "近6个月内",
+      "6个月-2年前",
+      "2-5年内",
+      "5年前",
+      "不清楚"
+    ],
+    "values": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "informantMeta": {
+    "availabilityOptions": [
+      "无知情者",
+      "受访者不希望知情者提供信息"
+    ],
+    "relationshipOptions": [
+      "配偶",
+      "孩子",
+      "兄弟姐妹",
+      "朋友",
+      "其他"
+    ]
+  },
+  "additionalInformation": [
+    {
+      "id": "additional_1",
+      "question": "是否存在其他已知导致认知障碍的病因？",
+      "options": [
+        "是",
+        "否"
+      ]
+    },
+    {
+      "id": "additional_2",
+      "question": "认知表现是否存在明显波动?",
+      "options": [
+        "是",
+        "否"
+      ]
+    },
+    {
+      "id": "additional_3",
+      "question": "认知主诉的出现形式",
+      "options": [
+        "突然的",
+        "不知道",
+        "慢性的"
+      ]
+    },
+    {
+      "id": "additional_4",
+      "question": "认知损害的进展特点",
+      "options": [
+        "迅速",
+        "不知道",
+        "缓慢",
+        "阶梯式"
+      ]
+    }
+  ]
+}

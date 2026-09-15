@@ -13,7 +13,7 @@ def new_assignment(client, doctor, **extra):
     })
     assert patient.status_code == 201, patient.text
     templates = client.get('/api/v1/questionnaires', headers=doctor).json()
-    version = next(row['latest_version_id'] for row in templates if row['code'] == 'DEMO_SCD')
+    version = next(row['latest_version_id'] for row in templates if row['code'] == 'SCD_QUESTIONNAIRE')
     assignment = client.post('/api/v1/assignments', headers=doctor, json={
         'patient_id': patient.json()['id'], 'questionnaire_version_ids': [version],
         'title': '集成验证任务', **extra,

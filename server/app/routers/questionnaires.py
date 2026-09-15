@@ -7,9 +7,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..core.database import get_db
-from ..core.dependencies import admin_user, current_user
+from ..core.dependencies import current_user
 from ..models import QuestionnaireTemplate, QuestionnaireVersion, User
 from ..services.audit import audit
+from ..services.permissions import require_permission
 from ..services.questionnaire import validate_schema
 from ..services.questionnaire_governance import content_hash, governance_review, version_diff
 from ..services.scale_catalog import catalog_items
@@ -51,6 +52,11 @@ class PublishInput(BaseModel):
 class RetireInput(BaseModel):
     confirmation_code: str
     reason: str = Field(min_length=2, max_length=1000)
+
+
+def template_manager(user: User = Depends(current_user), db: Session = Depends(get_db)) -> User:
+    require_permission(db, user, "can_manage_templates")
+    return user
 
 
 def version_name(version: QuestionnaireVersion) -> str:
@@ -196,7 +202,7 @@ def list_templates(user: User = Depends(current_user), db: Session = Depends(get
 
 
 @router.get("/catalog")
-def scale_catalog(_: User = Depends(admin_user)):
+def scale_catalog(_: User = Depends(template_manager)):
     return [{
         "code": item["code"], "name": item["name"], "description": item["description"],
         "administration_mode": item["questionnaire_schema"].get("administration_mode"),
@@ -206,22 +212,22 @@ def scale_catalog(_: User = Depends(admin_user)):
 
 
 @router.post("/import-preview")
-def import_preview(payload: ImportPackageInput, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+def import_preview(payload: ImportPackageInput, _: User = Depends(template_manager), db: Session = Depends(get_db)):
     return {"items": preview_items(payload.templates, db)}
 
 
 @router.post("/import-preview/catalog")
-def import_catalog_preview(payload: CatalogImportInput, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+def import_catalog_preview(payload: CatalogImportInput, _: User = Depends(template_manager), db: Session = Depends(get_db)):
     return {"items": preview_items(catalog_templates(payload.codes), db)}
 
 
 @router.post("/import-package")
-def import_package(payload: ImportPackageInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
+def import_package(payload: ImportPackageInput, user: User = Depends(template_manager), db: Session = Depends(get_db)):
     return {"items": import_templates(payload, user, db, require_preview=True)}
 
 
 @router.post("/import-catalog")
-def import_catalog(payload: CatalogImportInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
+def import_catalog(payload: CatalogImportInput, user: User = Depends(template_manager), db: Session = Depends(get_db)):
     templates = catalog_templates(payload.codes)
     package = ImportPackageInput(
         templates=templates, conflict_strategy="new_version", publish=payload.publish,
@@ -231,7 +237,7 @@ def import_catalog(payload: CatalogImportInput, user: User = Depends(admin_user)
 
 
 @router.post("", status_code=201)
-def create_template(payload: TemplateInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
+def create_template(payload: TemplateInput, user: User = Depends(template_manager), db: Session = Depends(get_db)):
     validate_schema(payload.questionnaire_schema)
     errors, _ = governance_review(payload.questionnaire_schema, payload.scoring_json)
     if errors:
@@ -253,7 +259,7 @@ def create_template(payload: TemplateInput, user: User = Depends(admin_user), db
 
 
 @router.get("/{template_id}/versions")
-def list_versions(template_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+def list_versions(template_id: int, _: User = Depends(template_manager), db: Session = Depends(get_db)):
     template = db.get(QuestionnaireTemplate, template_id)
     if not template:
         raise HTTPException(status_code=404, detail="问卷不存在")
@@ -261,7 +267,7 @@ def list_versions(template_id: int, _: User = Depends(admin_user), db: Session =
 
 
 @router.get("/versions/{version_id}/diff")
-def compare_version(version_id: int, base_version_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+def compare_version(version_id: int, base_version_id: int, _: User = Depends(template_manager), db: Session = Depends(get_db)):
     target, base = db.get(QuestionnaireVersion, version_id), db.get(QuestionnaireVersion, base_version_id)
     if not target or not base:
         raise HTTPException(status_code=404, detail="问卷版本不存在")
@@ -271,7 +277,7 @@ def compare_version(version_id: int, base_version_id: int, _: User = Depends(adm
 
 
 @router.post("/versions/{version_id}/publish")
-def publish_version(version_id: int, payload: PublishInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
+def publish_version(version_id: int, payload: PublishInput, user: User = Depends(template_manager), db: Session = Depends(get_db)):
     version = db.get(QuestionnaireVersion, version_id)
     if not version:
         raise HTTPException(status_code=404, detail="问卷版本不存在")
@@ -303,7 +309,7 @@ def publish_version(version_id: int, payload: PublishInput, user: User = Depends
 
 
 @router.post("/versions/{version_id}/retire")
-def retire_version(version_id: int, payload: RetireInput, user: User = Depends(admin_user), db: Session = Depends(get_db)):
+def retire_version(version_id: int, payload: RetireInput, user: User = Depends(template_manager), db: Session = Depends(get_db)):
     version = db.get(QuestionnaireVersion, version_id)
     if not version:
         raise HTTPException(status_code=404, detail="问卷版本不存在")

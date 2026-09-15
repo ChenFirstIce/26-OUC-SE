@@ -136,9 +136,9 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
         headers = {"Authorization": f"Bearer {verified['access_token']}"}
         tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
         by_code = {item["code"]: item for item in tasks}
-        assert {"DEMO_SCD_INTERVIEW", "DEMO_MOCA_OPEN", "DEMO_BOSTON", "DEMO_TRAIL"} <= set(by_code)
+        assert {"SCD_INTERVIEW", "MOCA_OPEN_ANSWER", "BOSTON_NAMING", "STT_SHAPE_TRAIL_MAKING"} <= set(by_code)
 
-        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
+        scd_id = by_code["SCD_INTERVIEW"]["id"]
         detail = client.get(f"/api/v1/patient-session/tasks/{scd_id}", headers=headers).json()
         message = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/test-session/messages",
                               headers=headers, json={"message": "最近半年开始有变化。"})
@@ -151,7 +151,7 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
         assert submitted.status_code == 200
         assert "candidate" not in submitted.text and "score" not in submitted.text
 
-        moca_id = by_code["DEMO_MOCA_OPEN"]["id"]
+        moca_id = by_code["MOCA_OPEN_ANSWER"]["id"]
         moca_detail = client.get(f"/api/v1/patient-session/tasks/{moca_id}", headers=headers).json()
         empty_moca = client.post(f"/api/v1/patient-session/tasks/{moca_id}/assisted-submit",
             headers={**headers, "Idempotency-Key": "cb-moca-empty"}, json={
@@ -169,7 +169,7 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
             })
         assert moca.status_code == 200 and "score" not in moca.text
 
-        boston_id = by_code["DEMO_BOSTON"]["id"]
+        boston_id = by_code["BOSTON_NAMING"]["id"]
         boston_detail = client.get(f"/api/v1/patient-session/tasks/{boston_id}", headers=headers).json()
         boston = client.post(f"/api/v1/patient-session/tasks/{boston_id}/assisted-submit",
             headers={**headers, "Idempotency-Key": "cb-boston-submit"}, json={
@@ -177,18 +177,28 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
                 "revision": boston_detail["revision"], "metrics": {"durationMs": 900},
             })
         assert boston.status_code == 200 and "score" not in boston.text
-        trail_id = by_code["DEMO_TRAIL"]["id"]
+        trail_id = by_code["STT_SHAPE_TRAIL_MAKING"]["id"]
         trail_detail = client.get(f"/api/v1/patient-session/tasks/{trail_id}", headers=headers).json()
-        trail_nodes = {"1": (12, 18), "A": (72, 12), "2": (42, 38), "B": (86, 56), "3": (22, 78), "C": (68, 86)}
-        clicks = ["B", "1", "A", "2", "B", "3", "C"]
-        trail_events = [{"nodeId": node, "timestampMs": (index + 1) * 100,
-                         "x": trail_nodes[node][0], "y": trail_nodes[node][1]}
-                        for index, node in enumerate(clicks)]
+        from app.services.stt_scale import expected_sequence
+        practice_seq = expected_sequence("A", "practice")
+        test_seq = expected_sequence("A", "test")
+        assert practice_seq and test_seq
+
+        def trail_stage_events(sequence: tuple[str, ...]) -> list[dict]:
+            # 在序列第 2 位插入一次错误点击，随后点回正确目标，验证错误/纠正统计。
+            clicks = [sequence[0], sequence[2], *sequence[1:]]
+            return [{"nodeId": node, "timestampMs": (index + 1) * 100,
+                     "x": (index % 90) + 5, "y": (index % 80) + 5}
+                    for index, node in enumerate(clicks)]
+
         trail = client.post(f"/api/v1/patient-session/tasks/{trail_id}/assisted-submit",
             headers={**headers, "Idempotency-Key": "cb-trail-submit"}, json={
-                "answers": {"events": trail_events, "sequence": ["1", "A", "2", "B", "3", "C"],
-                            "errorCount": 1, "elapsedMs": 700},
-                "revision": trail_detail["revision"], "metrics": {"durationMs": 800},
+                "answers": {"form": "A", "ageBand": "60-69", "stages": {
+                    "A-practice": {"events": trail_stage_events(practice_seq), "errorCount": 1,
+                                   "sequence": list(practice_seq)},
+                    "A-test": {"events": trail_stage_events(test_seq), "errorCount": 1,
+                               "sequence": list(test_seq), "elapsedMs": 60000}}},
+                "revision": trail_detail["revision"], "metrics": {"durationMs": 80000},
             })
         assert trail.status_code == 200, trail.text
         with SessionLocal() as db:
@@ -202,9 +212,14 @@ def test_cb_tasks_are_in_formal_patient_workflow_and_require_review():
             assert moca_assessment.candidate_result_json["max_score"] == 6
             assert {item["question_id"] for item in moca_assessment.candidate_result_json["items"]} == {"moca_payment_13", "moca_abstraction"}
             assert boston_assessment.auto_result_json["provisional_total"] == 1
-            assert trail_assessment.auto_result_json["error_count"] == 1
-            assert trail_assessment.auto_result_json["correction_count"] == 1
-            assert trail_assessment.auto_result_json["events"][0]["expected_node"] == "1"
+            trail_auto = trail_assessment.auto_result_json
+            assert trail_auto["form"] == "A" and trail_auto["age_band"] == "60-69"
+            assert trail_auto["error_count"] == 2 and trail_auto["correction_count"] == 2
+            assert trail_auto["stages"]["A-practice"]["error_count"] == 1
+            assert trail_auto["stages"]["A-test"]["threshold_seconds"] == 80
+            assert trail_auto["stages"]["A-test"]["duration_seconds"] == 60.0
+            assert trail_auto["stages"]["A-test"]["threshold_interpretation"] == "未达到异常阈值"
+            assert trail_auto["stages"]["A-test"]["events"][0]["expected_node"] == test_seq[0]
             assert db.query(LlmMessage).count() >= 2
 
         doctor = auth(client, "doctor1", "Doctor123!")
@@ -313,7 +328,7 @@ def test_deepseek_success_and_failure_paths(monkeypatch):
         assert patient.status_code == 201, patient.text
         templates = client.get("/api/v1/questionnaires", headers=doctor_headers).json()
         versions = [next(item["latest_version_id"] for item in templates if item["code"] == code)
-                    for code in ("DEMO_SCD_INTERVIEW", "DEMO_MOCA_OPEN")]
+                    for code in ("SCD_INTERVIEW", "MOCA_OPEN_ANSWER")]
         assignment = client.post("/api/v1/assignments", headers=doctor_headers, json={
             "patient_id": patient.json()["id"], "questionnaire_version_ids": versions, "title": "DeepSeek C 类测试",
         })
@@ -335,8 +350,8 @@ def test_deepseek_success_and_failure_paths(monkeypatch):
         headers = create_cb_assignment(client, doctor)
         tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
         by_code = {item["code"]: item for item in tasks}
-        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
-        moca_id = by_code["DEMO_MOCA_OPEN"]["id"]
+        scd_id = by_code["SCD_INTERVIEW"]["id"]
+        moca_id = by_code["MOCA_OPEN_ANSWER"]["id"]
 
         scd_reply = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/deepseek-test/messages",
             headers=headers, json={"message": "最近半年开始有变化。"})
@@ -368,7 +383,7 @@ def test_deepseek_success_and_failure_paths(monkeypatch):
         headers = create_cb_assignment(client, doctor)
         tasks = client.get("/api/v1/patient-session/tasks", headers=headers).json()["items"]
         by_code = {item["code"]: item for item in tasks}
-        scd_id = by_code["DEMO_SCD_INTERVIEW"]["id"]
+        scd_id = by_code["SCD_INTERVIEW"]["id"]
         reply = client.post(f"/api/v1/patient-session/tasks/{scd_id}/llm/sessions/fallback-test/messages",
             headers=headers, json={"message": "最近半年开始有变化。"})
         assert reply.status_code == 200
