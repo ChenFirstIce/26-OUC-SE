@@ -92,6 +92,15 @@
 
 ## 🚀 快速开始
 
+> **团队成员请查看**: [TEAM_STARTUP.md](./TEAM_STARTUP.md) - 包含完整的环境配置、密钥配置和功能清单
+
+### 一键启动 (推荐)
+
+```powershell
+# 自动安装依赖并启动前后端服务
+.\scripts\start.ps1
+```
+
 ### 环境要求
 - Python 3.10+
 - Node.js 18+
@@ -281,6 +290,11 @@ pytest tests/test_flow.py::test_cb_trail_making_structured -v
 
 ## 📄 文档索引
 
+### 快速上手
+- [**团队启动指南**](./TEAM_STARTUP.md) - 新成员必读，包含环境配置、密钥、功能清单和验证步骤
+- [详细启动说明](./STARTUP.md) - 完整的启动流程和故障排除
+
+### 技术文档
 - [架构说明](./docs/ARCHITECTURE.md)
 - [开发日志](./docs/DEVELOPMENT_LOG.md)
 - [集成完成报告](./INTEGRATION_COMPLETE.md)

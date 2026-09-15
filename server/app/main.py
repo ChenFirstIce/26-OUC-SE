@@ -1,3 +1,4 @@
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -16,6 +17,8 @@ from .core.database import Base, SessionLocal, engine
 from .routers import admin, assignments, assisted_tasks, auth, patient_session, patients, questionnaires, statistics
 from .seed import seed_database
 
+logger = logging.getLogger(__name__)
+
 
 def initialize_database() -> None:
     Base.metadata.create_all(engine)
@@ -31,6 +34,11 @@ def initialize_database() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    if not settings.llm_secret_key:
+        logger.warning(
+            "LLM_SECRET_KEY is not configured. AI-assisted features (DeepSeek) will run in degraded mode. "
+            "Set LLM_SECRET_KEY environment variable to enable AI functionality."
+        )
     initialize_database()
     yield
 

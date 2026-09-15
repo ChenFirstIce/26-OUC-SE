@@ -205,8 +205,17 @@ def assisted_submit(payload: AssistedSubmitInput, item_id: int,
             try:
                 candidate_result = summarize_scd_interview(db, messages)
             except DeepSeekUnavailable as exc:
-                candidate_result = {"status": "candidate_generated", "requires_clinician_review": True,
-                                    "source": "local_fallback", "fallback_reason": str(exc)}
+                candidate_result = {
+                    "status": "candidate_generated",
+                    "requires_clinician_review": True,
+                    "source": "local_fallback",
+                    "summary": f"访谈已完成（共 {len(messages)} 条对话），等待人工整理",
+                    "subjective_changes": "",
+                    "daily_impact": "",
+                    "concerns": [],
+                    "explanation": "AI 服务不可用，已保存原始访谈记录供医生查看。",
+                    "fallback_reason": str(exc),
+                }
         else:
             candidate_result = {"status": "candidate_generated", "requires_clinician_review": True,
                                 "source": "local_fallback"}
@@ -215,7 +224,7 @@ def assisted_submit(payload: AssistedSubmitInput, item_id: int,
         selected_domains = answers.get("selectedDomains", [])
         main_answers = answers.get("mainAnswers", {})
         follow_up_answers = answers.get("followUpAnswers", {})
-        informant_data = answers.get("informant", )
+        informant_data = answers.get("informant", {})
         additional_info = answers.get("additionalInformation", {})
 
         if not isinstance(selected_domains, list) or not selected_domains:
