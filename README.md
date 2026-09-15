@@ -8,13 +8,11 @@
 | --- | --- |
 | `admin-web/` | Vue 医生管理、患者移动填写、问卷治理；正式患者入口 `/p/fill/:token` |
 | `server/` | FastAPI、数据库模型、认证、草稿、计分、统计、迁移与后端测试 |
-| `patient-web/c2b/Frontend/` | main 原始 React C/B 原型，仅作来源参考；STT 已补入完整坐标与年龄阈值，正式入口已迁入 `admin-web` |
+| `patient-web/` | React C/B 参考原型（仅供来源参考）；STT 数据文件被正式前端使用 |
 | `contracts/` | 正式 API 契约 |
 | `scripts/` | 安装、启动、停止、测试及来源审计 |
-| `docs/integration/` | 固定来源版本、逐文件去向、覆盖报告与验证记录 |
-| `docs/references/lfy/` | lfy 原始资料与图片参考 |
-| `docs/requirements/` | main 保留的原始需求与量表材料 |
-| `assets/`、`samples/` | dl 参考图片与问卷导入样例 |
+| `docs/` | 项目文档（按贡献者和时间线组织，详见 [docs/README.md](docs/README.md)） |
+| `assets/`、`samples/` | 参考图片与问卷导入样例 |
 
 正式闭环：医生登录 → 建档 → 派发 → 患者通过链接和访问码进入 → 草稿/提交 → 服务端计分 → 医生查看报告和统计。
 
