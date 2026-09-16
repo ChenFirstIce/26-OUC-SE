@@ -1,82 +1,124 @@
-import { type FormEvent, useState } from "react";
-import { CheckCircle2, LoaderCircle, RotateCcw, Sparkles } from "lucide-react";
-import { analyzeOpenAnswer } from "../api/llm";
-import { Button, Card, DemoNotice } from "../components/ui";
-import { mocaOpenTasks } from "../data/moca-open";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Bot, CheckCircle2, LoaderCircle, MessageCircleMore, RotateCcw, Send, UserRound } from "lucide-react";
+import { resetMockMoca, sendMocaMessage } from "../api/llm";
+import { Button, Card, DemoNotice, Progress } from "../components/ui";
+import { mocaInitialMessage } from "../data/demo-data";
 import { useDemoStore } from "../store/use-demo-store";
-import { ApiError, type DemoSubmission, type OpenAnswerAnalysis } from "../types";
+import { ApiError, type DemoSubmission, type InterviewMessage } from "../types";
+
+const MOCA_MAX_TURNS = 2;
+
+const makeMessage = (role: InterviewMessage["role"], content: string): InterviewMessage => ({
+  id: crypto.randomUUID(), role, content, createdAt: new Date().toISOString(),
+});
 
 export function MocaOpenAnswerPage() {
-  const answers = useDemoStore((state) => state.openAnswers ?? {});
+  const storedMessages = useDemoStore((state) => state.mocaMessages);
+  const storedProgress = useDemoStore((state) => state.mocaProgress);
+  const storedStartedAt = useDemoStore((state) => state.mocaStartedAt);
   const status = useDemoStore((state) => state.statuses.moca_open_answer);
-  const submission = useDemoStore((state) => state.submissions.moca_open_answer);
-  const setAnswer = useDemoStore((state) => state.setOpenAnswer);
   const setStatus = useDemoStore((state) => state.setStatus);
+  const setMoca = useDemoStore((state) => state.setMoca);
   const saveSubmission = useDemoStore((state) => state.saveSubmission);
   const resetTask = useDemoStore((state) => state.resetTask);
-  const [analyzing, setAnalyzing] = useState(false);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
-  const [startedAt] = useState(new Date().toISOString());
-  const allAnswered = mocaOpenTasks.every((task) => answers[task.id]?.trim());
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const messages = useMemo(
+    () => storedMessages.length ? storedMessages : [makeMessage("assistant", mocaInitialMessage)],
+    [storedMessages],
+  );
+  const progress = storedMessages.length ? storedProgress : 0.15;
+  const startedAt = storedStartedAt ?? new Date().toISOString();
+
+  useEffect(() => {
+    if (!storedMessages.length && status !== "completed") {
+      setMoca(messages, progress, startedAt);
+      setStatus("moca_open_answer", "in_progress");
+    }
+  }, [messages, progress, setMoca, setStatus, startedAt, status, storedMessages.length]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, sending]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const cleanAnswers = Object.fromEntries(mocaOpenTasks.map((task) => [task.id, answers[task.id]?.trim() ?? ""]));
-    if (!mocaOpenTasks.every((task) => cleanAnswers[task.id]) || analyzing || status === "completed") return;
-    setAnalyzing(true);
+    const clean = input.trim();
+    if (!clean || sending || status === "completed") return;
     setError(undefined);
-    setStatus("moca_open_answer", "in_progress");
+    setSending(true);
+    const userMessage = makeMessage("user", clean);
+    const withUser = [...messages, userMessage];
+    setInput("");
+    setMoca(withUser, progress, startedAt);
     try {
-      const response = await analyzeOpenAnswer({ assignmentId: "demo-moca-001", answers: cleanAnswers });
-      const completedAt = new Date().toISOString();
-      const result: DemoSubmission<Record<string, string>, OpenAnswerAnalysis> = {
-        assignmentId: "demo-moca-001", taskId: "demo-moca-open-answer", taskType: "moca_open_answer",
-        answers: cleanAnswers, result: response.analysis,
-        metrics: { startedAt, completedAt, durationMs: Date.parse(completedAt) - Date.parse(startedAt) },
-      };
-      saveSubmission("moca_open_answer", result);
+      const completedUserTurns = withUser.filter((message) => message.role === "user").length;
+      const shouldForceComplete = completedUserTurns >= MOCA_MAX_TURNS;
+      const reply = await sendMocaMessage("demo-moca-session", clean, completedUserTurns - 1);
+      const finalReply = shouldForceComplete ? { ...reply, completed: true, progress: 1 } : reply;
+      const nextMessages = [...withUser, makeMessage("assistant", finalReply.reply)];
+      setMoca(nextMessages, finalReply.progress, startedAt);
+      if (finalReply.completed) {
+        const completedAt = new Date().toISOString();
+        const submission: DemoSubmission<InterviewMessage[], { completed: true; progress: number }> = {
+          assignmentId: "demo-moca-001",
+          taskId: "demo-moca-open-answer",
+          taskType: "moca_open_answer",
+          answers: nextMessages,
+          result: { completed: true, progress: finalReply.progress },
+          metrics: { startedAt, completedAt, durationMs: Date.parse(completedAt) - Date.parse(startedAt) },
+        };
+        saveSubmission("moca_open_answer", submission);
+      }
     } catch (caught) {
       setStatus("moca_open_answer", "failed");
-      setError(caught instanceof ApiError ? caught.message : "分析暂时失败，请重试。");
+      setError(caught instanceof ApiError ? caught.message : "发送失败，请稍后重试。");
     } finally {
-      setAnalyzing(false);
+      setSending(false);
     }
+  }
+
+  function restart() {
+    resetTask("moca_open_answer");
+    resetMockMoca();
+    setError(undefined);
   }
 
   return (
     <div className="task-page narrow">
-      <div className="task-heading"><div><span className="eyebrow">C 类 · LLM 辅助</span><h1>MoCA-B 开放题</h1></div><Button variant="ghost" onClick={() => resetTask("moca_open_answer")}><RotateCcw size={18} />重新开始</Button></div>
+      <div className="task-heading">
+        <div><span className="eyebrow">C 类 · LLM 辅助</span><h1>MoCA-B 开放题</h1></div>
+        <Button variant="ghost" onClick={restart}><RotateCcw size={18} />重新开始</Button>
+      </div>
       <DemoNotice />
-      {status === "completed" ? (
-        <Card className="success-card">
-          <span className="success-icon"><CheckCircle2 size={38} /></span><h2>回答已记录</h2><p>您的回答已经安全保存，后续将由专业人员查看。</p>
-          <div className="answer-review">
-            <span>您提交的回答</span>
-            {mocaOpenTasks.map((task) => <p key={task.id}><strong>{task.title}：</strong>{String((submission?.answers as Record<string, string> | undefined)?.[task.id] ?? answers[task.id] ?? "")}</p>)}
-          </div>
-          <p className="privacy-note">内部候选分数与分析依据不会在患者端展示。</p>
-        </Card>
-      ) : (
-        <Card className="question-card">
-          <div className="question-badge"><Sparkles size={18} />开放回答</div>
-          <h2>请完成以下 2 个 MoCA-B 开放题子任务。</h2>
-          <p className="question-help">没有唯一的表达方式，请用您觉得自然的语言回答；候选分只供专业人员参考。</p>
-          <form onSubmit={submit}>
-            {mocaOpenTasks.map((task) => (
-              <div className="open-task-field" key={task.id}>
-                <label htmlFor={task.id}>{task.title}</label>
-                <p>{task.prompt}</p>
-                <textarea id={task.id} rows={4} maxLength={500} value={answers[task.id] ?? ""} onChange={(event) => setAnswer(task.id, event.target.value)} placeholder={task.hint} disabled={analyzing} />
-                <div className="field-meta"><span>{(answers[task.id] ?? "").length} / 500 字</span></div>
-              </div>
-            ))}
-            {error && <div className="error-message" role="alert">{error}</div>}
-            <Button className="full-button" type="submit" disabled={!allAnswered || analyzing}>
-              {analyzing ? <><LoaderCircle size={20} className="spin" />正在记录与分析…</> : "确认提交"}
-            </Button>
+      <Progress value={status === "completed" ? 1 : progress} label="问答进度" />
+      <Card className="chat-card">
+        <div className="chat-header"><MessageCircleMore size={20} /><span>认知评估助手</span><small>{status === "completed" ? "已完成" : "问答中"}</small></div>
+        <div className="message-list" aria-live="polite">
+          {messages.map((message) => (
+            <div key={message.id} className={`message-row ${message.role}`}>
+              <span className="avatar">{message.role === "assistant" ? <Bot size={20} /> : <UserRound size={20} />}</span>
+              <div className="message-bubble">{message.content}</div>
+            </div>
+          ))}
+          {sending && <div className="message-row assistant"><span className="avatar"><Bot size={20} /></span><div className="message-bubble typing"><LoaderCircle size={18} className="spin" />正在处理回答…</div></div>}
+          <div ref={bottomRef} />
+        </div>
+        {status === "completed" ? (
+          <div className="complete-panel"><CheckCircle2 size={26} /><div><strong>问答已完成</strong><span>回答已保存，后续由专业人员查看。</span></div></div>
+        ) : (
+          <form className="chat-form" onSubmit={submit}>
+            <label htmlFor="moca-answer">请输入您的回答</label>
+            <div className="chat-input-row">
+              <textarea id="moca-answer" rows={2} value={input} onChange={(event) => setInput(event.target.value)} placeholder="请用自然语言回答…" disabled={sending} />
+              <Button type="submit" disabled={!input.trim() || sending} aria-label="发送回答"><Send size={20} /><span>发送</span></Button>
+            </div>
+            {error && <div className="error-message" role="alert">{error} 您可以再次点击发送重试。</div>}
           </form>
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

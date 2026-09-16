@@ -24,3 +24,5 @@ export const trailNodes: TrailNode[] = sttTasks.A.test.nodes;
 export const trailSequence = sttTasks.A.test.sequence;
 
 export const scdInitialMessage = "这是一个演示访谈。最近您是否感觉自己的记忆或思考能力与以前相比发生了变化？";
+
+export const mocaInitialMessage = "这是一个 MoCA-B 开放题演示问答。第 1 题：如果买东西需要付 13 元，请写出 3 种不同的付款方式（例如可使用 10 元、5 元、2 元、1 元等面额组合）。";

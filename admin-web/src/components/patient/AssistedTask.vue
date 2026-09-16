@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../../api/client'
 import { createIdempotencyKey } from '../../utils/idempotency'
-import { mocaOpenTasks } from '../../utils/mocaOpen'
 import { sttAgeBands, sttStages, type SttAgeBand, type SttForm, type SttNode, type SttStage } from '../../data/stt-scale'
 import ScdQuestionnaire from '../questionnaire/ScdQuestionnaire.vue'
 
@@ -16,9 +15,14 @@ const startedAt = ref(Date.now() - Number(props.task.answers?.elapsedMs || 0))
 const sessionId = `scd-${props.task.id}-${Date.now()}`
 const submissionKey = createIdempotencyKey()
 const input = ref('')
-const openAnswers = ref<Record<string, string>>({ ...(props.task.answers?.answers || {}) })
 const messages = ref<any[]>(props.task.answers?.messages || [{ role: 'assistant', content: '最近您是否感觉自己的记忆或思考能力与以前相比发生了变化？' }])
 const progress = ref(props.task.answers?.progress || .15)
+const SCD_MAX_TURNS = 5
+const mocaSessionId = `moca-${props.task.id}-${Date.now()}`
+const mocaInput = ref('')
+const mocaMessages = ref<any[]>(props.task.answers?.messages || [{ role: 'assistant', content: '这是一个 MoCA-B 开放题问答。第 1 题：如果买东西需要付 13 元，请写出 3 种不同的付款方式（例如可使用 10 元、5 元、2 元、1 元等面额组合）。' }])
+const mocaProgress = ref(props.task.answers?.mocaProgress || .15)
+const MOCA_MAX_TURNS = 2
 const boston = [
   { id:'demo_boston_01', emoji:'☂️', title:'这是什么物品？', hint:'下雨时常用的物品' },
   { id:'demo_boston_02', emoji:'🚲', title:'这是什么交通工具？', hint:'通常有两个轮子' },
@@ -78,18 +82,28 @@ async function sendInterview() {
   busy.value = true
   try {
     messages.value.push({ role:'user', content:value }); input.value = ''
+    const completedUserTurns = messages.value.filter((m:any) => m.role === 'user').length
+    const shouldForceComplete = completedUserTurns >= SCD_MAX_TURNS
     const { data } = await api.post(`/patient-session/tasks/${props.task.id}/llm/sessions/${sessionId}/messages`, { message:value })
     messages.value.push({ role:'assistant', content:data.reply }); progress.value = data.progress
     await saveDraft({ messages:messages.value, progress:progress.value })
-    if (data.completed) await finish({ messages:messages.value, progress:progress.value })
+    if (data.completed || shouldForceComplete) await finish({ messages:messages.value, progress:shouldForceComplete ? 1 : data.progress })
   } catch (error) { ElMessage.error(error instanceof Error ? error.message : '发送失败') }
   finally { busy.value = false }
 }
-async function submitOpen() {
-  const answers = Object.fromEntries(mocaOpenTasks.map(task => [task.id, (openAnswers.value[task.id] || '').trim()]))
-  if (mocaOpenTasks.some(task => !answers[task.id])) return
-  await saveDraft({ answers })
-  await finish({ answers, completedAt:new Date().toISOString() })
+async function sendMocaInterview() {
+  const value = mocaInput.value.trim(); if (!value || busy.value) return
+  busy.value = true
+  try {
+    mocaMessages.value.push({ role:'user', content:value }); mocaInput.value = ''
+    const completedUserTurns = mocaMessages.value.filter((m:any) => m.role === 'user').length
+    const shouldForceComplete = completedUserTurns >= MOCA_MAX_TURNS
+    const { data } = await api.post(`/patient-session/tasks/${props.task.id}/llm/sessions/${mocaSessionId}/messages`, { message:value })
+    mocaMessages.value.push({ role:'assistant', content:data.reply }); mocaProgress.value = data.progress
+    await saveDraft({ messages:mocaMessages.value, mocaProgress:shouldForceComplete ? 1 : data.progress })
+    if (data.completed || shouldForceComplete) await finish({ messages:mocaMessages.value, mocaProgress:shouldForceComplete ? 1 : data.progress })
+  } catch (error) { ElMessage.error(error instanceof Error ? error.message : '发送失败') }
+  finally { busy.value = false }
 }
 async function submitNaming() {
   if (!namingAnswer.value.trim()) return
@@ -167,14 +181,10 @@ async function clickTrail(nodeId:string) {
     </section>
 
     <section v-else-if="kind === 'moca_open_answer'" class="cb-card">
-      <h2>请完成以下 2 个 MoCA-B 开放题子任务。</h2>
-      <p>没有唯一表达方式，请使用自然语言回答；内部候选分仅供专业人员复核。</p>
-      <div v-for="task in mocaOpenTasks" :key="task.id" class="open-question">
-        <b>{{ task.title }}</b>
-        <p>{{ task.prompt }}</p>
-        <el-input v-model="openAnswers[task.id]" type="textarea" :rows="4" maxlength="500" show-word-limit :placeholder="task.hint" />
-      </div>
-      <el-button type="primary" size="large" class="full" :loading="busy" :disabled="mocaOpenTasks.some(task => !openAnswers[task.id]?.trim())" @click="submitOpen">确认提交</el-button>
+      <div class="cb-progress"><i :style="{width:`${mocaProgress*100}%`}"></i></div>
+      <div class="chat-list"><div v-for="(message,index) in mocaMessages" :key="index" :class="['chat-message',message.role]">{{ message.content }}</div></div>
+      <el-input v-model="mocaInput" type="textarea" :rows="3" placeholder="请用自然语言回答" :disabled="busy" />
+      <el-button type="primary" size="large" class="full" :loading="busy" :disabled="!mocaInput.trim()" @click="sendMocaInterview">发送回答</el-button>
     </section>
 
     <section v-else-if="kind === 'boston_naming'" class="cb-card naming-card">

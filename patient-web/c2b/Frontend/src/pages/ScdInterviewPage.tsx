@@ -10,6 +10,8 @@ const makeMessage = (role: InterviewMessage["role"], content: string): Interview
   id: crypto.randomUUID(), role, content, createdAt: new Date().toISOString(),
 });
 
+const SCD_MAX_TURNS = 5;
+
 export function ScdInterviewPage() {
   const storedMessages = useDemoStore((state) => state.interviewMessages);
   const storedProgress = useDemoStore((state) => state.interviewProgress);
@@ -53,17 +55,19 @@ export function ScdInterviewPage() {
     setInterview(withUser, progress, startedAt);
     try {
       const completedUserTurns = withUser.filter((message) => message.role === "user").length;
+      const shouldForceComplete = completedUserTurns >= SCD_MAX_TURNS;
       const reply = await sendInterviewMessage("demo-scd-session", clean, completedUserTurns - 1);
-      const nextMessages = [...withUser, makeMessage("assistant", reply.reply)];
-      setInterview(nextMessages, reply.progress, startedAt);
-      if (reply.completed) {
+      const finalReply = shouldForceComplete ? { ...reply, completed: true, progress: 1 } : reply;
+      const nextMessages = [...withUser, makeMessage("assistant", finalReply.reply)];
+      setInterview(nextMessages, finalReply.progress, startedAt);
+      if (finalReply.completed) {
         const completedAt = new Date().toISOString();
         const submission: DemoSubmission<InterviewMessage[], { completed: true; progress: number }> = {
           assignmentId: "demo-scd-001",
           taskId: "demo-scd-interview",
           taskType: "scd_interview",
           answers: nextMessages,
-          result: { completed: true, progress: reply.progress },
+          result: { completed: true, progress: finalReply.progress },
           metrics: { startedAt, completedAt, durationMs: Date.parse(completedAt) - Date.parse(startedAt) },
         };
         saveSubmission("scd_interview", submission);

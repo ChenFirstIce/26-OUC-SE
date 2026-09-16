@@ -36,6 +36,13 @@ const mockReplies: InterviewReply[] = [
 
 let mockTurn = 0;
 
+const mocaMockReplies: InterviewReply[] = [
+  { reply: "第 2 题：请分别说明以下三组词语的共同类别：火车/轮船、锣鼓/笛子、南方/北方。", progress: 0.6, completed: false },
+  { reply: "感谢您的回答，本次 MoCA-B 开放题演示已完成，回答将由专业人员查看。", progress: 1, completed: true },
+];
+
+let mocaMockTurn = 0;
+
 const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 async function parseResponse(response: Response): Promise<unknown> {
@@ -51,12 +58,39 @@ export function resetMockInterview(): void {
   mockTurn = 0;
 }
 
+export function resetMockMoca(): void {
+  mocaMockTurn = 0;
+}
+
 export async function sendInterviewMessage(sessionId: string, message: string, mockTurnHint?: number): Promise<InterviewReply> {
   if (useMock) {
     await delay(700);
     const turn = mockTurnHint ?? mockTurn;
     const reply = mockReplies[Math.min(turn, mockReplies.length - 1)];
     mockTurn = turn + 1;
+    return reply;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/llm/session/${encodeURIComponent(sessionId)}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    return interviewReplySchema.parse(await parseResponse(response));
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (error instanceof z.ZodError) throw new ApiError("INVALID_MODEL_OUTPUT", "服务返回内容无法识别。", true);
+    throw new ApiError("NETWORK_ERROR", "网络连接失败，请检查网络后重试。", true);
+  }
+}
+
+export async function sendMocaMessage(sessionId: string, message: string, mockTurnHint?: number): Promise<InterviewReply> {
+  if (useMock) {
+    await delay(700);
+    const turn = mockTurnHint ?? mocaMockTurn;
+    const reply = mocaMockReplies[Math.min(turn, mocaMockReplies.length - 1)];
+    mocaMockTurn = turn + 1;
     return reply;
   }
 
