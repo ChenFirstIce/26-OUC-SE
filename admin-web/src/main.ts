@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import {
   ElButton, ElCheckbox, ElCheckboxGroup, ElConfigProvider, ElDatePicker, ElDialog, ElEmpty,
-  ElForm, ElFormItem, ElInput, ElInputNumber, ElLoading, ElOption, ElRadio, ElRadioGroup,
+  ElForm, ElFormItem, ElInput, ElInputNumber, ElLoading, ElOption, ElRadio, ElRadioButton, ElRadioGroup,
   ElSelect, ElSwitch, ElTable, ElTableColumn, ElTabPane, ElTabs, ElTag, ElTimePicker, ElUpload,
 } from 'element-plus'
 import 'element-plus/es/components/base/style/css'
@@ -21,6 +21,7 @@ import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/es/components/option/style/css'
 import 'element-plus/es/components/radio/style/css'
+import 'element-plus/es/components/radio-button/style/css'
 import 'element-plus/es/components/radio-group/style/css'
 import 'element-plus/es/components/select/style/css'
 import 'element-plus/es/components/switch/style/css'
@@ -39,7 +40,7 @@ import router from './router'
 const app = createApp(App)
 const components = [
   ElButton, ElCheckbox, ElCheckboxGroup, ElConfigProvider, ElDatePicker, ElDialog, ElEmpty,
-  ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioGroup, ElSelect,
+  ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect,
   ElSwitch, ElTable, ElTableColumn, ElTabPane, ElTabs, ElTag, ElTimePicker, ElUpload,
 ]
 for (const component of components) app.component(component.name!, component)

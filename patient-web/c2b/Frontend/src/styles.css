@@ -153,6 +153,7 @@ footer { color: #71827e; text-align: center; font-size: 14px; padding: 20px; }
 .trail-node:hover circle, .trail-node:focus circle, .trail-node:hover rect, .trail-node:focus rect { fill: #d8f6ed; stroke: #0f766e; stroke-width: .42; }
 .trail-node.done circle, .trail-node.done rect { fill: #0f766e; stroke: #0f766e; }
 .trail-node.done text { fill: white; }
+.trail-node.next-target circle, .trail-node.next-target rect { stroke: #f59e0b; stroke-width: .48; filter: drop-shadow(0 0 .8px rgba(245,158,11,.6)); }
 .trail-source-note { color: #71837e; font-size: 13px; margin-top: 10px; text-align: center; }
 .trail-complete { position: absolute; left: 32px; right: 32px; bottom: 32px; border-radius: 14px; box-shadow: 0 8px 25px rgba(23,111,72,.14); }
 .empty-state { max-width: 600px; margin: 50px auto; padding: 45px; text-align: center; }

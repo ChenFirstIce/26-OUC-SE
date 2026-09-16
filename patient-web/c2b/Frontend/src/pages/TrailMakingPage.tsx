@@ -227,7 +227,7 @@ export function TrailMakingPage() {
                 tabIndex={result.completed || completedNodes.has(node.id) ? -1 : 0}
                 onClick={() => selectNode(node.id)}
                 onKeyDown={(event) => handleKey(event, node.id)}
-                className={`trail-node ${completedNodes.has(node.id) ? "done" : ""} ${node.isTarget ? "target" : "distractor"}`}
+                className={`trail-node ${completedNodes.has(node.id) ? "done" : ""} ${node.isTarget ? "target" : "distractor"} ${node.id === expectedNodeId ? "next-target" : ""}`}
               >
                 {node.shape === "circle"
                   ? <circle cx={node.x} cy={node.y} r="2.15" />
