@@ -149,6 +149,7 @@ async function clickTrail(nodeId:string) {
     busy.value = false
     if (trailProgress.value === trailSequence.value.length) {
       if (stage.value.phase === 'practice') {
+        await saveDraft({ ...sttDraft.value, stages })
         await ElMessageBox.alert('练习完成！接下来进入正式测试，请按同样方式依次点击目标。', '练习结束', { confirmButtonText:'开始正式测试', showCancelButton:false })
         sttStageIndex.value = 1
         trailEvents.value = []
@@ -156,10 +157,8 @@ async function clickTrail(nodeId:string) {
         trailErrors.value = 0
         lastWrongNode.value = ''
         startedAt.value = Date.now()
-        await saveDraft({ ...sttDraft.value, stages })
       } else {
-        const practiceStages = props.task.answers?.stages || {}
-        await finish({ ...sttDraft.value, stages:{ ...practiceStages, ...stages, [stage.value.id]:{ ...stageResult, elapsedMs:Date.now()-startedAt.value } } })
+        await finish({ ...sttDraft.value, stages:{ ...stages, [stage.value.id]:{ ...stageResult, elapsedMs:Date.now()-startedAt.value } } })
       }
     }
   } catch (error) { ElMessage.error(error instanceof Error ? error.message : '保存失败') }
